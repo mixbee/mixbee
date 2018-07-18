@@ -6,7 +6,7 @@ Welcome to MixbeeChain's source code library!
 `MixbeeChain` a general purpose blockchain service,this is the first implementation written in golang.
 
 
-Project is developing, please look forward to it^
+Project is developing, please look forward to it ....
 
 # Highlight Features
 * Scalable Lightweight Universal Smart Contract
