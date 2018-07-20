@@ -5,7 +5,10 @@ import (
 	"time"
 	"github.com/mixbee/mixbee-crypto/keypair"
 	s "github.com/mixbee/mixbee-crypto/signature"
-
+	"fmt"
+	"encoding/hex"
+	"github.com/mixbee/mixbee/common"
+	"strings"
 )
 
 
@@ -15,6 +18,8 @@ type unlockAccountInfo struct {
 	expiredAt  int //s
 }
 
+
+// wallet date
 type ClientImpl struct {
 	path       string
 	accAddrs   map[string]*AccountData //Map Address(base58) => Account
@@ -29,17 +34,72 @@ type ClientImpl struct {
 
 //NewAccount create a new account.
 func (this *ClientImpl) NewAccount(label string, typeCode keypair.KeyType, curveCode byte, sigScheme s.SignatureScheme, passwd []byte) (*Account, error){
+	if len(passwd) == 0 {
+		return nil, fmt.Errorf("password cannot empty")
+	}
+	prvkey, pubkey, err := keypair.GenerateKeyPair(typeCode, curveCode)
+	if err != nil {
+		return nil, fmt.Errorf("generateKeyPair error:%s", err)
+	}
+	//address := types.AddressFromPubKey(pubkey)
+	//addressBase58 := address.ToBase58()
+	buf :=  keypair.SerializePublicKey(pubkey)
+	codeHash,_ := common.ToCodeHash(buf)
+	address ,_ := codeHash.ToAddress()
+	prvSecret, err := keypair.EncryptPrivateKey(prvkey, address, passwd)
+	if err != nil {
+		return nil, fmt.Errorf("encryptPrivateKey error:%s", err)
+	}
+	accData := &AccountData{}
+	accData.Label = label
+	accData.SetKeyPair(prvSecret)
+	accData.SigSch = sigScheme.Name()
+	accData.PubKey = hex.EncodeToString(keypair.SerializePublicKey(pubkey))
 
+	// account date store to file
+	err = this.addAccountData(accData)
+	if err != nil {
+		return nil, err
+	}
+	return &Account{
+		PrivateKey: prvkey,
+		PublicKey:  pubkey,
+		Address:    codeHash,
+		SigScheme:  sigScheme,
+	}, nil
 }
 
 //ImportAccount import a already exist account to wallet
 func (this *ClientImpl) ImportAccount(accMeta *AccountMetadata) error {
+	accData := &AccountData{}
+	accData.Label = accMeta.Label
+	accData.PubKey = accMeta.PubKey
+	accData.SigSch = accMeta.SigSch
+	accData.Key = accMeta.Key
+	accData.Alg = accMeta.KeyType
+	accData.Address = accMeta.Address
+	accData.EncAlg = accMeta.EncAlg
+	accData.Hash = accMeta.Hash
+	accData.Salt = accMeta.Salt
+	accData.Param = map[string]string{"curve": accMeta.Curve}
 
+	oldAccMeta := this.GetAccountMetadataByLabel(accData.Label)
+	if oldAccMeta != nil {
+		//rename
+		accData.Label = fmt.Sprintf("%s_1", accData.Label)
+	}
+	return this.addAccountData(accData)
 }
 
 //GetAccountByAddress return account object by address
 func (this *ClientImpl) GetAccountByAddress(address string, passwd []byte) (*Account, error) {
-
+	this.lock.Lock()
+	defer this.lock.Unlock()
+	accData, ok := this.accAddrs[address]
+	if !ok {
+		return nil, nil
+	}
+	return this.getAccount(accData, passwd)
 }
 
 //GetAccountByLabel return account object by label
@@ -133,6 +193,95 @@ func (this *ClientImpl) ChangeSigScheme(address string, sigScheme s.SignatureSch
 //Get the underlying wallet data
 func (this *ClientImpl) GetWalletData() *WalletData {
 
+}
+
+func (this *ClientImpl) addAccountData(accData *AccountData) error {
+	if !this.checkSigScheme(accData.Alg, accData.SigSch) {
+		return fmt.Errorf("sigScheme:%s does not match KeyType:%s", accData.SigSch, accData.Alg)
+	}
+	this.lock.Lock()
+	defer this.lock.Unlock()
+	label := accData.Label
+	if label != "" {
+		_, ok := this.accLabels[label]
+		if ok {
+			return fmt.Errorf("duplicate label")
+		}
+	}
+	if len(this.walletData.Accounts) == 0 {
+		accData.IsDefault = true
+	}
+	this.walletData.AddAccount(accData)
+	err := this.save()
+	if err != nil {
+		this.walletData.DelAccount(accData.Address)
+		return fmt.Errorf("save error:%s", err)
+	}
+	this.accAddrs[accData.Address] = accData
+	if accData.IsDefault {
+		this.defaultAcc = accData
+	}
+	if label != "" {
+		this.accLabels[label] = accData
+	}
+	return nil
+}
+
+func (this *ClientImpl) checkSigScheme(keyType, sigScheme string) bool {
+	switch strings.ToUpper(keyType) {
+	case "ECDSA":
+		switch strings.ToUpper(sigScheme) {
+		case "SHA224WITHECDSA":
+		case "SHA256WITHECDSA":
+		case "SHA384WITHECDSA":
+		case "SHA512WITHECDSA":
+		case "SHA3-224WITHECDSA":
+		case "SHA3-256WITHECDSA":
+		case "SHA3-384WITHECDSA":
+		case "SHA3-512WITHECDSA":
+		case "RIPEMD160WITHECDSA":
+		default:
+			return false
+		}
+	case "SM2":
+		switch strings.ToUpper(sigScheme) {
+		case "SM3WITHSM2":
+		default:
+			return false
+		}
+	case "ED25519":
+		switch strings.ToUpper(sigScheme) {
+		case "SHA512WITHEDDSA":
+		default:
+			return false
+		}
+	default:
+		return false
+	}
+	return true
+}
+
+func (this *ClientImpl) save() error {
+	return this.walletData.Save(this.path)
+}
+
+func (this *ClientImpl) getAccount(accData *AccountData, passwd []byte) (*Account, error) {
+	privateKey, err := keypair.DecryptWithCustomScrypt(&accData.ProtectedKey, passwd, this.walletData.Scrypt)
+	if err != nil {
+		return nil, fmt.Errorf("decrypt PrivateKey error:%s", err)
+	}
+	publicKey := privateKey.Public()
+	//addr := types.AddressFromPubKey(publicKey)
+//	scheme, err := s.GetScheme(accData.SigSch)
+	if err != nil {
+		return nil, fmt.Errorf("signature scheme error:%s", err)
+	}
+	return &Account{
+		PrivateKey: privateKey,
+		PublicKey:  publicKey,
+		Address:    addr,
+		SigScheme:  scheme,
+	}, nil
 }
 
 

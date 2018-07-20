@@ -9,7 +9,7 @@ import (
 type Account struct {
 	PrivateKey keypair.PrivateKey
 	PublicKey  keypair.PublicKey
-	ProgramHash common.Uint160
+	Address common.Uint160
 	SigScheme  s.SignatureScheme
 }
 
@@ -37,11 +37,10 @@ func NewAccount() *Account  {
 	prk, pub, _ := keypair.GenerateKeyPair(pkAlgorithm, params)
 	buf :=  keypair.SerializePublicKey(pub)
 	codeHash,_ := common.ToCodeHash(buf)
-
 	return &Account{
 		PrivateKey: prk,
 		PublicKey:  pub,
-		ProgramHash: codeHash,
+		Address: codeHash,
 		SigScheme: scheme,
 	}
 }
