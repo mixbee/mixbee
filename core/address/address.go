@@ -17,6 +17,5 @@ func AddressFromVmCode(code []byte) account.Address {
 	md := ripemd160.New()
 	md.Write(temp[:])
 	md.Sum(addr[:0])
-
 	return addr
 }

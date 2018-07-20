@@ -3,13 +3,12 @@ package account
 import (
 	"github.com/mixbee/mixbee-crypto/keypair"
 	s "github.com/mixbee/mixbee-crypto/signature"
-	"github.com/mixbee/mixbee/common"
 )
 
 type Account struct {
 	PrivateKey keypair.PrivateKey
 	PublicKey  keypair.PublicKey
-	Address common.Uint160
+	Address    Address
 	SigScheme  s.SignatureScheme
 }
 
@@ -35,12 +34,14 @@ func NewAccount() *Account  {
 	scheme = s.SHA256withECDSA
 
 	prk, pub, _ := keypair.GenerateKeyPair(pkAlgorithm, params)
-	buf :=  keypair.SerializePublicKey(pub)
-	codeHash,_ := common.ToCodeHash(buf)
+	// buf :=  keypair.SerializePublicKey(pub)
+	// codeHash,_ := common.ToCodeHash(buf)
+	// 	address := types.AddressFromPubKey(pub)
+	abbress := AddressFromPubKey(pub)
 	return &Account{
 		PrivateKey: prk,
 		PublicKey:  pub,
-		Address: codeHash,
+		Address: abbress,
 		SigScheme: scheme,
 	}
 }

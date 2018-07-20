@@ -8,6 +8,10 @@ import (
 	"io"
 	"crypto/sha256"
 	"github.com/mixbee/mixbee/common"
+	"github.com/mixbee/mixbee/core/program"
+	"github.com/mixbee/mixbee-crypto/keypair"
+	"golang.org/x/crypto/ripemd160"
+
 )
 
 const ADDR_LEN = 20
@@ -15,6 +19,24 @@ const ADDR_LEN = 20
 type Address [ADDR_LEN]byte
 
 var ADDRESS_EMPTY = Address{}
+
+
+func AddressFromPubKey(pubkey keypair.PublicKey) Address {
+	prog := program.ProgramFromPubKey(pubkey)
+
+	return AddressFromVmCode(prog)
+}
+
+func AddressFromVmCode(code []byte) Address {
+	var addr Address
+	temp := sha256.Sum256(code)
+	md := ripemd160.New()
+	md.Write(temp[:])
+	md.Sum(addr[:0])
+
+	return addr
+}
+
 
 // ToHexString returns  hex string representation of Address
 func (self *Address) ToHexString() string {

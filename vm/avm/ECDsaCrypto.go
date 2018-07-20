@@ -1,5 +1,6 @@
 package avm
 
+/**
 import (
 	"github.com/mixbee/mixbee/crypto"
 	. "github.com/mixbee/mixbee/errors"
@@ -39,3 +40,4 @@ func (c * ECDsaCrypto) VerifySignature(message []byte,signature []byte, pubkey [
 
 	return true,nil
 }
+*/

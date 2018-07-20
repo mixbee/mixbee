@@ -7,7 +7,6 @@ import (
 	s "github.com/mixbee/mixbee-crypto/signature"
 	"fmt"
 	"encoding/hex"
-	"github.com/mixbee/mixbee/common"
 	"strings"
 )
 
@@ -41,12 +40,14 @@ func (this *ClientImpl) NewAccount(label string, typeCode keypair.KeyType, curve
 	if err != nil {
 		return nil, fmt.Errorf("generateKeyPair error:%s", err)
 	}
-	//address := types.AddressFromPubKey(pubkey)
-	//addressBase58 := address.ToBase58()
-	buf :=  keypair.SerializePublicKey(pubkey)
-	codeHash,_ := common.ToCodeHash(buf)
-	address ,_ := codeHash.ToAddress()
-	prvSecret, err := keypair.EncryptPrivateKey(prvkey, address, passwd)
+	address := AddressFromPubKey(pubkey)
+	addressBase58 := address.ToBase58()
+
+	// buf :=  keypair.SerializePublicKey(pubkey)
+	// codeHash,_ := common.ToCodeHash(buf)
+	// address ,_ := codeHash.ToAddress()
+
+	prvSecret, err := keypair.EncryptPrivateKey(prvkey, addressBase58, passwd)
 	if err != nil {
 		return nil, fmt.Errorf("encryptPrivateKey error:%s", err)
 	}
@@ -64,7 +65,7 @@ func (this *ClientImpl) NewAccount(label string, typeCode keypair.KeyType, curve
 	return &Account{
 		PrivateKey: prvkey,
 		PublicKey:  pubkey,
-		Address:    codeHash,
+		Address:    address,
 		SigScheme:  sigScheme,
 	}, nil
 }
@@ -102,6 +103,7 @@ func (this *ClientImpl) GetAccountByAddress(address string, passwd []byte) (*Acc
 	return this.getAccount(accData, passwd)
 }
 
+/**
 //GetAccountByLabel return account object by label
 func (this *ClientImpl) GetAccountByLabel(label string, passwd []byte) (*Account, error){
 
@@ -120,11 +122,6 @@ func (this *ClientImpl) GetDefaultAccount(passwd []byte) (*Account, error){
 
 //GetAccountMetadataByIndex return account Metadata info by address
 func (this *ClientImpl) GetAccountMetadataByAddress(address string) *AccountMetadata {
-
-}
-
-//GetAccountMetadataByLabel return account Metadata info by label
-func (this *ClientImpl) GetAccountMetadataByLabel(label string) *AccountMetadata{
 
 }
 
@@ -193,6 +190,38 @@ func (this *ClientImpl) ChangeSigScheme(address string, sigScheme s.SignatureSch
 //Get the underlying wallet data
 func (this *ClientImpl) GetWalletData() *WalletData {
 
+}
+*/
+
+//GetAccountMetadataByLabel return account Metadata info by label
+func (this *ClientImpl) GetAccountMetadataByLabel(label string) *AccountMetadata{
+	if label == "" {
+		return nil
+	}
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+	accData, ok := this.accLabels[label]
+	if !ok {
+		return nil
+	}
+	return this.getAccountMetadata(accData)
+}
+
+
+func (this *ClientImpl) getAccountMetadata(accData *AccountData) *AccountMetadata {
+	accMeta := &AccountMetadata{}
+	accMeta.Label = accData.Label
+	accMeta.KeyType = accData.Alg
+	accMeta.SigSch = accData.SigSch
+	accMeta.Key = accData.Key
+	accMeta.Address = accData.Address
+	accMeta.IsDefault = accData.IsDefault
+	accMeta.PubKey = accData.PubKey
+	accMeta.EncAlg = accData.EncAlg
+	accMeta.Hash = accData.Hash
+	accMeta.Curve = accData.Param["curve"]
+	accMeta.Salt = accData.Salt
+	return accMeta
 }
 
 func (this *ClientImpl) addAccountData(accData *AccountData) error {
@@ -271,15 +300,16 @@ func (this *ClientImpl) getAccount(accData *AccountData, passwd []byte) (*Accoun
 		return nil, fmt.Errorf("decrypt PrivateKey error:%s", err)
 	}
 	publicKey := privateKey.Public()
+	address := AddressFromPubKey(publicKey)
 	//addr := types.AddressFromPubKey(publicKey)
-//	scheme, err := s.GetScheme(accData.SigSch)
+	scheme, err := s.GetScheme(accData.SigSch)
 	if err != nil {
 		return nil, fmt.Errorf("signature scheme error:%s", err)
 	}
 	return &Account{
 		PrivateKey: privateKey,
 		PublicKey:  publicKey,
-		Address:    addr,
+		Address:    address,
 		SigScheme:  scheme,
 	}, nil
 }
