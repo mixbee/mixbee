@@ -5,7 +5,7 @@ package dbft
 import (
 	"bytes"
 	"fmt"
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/account"
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/config"

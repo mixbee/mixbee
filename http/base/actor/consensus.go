@@ -3,7 +3,7 @@
 package actor
 
 import (
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	cactor "github.com/mixbee/mixbee/consensus/actor"
 )
 

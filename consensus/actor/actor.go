@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/core/types"
 	ontErrors "github.com/mixbee/mixbee/errors"
 	netActor "github.com/mixbee/mixbee/p2pserver/actor/server"

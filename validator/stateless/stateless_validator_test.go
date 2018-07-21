@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/mixbee/mixbee-crypto/keypair"
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/account"
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/core/signature"

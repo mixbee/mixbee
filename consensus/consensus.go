@@ -3,7 +3,7 @@
 package consensus
 
 import (
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/account"
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/consensus/dbft"

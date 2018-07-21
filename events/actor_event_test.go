@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 )
 
 const testTopic = "test"

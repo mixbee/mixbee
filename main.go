@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/mixbee/mixbee-crypto/keypair"
-	"github.com/mixbee/mixbee-eventbus/actor"
-	alog "github.com/mixbee/mixbee-eventbus/log"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
+	alog "github.com/mixbee/mixbee/mixbee-eventbus/log"
 	"github.com/mixbee/mixbee/account"
 	"github.com/mixbee/mixbee/cmd"
 	cmdcom "github.com/mixbee/mixbee/cmd/common"

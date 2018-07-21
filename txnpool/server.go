@@ -6,7 +6,7 @@ package txnpool
 
 import (
 	"fmt"
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/events"
 	"github.com/mixbee/mixbee/events/message"
 	tc "github.com/mixbee/mixbee/txnpool/common"

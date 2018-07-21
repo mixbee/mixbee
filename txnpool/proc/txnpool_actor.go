@@ -21,7 +21,7 @@ package proc
 import (
 	"reflect"
 
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/config"

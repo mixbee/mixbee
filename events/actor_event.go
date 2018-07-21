@@ -5,8 +5,8 @@ package events
 import (
 	"fmt"
 
-	"github.com/mixbee/mixbee-eventbus/actor"
-	"github.com/mixbee/mixbee-eventbus/eventhub"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/eventhub"
 )
 
 var DefEvtHub *eventhub.EventHub

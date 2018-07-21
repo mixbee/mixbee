@@ -5,7 +5,7 @@ package req
 import (
 	"time"
 
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/core/types"

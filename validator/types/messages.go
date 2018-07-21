@@ -3,7 +3,7 @@
 package types
 
 import (
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/core/types"
 	"github.com/mixbee/mixbee/errors"

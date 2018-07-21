@@ -12,7 +12,7 @@ import (
 
 	"github.com/mixbee/mixbee-crypto/keypair"
 	"github.com/mixbee/mixbee-crypto/vrf"
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/account"
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/log"

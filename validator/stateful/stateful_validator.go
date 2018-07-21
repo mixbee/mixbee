@@ -3,7 +3,7 @@
 package stateful
 
 import (
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/core/ledger"
 	"github.com/mixbee/mixbee/core/types"

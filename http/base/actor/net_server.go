@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/common/log"
 	ac "github.com/mixbee/mixbee/p2pserver/actor/server"
 	"github.com/mixbee/mixbee/p2pserver/common"

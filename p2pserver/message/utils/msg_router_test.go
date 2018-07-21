@@ -4,7 +4,7 @@ package utils
 
 import (
 	"github.com/mixbee/mixbee-crypto/keypair"
-	"github.com/mixbee/mixbee-eventbus/actor"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/common/log"
 	msgCommon "github.com/mixbee/mixbee/p2pserver/common"
 	"github.com/mixbee/mixbee/p2pserver/net/netserver"
