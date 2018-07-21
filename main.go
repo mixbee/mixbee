@@ -47,7 +47,7 @@ func setupAPP() *cli.App {
 	app.Usage = "Ontology CLI"
 	app.Action = startOntology  // 服务的起点
 	app.Version = config.Version
-	app.Copyright = "Copyright in 2018 The Ontology Authors"
+	app.Copyright = "Copyright in 2018 The Mixbee Authors"
 	app.Commands = []cli.Command{
 		cmd.AccountCommand,
 		cmd.InfoCommand,
@@ -191,9 +191,9 @@ func initLog(ctx *cli.Context) {
 	log.InitLog(logLevel, log.PATH, log.Stdout)
 }
 
-func initConfig(ctx *cli.Context) (*config.OntologyConfig, error) {
+func initConfig(ctx *cli.Context) (*config.MixbeeConfig, error) {
 	//init ontology config from cli
-	cfg, err := cmd.SetOntologyConfig(ctx)
+	cfg, err := cmd.SetMixbeeConfig(ctx)
 	if err != nil {
 		return nil, err
 	}

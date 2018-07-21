@@ -34,8 +34,8 @@ var (
 	VM_STEP_LIMIT       int = 400000
 
 	// API Name
-	ATTRIBUTE_GETUSAGE_NAME = "Ontology.Attribute.GetUsage"
-	ATTRIBUTE_GETDATA_NAME  = "Ontology.Attribute.GetData"
+	ATTRIBUTE_GETUSAGE_NAME = "Mixbee.Attribute.GetUsage"
+	ATTRIBUTE_GETDATA_NAME  = "Mixbee.Attribute.GetData"
 
 	BLOCK_GETTRANSACTIONCOUNT_NAME       = "System.Block.GetTransactionCount"
 	BLOCK_GETTRANSACTIONS_NAME           = "System.Block.GetTransactions"
@@ -49,22 +49,22 @@ var (
 
 	HEADER_GETINDEX_NAME         = "System.Header.GetIndex"
 	HEADER_GETHASH_NAME          = "System.Header.GetHash"
-	HEADER_GETVERSION_NAME       = "Ontology.Header.GetVersion"
+	HEADER_GETVERSION_NAME       = "Mixbee.Header.GetVersion"
 	HEADER_GETPREVHASH_NAME      = "System.Header.GetPrevHash"
 	HEADER_GETTIMESTAMP_NAME     = "System.Header.GetTimestamp"
-	HEADER_GETCONSENSUSDATA_NAME = "Ontology.Header.GetConsensusData"
-	HEADER_GETNEXTCONSENSUS_NAME = "Ontology.Header.GetNextConsensus"
-	HEADER_GETMERKLEROOT_NAME    = "Ontology.Header.GetMerkleRoot"
+	HEADER_GETCONSENSUSDATA_NAME = "Mixbee.Header.GetConsensusData"
+	HEADER_GETNEXTCONSENSUS_NAME = "Mixbee.Header.GetNextConsensus"
+	HEADER_GETMERKLEROOT_NAME    = "Mixbee.Header.GetMerkleRoot"
 
 	TRANSACTION_GETHASH_NAME       = "System.Transaction.GetHash"
-	TRANSACTION_GETTYPE_NAME       = "Ontology.Transaction.GetType"
-	TRANSACTION_GETATTRIBUTES_NAME = "Ontology.Transaction.GetAttributes"
+	TRANSACTION_GETTYPE_NAME       = "Mixbee.Transaction.GetType"
+	TRANSACTION_GETATTRIBUTES_NAME = "Mixbee.Transaction.GetAttributes"
 
-	CONTRACT_CREATE_NAME            = "Ontology.Contract.Create"
-	CONTRACT_MIGRATE_NAME           = "Ontology.Contract.Migrate"
+	CONTRACT_CREATE_NAME            = "Mixbee.Contract.Create"
+	CONTRACT_MIGRATE_NAME           = "Mixbee.Contract.Migrate"
 	CONTRACT_GETSTORAGECONTEXT_NAME = "System.Contract.GetStorageContext"
 	CONTRACT_DESTROY_NAME           = "System.Contract.Destroy"
-	CONTRACT_GETSCRIPT_NAME         = "Ontology.Contract.GetScript"
+	CONTRACT_GETSCRIPT_NAME         = "Mixbee.Contract.GetScript"
 
 	STORAGE_GET_NAME                = "System.Storage.Get"
 	STORAGE_PUT_NAME                = "System.Storage.Put"
@@ -82,7 +82,7 @@ var (
 	RUNTIME_SERIALIZE_NAME    = "System.Runtime.Serialize"
 	RUNTIME_DESERIALIZE_NAME  = "System.Runtime.Deserialize"
 
-	NATIVE_INVOKE_NAME = "Ontology.Native.Invoke"
+	NATIVE_INVOKE_NAME = "Mixbee.Native.Invoke"
 
 	GETSCRIPTCONTAINER_NAME     = "System.ExecutionEngine.GetScriptContainer"
 	GETEXECUTINGSCRIPTHASH_NAME = "System.ExecutionEngine.GetExecutingScriptHash"

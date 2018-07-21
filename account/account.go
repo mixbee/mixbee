@@ -3,12 +3,17 @@ package account
 import (
 	"github.com/mixbee/mixbee-crypto/keypair"
 	s "github.com/mixbee/mixbee-crypto/signature"
+	"github.com/mixbee/mixbee/common/log"
+
+	"github.com/mixbee/mixbee/common"
+	"github.com/mixbee/mixbee/core/types"
+
 )
 
 type Account struct {
 	PrivateKey keypair.PrivateKey
 	PublicKey  keypair.PublicKey
-	Address    Address
+	Address    common.Address
 	SigScheme  s.SignatureScheme
 }
 
@@ -27,22 +32,48 @@ type AccountMetadata struct {
 	Hash      string //Hash alg
 }
 
-func NewAccount() *Account  {
-	var pkAlgorithm = keypair.PK_ECDSA
-	var params = keypair.P256
+func NewAccount(encrypt string) *Account  {
+	var pkAlgorithm keypair.KeyType
+	var params interface{}
 	var scheme s.SignatureScheme
-	scheme = s.SHA256withECDSA
+	var err error
+	if "" != encrypt {
+		scheme, err = s.GetScheme(encrypt)
+	} else {
+		scheme = s.SHA256withECDSA
+	}
+	if err != nil {
+		log.Warn("unknown signature scheme, use SHA256withECDSA as default.")
+		scheme = s.SHA256withECDSA
+	}
+	switch scheme {
+	case s.SHA224withECDSA, s.SHA3_224withECDSA:
+		pkAlgorithm = keypair.PK_ECDSA
+		params = keypair.P224
+	case s.SHA256withECDSA, s.SHA3_256withECDSA, s.RIPEMD160withECDSA:
+		pkAlgorithm = keypair.PK_ECDSA
+		params = keypair.P256
+	case s.SHA384withECDSA, s.SHA3_384withECDSA:
+		pkAlgorithm = keypair.PK_ECDSA
+		params = keypair.P384
+	case s.SHA512withECDSA, s.SHA3_512withECDSA:
+		pkAlgorithm = keypair.PK_ECDSA
+		params = keypair.P521
+	case s.SM3withSM2:
+		pkAlgorithm = keypair.PK_SM2
+		params = keypair.SM2P256V1
+	case s.SHA512withEDDSA:
+		pkAlgorithm = keypair.PK_EDDSA
+		params = keypair.ED25519
+	}
 
-	prk, pub, _ := keypair.GenerateKeyPair(pkAlgorithm, params)
-	// buf :=  keypair.SerializePublicKey(pub)
-	// codeHash,_ := common.ToCodeHash(buf)
-	// 	address := types.AddressFromPubKey(pub)
-	abbress := AddressFromPubKey(pub)
+	pri, pub, _ := keypair.GenerateKeyPair(pkAlgorithm, params)
+	address := types.AddressFromPubKey(pub)
 	return &Account{
-		PrivateKey: prk,
+		PrivateKey: pri,
 		PublicKey:  pub,
-		Address: abbress,
-		SigScheme: scheme,
+		Address:    address,
+		SigScheme:  scheme,
 	}
 }
 
@@ -56,7 +87,7 @@ func (this *Account) PubKey() keypair.PublicKey {
 	return this.PublicKey
 }
 
-func (this *Account) getSigScheme() s.SignatureScheme  {
+func (this *Account) Scheme() s.SignatureScheme  {
 	return this.SigScheme
 }
 

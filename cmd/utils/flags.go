@@ -17,10 +17,10 @@ const (
 )
 
 var (
-	//Ontology setting
+	//Mixbee setting
 	ConfigFlag = cli.StringFlag{
 		Name:  "config",
-		Usage: "Use `<filename>` to specifies the genesis block config file. If doesn't specifies the genesis block config, Ontology will use Polaris config with VBFT consensus as default.",
+		Usage: "Use `<filename>` to specifies the genesis block config file. If doesn't specifies the genesis block config, Mixbee will use Polaris config with VBFT consensus as default.",
 	}
 	LogLevelFlag = cli.UintFlag{
 		Name:  "loglevel",
@@ -29,7 +29,7 @@ var (
 	}
 	DisableEventLogFlag = cli.BoolFlag{
 		Name:  "disableeventlog",
-		Usage: "If set disableeventlog flag, Ontology will not record event log output by smart contract",
+		Usage: "If set disableeventlog flag, Mixbee will not record event log output by smart contract",
 	}
 	WalletFileFlag = cli.StringFlag{
 		Name:  "wallet,w",
@@ -79,7 +79,7 @@ var (
 	//Test Mode setting
 	EnableTestModeFlag = cli.BoolFlag{
 		Name:  "testmode",
-		Usage: "Using to start a single node test network for ease of development and debug. In testmode, Ontology will start rpc, rest and web socket server",
+		Usage: "Using to start a single node test network for ease of development and debug. In testmode, Mixbee will start rpc, rest and web socket server",
 	}
 	TestModeGenBlockTimeFlag = cli.UintFlag{
 		Name:  "testmodegenblocktime",
@@ -103,7 +103,7 @@ var (
 	}
 	NetworkIdFlag = cli.UintFlag{
 		Name:  "networkid",
-		Usage: "Using to specify the network ID. Different networkids cannot connect to the blockchain network. 1=ontology main net, 2=polaris test net, 3=testmode, and other for custom network",
+		Usage: "Using to specify the network ID. Different networkids cannot connect to the blockchain network. 1=Mixbee main net, 2=polaris test net, 3=testmode, and other for custom network",
 		Value: config.NETWORK_ID_MAIN_NET,
 	}
 	NodePortFlag = cli.UintFlag{
@@ -138,7 +138,7 @@ var (
 	// RPC settings
 	RPCDisabledFlag = cli.BoolFlag{
 		Name:  "disablerpc",
-		Usage: "Using to shut down the rpc server. The Ontology node starts the rpc server by default at startup.",
+		Usage: "Using to shut down the rpc server. The Mixbee node starts the rpc server by default at startup.",
 	}
 	RPCPortFlag = cli.UintFlag{
 		Name:  "rpcport",
@@ -181,11 +181,11 @@ var (
 	AccountPassFlag = cli.StringFlag{
 		Name:   "password,p",
 		Hidden: true,
-		Usage:  "Using to specify the account `<password>` when Ontology node starts. Because the account password entered in the command line is saved in the log, it is easy to leak the password. Therefore, it is not recommended to use this parameter in a production environment.",
+		Usage:  "Using to specify the account `<password>` when Mixbee node starts. Because the account password entered in the command line is saved in the log, it is easy to leak the password. Therefore, it is not recommended to use this parameter in a production environment.",
 	}
 	AccountAddressFlag = cli.StringFlag{
 		Name:  "account,a",
-		Usage: "Using to specify the account `<address|label|index>` when the Ontology node starts. If the account is null, it uses the wallet default account",
+		Usage: "Using to specify the account `<address|label|index>` when the Mixbee node starts. If the account is null, it uses the wallet default account",
 	}
 	AccountDefaultFlag = cli.BoolFlag{
 		Name:  "default,d",

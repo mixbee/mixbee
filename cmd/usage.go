@@ -12,7 +12,7 @@ var (
 	AppHelpTemplate = `NAME:
    {{.App.Name}} - {{.App.Usage}}
 
-	Ontology CLI is an Ontology node command line Client for starting and managing Ontology nodes,
+	Mixbee CLI is an Mixbee node command line Client for starting and managing Mixbee nodes,
 	managing user wallets, sending transactions, deploying and invoking contract, and so on.
 
 USAGE:
@@ -59,7 +59,7 @@ type flagGroup struct {
 
 var AppHelpFlagGroups = []flagGroup{
 	{
-		Name: "ONTOLOGY",
+		Name: "MIXBEE",
 		Flags: []cli.Flag{
 			utils.ConfigFlag,
 			utils.LogLevelFlag,

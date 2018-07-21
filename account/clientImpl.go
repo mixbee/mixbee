@@ -10,6 +10,8 @@ import (
 	"strings"
 	"bytes"
 	"github.com/mixbee/mixbee/common"
+	"github.com/mixbee/mixbee/core/types"
+
 )
 
 
@@ -59,7 +61,7 @@ func (this *ClientImpl) NewAccount(label string, typeCode keypair.KeyType, curve
 	if err != nil {
 		return nil, fmt.Errorf("generateKeyPair error:%s", err)
 	}
-	address := AddressFromPubKey(pubkey)
+	address := types.AddressFromPubKey(pubkey)
 	addressBase58 := address.ToBase58()
 
 	// buf :=  keypair.SerializePublicKey(pubkey)
@@ -505,7 +507,7 @@ func (this *ClientImpl) getAccount(accData *AccountData, passwd []byte) (*Accoun
 		return nil, fmt.Errorf("decrypt PrivateKey error:%s", err)
 	}
 	publicKey := privateKey.Public()
-	address := AddressFromPubKey(publicKey)
+	address := types.AddressFromPubKey(publicKey)
 	//addr := types.AddressFromPubKey(publicKey)
 	scheme, err := s.GetScheme(accData.SigSch)
 	if err != nil {
@@ -540,7 +542,7 @@ func (this *ClientImpl) load() error {
 	return nil
 }
 
-func Open(path string) (Clienter, error) {
+func Open(path string) (Client, error) {
 	return NewClientImpl(path)
 }
 

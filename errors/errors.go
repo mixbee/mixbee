@@ -1,3 +1,5 @@
+
+
 package errors
 
 import (
@@ -10,31 +12,31 @@ type DetailError interface {
 	error
 	ErrCoder
 	CallStacker
-	GetRoot()  error
+	GetRoot() error
 }
 
-
-func  NewErr(errmsg string) error {
+func NewErr(errmsg string) error {
 	return errors.New(errmsg)
 }
 
-func NewDetailErr(err error,errcode ErrCode,errmsg string) DetailError{
-	if err == nil {return nil}
+func NewDetailErr(err error, errcode ErrCode, errmsg string) DetailError {
+	if err == nil {
+		return nil
+	}
 
-	dnaerr, ok := err.(dnaError)
+	onterr, ok := err.(ontError)
 	if !ok {
-		dnaerr.root = err
-		dnaerr.errmsg = err.Error()
-		dnaerr.callstack = getCallStack(0, callStackDepth)
-		dnaerr.code = errcode
+		onterr.root = err
+		onterr.errmsg = err.Error()
+		onterr.callstack = getCallStack(0, callStackDepth)
+		onterr.code = errcode
 
 	}
 	if errmsg != "" {
-		dnaerr.errmsg = errmsg + ": " + dnaerr.errmsg
+		onterr.errmsg = errmsg + ": " + onterr.errmsg
 	}
 
-
-	return dnaerr
+	return onterr
 }
 
 func RootErr(err error) error {
@@ -43,6 +45,3 @@ func RootErr(err error) error {
 	}
 	return err
 }
-
-
-

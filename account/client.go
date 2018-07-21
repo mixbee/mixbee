@@ -7,7 +7,7 @@ import (
 
 
 // about wallet client
-type Clienter interface {
+type Client interface {
 
 	//NewAccount create a new account.
 	NewAccount(label string, typeCode keypair.KeyType, curveCode byte, sigScheme s.SignatureScheme, passwd []byte) (*Account, error)

@@ -9,8 +9,9 @@ import (
 	"github.com/itchyny/base58-go"
 	"crypto/sha256"
 	"bytes"
-	"github.com/mixbee/mixbee/common"
 	"encoding/hex"
+	"github.com/mixbee/mixbee/core/types"
+
 )
 
 const (
@@ -101,14 +102,16 @@ func NewIdentity(label string, keyType keypair.KeyType, param interface{}, passw
 	if err != nil {
 		return nil,err
 	}
-	buf :=  keypair.SerializePublicKey(pub)
-	codeHash,_ := common.ToCodeHash(buf)
-	address,_ := codeHash.ToAddress()
-
-	prot, err := keypair.EncryptPrivateKey(pri,address, password)
+	// buf :=  keypair.SerializePublicKey(pub)
+	// codeHash,_ := common.ToCodeHash(buf)
+	// address,_ := codeHash.ToAddress()
+	addr := types.AddressFromPubKey(pub)
+	b58addr := addr.ToBase58()
+	prot, err := keypair.EncryptPrivateKey(pri, b58addr, password)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
+
 	res.ID = id
 	res.Label = label
 	res.Lock = false

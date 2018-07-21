@@ -136,7 +136,7 @@ func deployContract(ctx *cli.Context) error {
 	fmt.Printf("  Contract Address:%s\n", address.ToHexString())
 	fmt.Printf("  TxHash:%s\n", txHash)
 	fmt.Printf("\nTip:\n")
-	fmt.Printf("  Using './ontology info status %s' to query transaction status\n", txHash)
+	fmt.Printf("  Using './Ontology info status %s' to query transaction status\n", txHash)
 	return nil
 }
 

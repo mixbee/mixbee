@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func SetOntologyConfig(ctx *cli.Context) (*config.OntologyConfig, error) {
+func SetMixbeeConfig(ctx *cli.Context) (*config.MixbeeConfig, error) {
 	cfg := config.DefConfig
 	netWorkId := ctx.GlobalInt(utils.GetFlagName(utils.NetworkIdFlag))
 	switch netWorkId {

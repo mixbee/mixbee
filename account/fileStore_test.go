@@ -3,19 +3,19 @@ package account
 import (
 	"github.com/mixbee/mixbee-crypto/keypair"
 	"testing"
-	"github.com/mixbee/mixbee/common"
 	"encoding/hex"
 	"os"
 	"github.com/stretchr/testify/assert"
 	"sort"
+	"github.com/mixbee/mixbee/core/types"
+
 )
 
 func genAccountData() (*AccountData, *keypair.ProtectedKey)  {
 	var acc = new(AccountData)
 	prvkey, pubkey, _ := keypair.GenerateKeyPair(keypair.PK_ECDSA, keypair.P256)
-	buf :=  keypair.SerializePublicKey(pubkey)
-	codeHash,_ := common.ToCodeHash(buf)
-	address,_ := codeHash.ToAddress()
+	ta := types.AddressFromPubKey(pubkey)
+	address := ta.ToBase58()
 	password := []byte("123456")
 	prvSectet, _ := keypair.EncryptPrivateKey(prvkey, address, password)
 	acc.SetKeyPair(prvSectet)
