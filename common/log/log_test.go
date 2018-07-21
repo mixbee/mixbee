@@ -1,11 +1,12 @@
+
 package log
 
 import (
-	"testing"
-	"os"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
-	"fmt"
+	"os"
+	"testing"
 	"time"
 )
 
@@ -24,10 +25,6 @@ func logPrint() {
 	Errorf("error %v", testValue)
 	Fatalf("fatal %v", testValue)
 	Tracef("trace %v", testValue)
-}
-
-func TestColor(t *testing.T)  {
-	Color(Blue, "test")
 }
 
 func TestLog(t *testing.T) {
@@ -70,3 +67,4 @@ func TestNewLogFile(t *testing.T) {
 	}
 	assert.Equal(t, len(logfileNum1), (len(logfileNum2) - 1))
 }
+

@@ -1,32 +1,12 @@
-package common
 
+
+package common
 
 import (
 	"encoding/hex"
 	"math/rand"
 	"os"
-	"io"
-	"crypto/sha256"
-	. "github.com/mixbee/mixbee/errors"
-	"golang.org/x/crypto/ripemd160"
-	"errors"
-
 )
-
-
-
-func ToCodeHash(code []byte) (Uint160, error) {
-	temp := sha256.Sum256(code)
-	md := ripemd160.New()
-	io.WriteString(md, string(temp[:]))
-	f := md.Sum(nil)
-
-	hash, err := Uint160ParseFromBytes(f)
-	if err != nil {
-		return Uint160{}, NewDetailErr(errors.New("[Common] , ToCodeHash err."), ErrNoCode, "")
-	}
-	return hash, nil
-}
 
 // GetNonce returns random nonce
 func GetNonce() uint64 {
@@ -59,4 +39,3 @@ func FileExisted(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
-

@@ -14,7 +14,7 @@ GoOnchain.iml
 *.orig
 *.rej
 vendor/*
-!vendor/github.com/ontio/ontology-crypto/*
+!vendor/github.com/mixbee/mixbee-crypto/*
 Chain/*
 /config/*
 nodectl

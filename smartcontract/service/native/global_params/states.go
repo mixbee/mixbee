@@ -1,0 +1,104 @@
+
+
+package global_params
+
+import (
+	"io"
+
+	"fmt"
+	"github.com/mixbee/mixbee/common/serialization"
+	"github.com/mixbee/mixbee/errors"
+	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
+)
+
+type Param struct {
+	Key   string
+	Value string
+}
+
+type Params []Param
+
+type ParamNameList []string
+
+func (params *Params) SetParam(value Param) {
+	for index, param := range *params {
+		if param.Key == value.Key {
+			(*params)[index] = value
+			return
+		}
+	}
+	*params = append(*params, value)
+}
+
+func (params *Params) GetParam(key string) (int, Param) {
+	for index, param := range *params {
+		if param.Key == key {
+			return index, param
+		}
+	}
+	return -1, Param{}
+}
+
+func (params *Params) Serialize(w io.Writer) error {
+	paramNum := len(*params)
+	if err := utils.WriteVarUint(w, uint64(paramNum)); err != nil {
+		return errors.NewDetailErr(err, errors.ErrNoCode, "param config, serialize params length error!")
+	}
+	for _, param := range *params {
+		if err := serialization.WriteString(w, param.Key); err != nil {
+			return errors.NewDetailErr(err, errors.ErrNoCode, fmt.Sprintf("param config, serialize param key %v error!", param.Key))
+		}
+		if err := serialization.WriteString(w, param.Value); err != nil {
+			return errors.NewDetailErr(err, errors.ErrNoCode, fmt.Sprintf("param config, serialize param value %v error!", param.Value))
+		}
+	}
+	return nil
+}
+
+func (params *Params) Deserialize(r io.Reader) error {
+	paramNum, err := utils.ReadVarUint(r)
+	if err != nil {
+		return errors.NewDetailErr(err, errors.ErrNoCode, "param config, deserialize params length error!")
+	}
+	for i := 0; uint64(i) < paramNum; i++ {
+		param := Param{}
+		param.Key, err = serialization.ReadString(r)
+		if err != nil {
+			return errors.NewDetailErr(err, errors.ErrNoCode, fmt.Sprintf("param config, deserialize param key %v error!", param.Key))
+		}
+		param.Value, err = serialization.ReadString(r)
+		if err != nil {
+			return errors.NewDetailErr(err, errors.ErrNoCode, fmt.Sprintf("param config, deserialize param value %v error!", param.Value))
+		}
+		*params = append(*params, param)
+	}
+	return nil
+}
+
+func (nameList *ParamNameList) Serialize(w io.Writer) error {
+	nameNum := len(*nameList)
+	if err := utils.WriteVarUint(w, uint64(nameNum)); err != nil {
+		return errors.NewDetailErr(err, errors.ErrNoCode, "param config, serialize param name list length error!")
+	}
+	for _, value := range *nameList {
+		if err := serialization.WriteString(w, value); err != nil {
+			return errors.NewDetailErr(err, errors.ErrNoCode, fmt.Sprintf("param config, serialize param name %v error!", value))
+		}
+	}
+	return nil
+}
+
+func (nameList *ParamNameList) Deserialize(r io.Reader) error {
+	nameNum, err := utils.ReadVarUint(r)
+	if err != nil {
+		return errors.NewDetailErr(err, errors.ErrNoCode, "param config, deserialize param name list length error!")
+	}
+	for i := 0; uint64(i) < nameNum; i++ {
+		name, err := serialization.ReadString(r)
+		if err != nil {
+			return errors.NewDetailErr(err, errors.ErrNoCode, fmt.Sprintf("param config, deserialize param name %v error!", name))
+		}
+		*nameList = append(*nameList, name)
+	}
+	return nil
+}
