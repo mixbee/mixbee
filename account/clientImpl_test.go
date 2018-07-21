@@ -16,14 +16,15 @@ var (
 	testPasswd     = []byte("123456")
 )
 
-func TestMain(t *testing.M) {
+func TestMain(m *testing.M) {
 	var err error
 	testWallet, err = Open(testWalletPath)
 	if err != nil {
 		fmt.Printf("Open wallet:%s error:%s\n", testWalletPath, err)
 		return
 	}
-	t.Run()
+	// 测试从TestMain进入，依次执行测试用例，最后从TestMain退出
+	m.Run()
 	os.Remove(testWalletPath)
 	os.Remove("ActorLog")
 }
@@ -32,6 +33,7 @@ func TestClientNewAccount(t *testing.T) {
 	accountNum := testWallet.GetAccountNum()
 	label1 := "t1"
 	acc1, err := testWallet.NewAccount(label1, keypair.PK_ECDSA, keypair.P256, s.SHA256withECDSA, testPasswd)
+	t.Log("acc1", acc1)
 	if err != nil {
 		t.Errorf("TestClientNewAccount error:%s", err)
 		return
@@ -46,6 +48,7 @@ func TestClientNewAccount(t *testing.T) {
 		t.Errorf("TestClientNewAccount account num:%d != %d", testWallet.GetAccountNum(), accountNum+2)
 		return
 	}
+	t.Log("acc1.Address.ToBase58()", acc1.Address.ToBase58())
 	accTmp, err := testWallet.GetAccountByAddress(acc1.Address.ToBase58(), testPasswd)
 	if err != nil {
 		t.Errorf("TestClientNewAccount GetAccountByAddress:%s error:%s", acc1.Address.ToBase58(), err)
@@ -72,7 +75,7 @@ func TestClientNewAccount(t *testing.T) {
 		t.Errorf("TestClientNewAccount by label address:%s != %s", accTmp.Address.ToBase58(), acc1.Address.ToBase58())
 		return
 	}
-
+	// open wallet file
 	testWallet2, err := Open(testWalletPath)
 	if err != nil {
 		t.Errorf("NewAccount Open wallet:%s error:%s", testWalletPath, err)
