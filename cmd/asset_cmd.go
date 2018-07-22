@@ -174,7 +174,7 @@ func transfer(ctx *cli.Context) error {
 	fmt.Printf("  Amount:%s\n", amountStr)
 	fmt.Printf("  TxHash:%s\n", txHash)
 	fmt.Printf("\nTip:\n")
-	fmt.Printf("  Using './ontology info status %s' to query transaction status\n", txHash)
+	fmt.Printf("  Using './mixbee info status %s' to query transaction status\n", txHash)
 	return nil
 }
 
@@ -309,7 +309,7 @@ func approve(ctx *cli.Context) error {
 	fmt.Printf("  Amount:%s\n", amountStr)
 	fmt.Printf("  TxHash:%s\n", txHash)
 	fmt.Printf("\nTip:\n")
-	fmt.Printf("  Using './ontology info status %s' to query transaction status\n", txHash)
+	fmt.Printf("  Using './mixbee info status %s' to query transaction status\n", txHash)
 	return nil
 }
 
@@ -386,7 +386,7 @@ func transferFrom(ctx *cli.Context) error {
 	fmt.Printf("  Amount:%s\n", amountStr)
 	fmt.Printf("  TxHash:%s\n", txHash)
 	fmt.Printf("\nTip:\n")
-	fmt.Printf("  Using './ontology info status %s' to query transaction status\n", txHash)
+	fmt.Printf("  Using './mixbee info status %s' to query transaction status\n", txHash)
 	return nil
 }
 
@@ -463,6 +463,6 @@ func withdrawOng(ctx *cli.Context) error {
 	fmt.Printf("  Amount:%s\n", utils.FormatOng(amount))
 	fmt.Printf("  TxHash:%s\n", txHash)
 	fmt.Printf("\nTip:\n")
-	fmt.Printf("  Using './ontology info status %s' to query transaction status\n", txHash)
+	fmt.Printf("  Using './mixbee info status %s' to query transaction status\n", txHash)
 	return nil
 }
