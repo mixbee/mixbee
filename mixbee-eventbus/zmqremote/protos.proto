@@ -2,7 +2,7 @@ syntax = "proto3";
 package zmqremote;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/ontio/ontology-eventbus/actor/protos.proto";
+import "github.com/mixbee/mixbee/mixbee-eventbus/actor/protos.proto";
 
 option (gogoproto.gostring_all) = false;
 

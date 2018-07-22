@@ -29,7 +29,7 @@ type Client struct{}
 
 //Call the server synchronous  同步回调
 func (client *Client) SyncCall(serverPID *actor.PID) (interface{}, error) {
-	future := serverPID.RequestFuture(&message.Request{Who: "ONTIO"}, 10*time.Second)
+	future := serverPID.RequestFuture(&message.Request{Who: "mixbee"}, 10*time.Second)
 	result, err := future.Result()
 	return result, err
 }
@@ -51,7 +51,7 @@ func (client *Client) Receive(context actor.Context) {
 func (client *Client) AsyncCall(serverPID *actor.PID) *actor.PID {
 	props := actor.FromProducer(func() actor.Actor { return &Client{} })
 	clientPID := actor.Spawn(props)
-	serverPID.Request(&message.Request{Who: "ONTIO"}, clientPID)
+	serverPID.Request(&message.Request{Who: "mixbee"}, clientPID)
 	return clientPID
 }
 

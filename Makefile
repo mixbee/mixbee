@@ -1,12 +1,12 @@
 GOFMT=gofmt
 GC=go build
 VERSION := $(shell git describe --abbrev=4 --always --tags)
-BUILD_NODE_PAR = -ldflags "-X github.com/ontio/mixbee/common/config.Version=$(VERSION)" #-race
+BUILD_NODE_PAR = -ldflags "-X github.com/mixbee/mixbee/common/config.Version=$(VERSION)" #-race
 
 ARCH=$(shell uname -m)
 DBUILD=docker build
 DRUN=docker run
-DOCKER_NS ?= ontio
+DOCKER_NS ?= mixbee
 DOCKER_TAG=$(ARCH)-$(VERSION)
 ONT_CFG_IN_DOCKER=config.json
 WALLET_FILE=wallet.dat
@@ -85,7 +85,7 @@ docker/build/bin/%: Makefile
 		-v $(abspath docker/build/bin):/go/bin \
 		-v $(abspath docker/build/pkg):/go/pkg \
 		-v $(GOPATH)/src:/go/src \
-		-w /go/src/github.com/ontio/mixbee \
+		-w /go/src/github.com/mixbee/mixbee \
 		golang:1.9.5-stretch \
 		$(GC)  $(BUILD_NODE_PAR) -o docker/build/bin/mixbee main.go
 	@touch $@

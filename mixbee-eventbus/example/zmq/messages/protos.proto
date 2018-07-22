@@ -1,6 +1,6 @@
 syntax = "proto3";
 package messages;
-import "github.com/ontio/ontology-eventbus/actor/protos.proto";
+import "github.com/mixbee/mixbee/mixbee-eventbus/actor/protos.proto";
 
 message Start {}
 message StartRemote {
