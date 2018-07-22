@@ -36,12 +36,25 @@ Project is developing, please look forward to it ....
 
 
 # Getting the source
+Clone the repository
+```
+$ mkdir -p $GOPATH/src/github.com/mixbee
+$ cd $GOPATH/src/github.com/mixbee
+$ git clone https://github.com/mixbee/mixbee.git
+$ glide install
+```
 
+Build the source code with make
+```
+make all
+```
 
-# Dependency management
+# Server deployment
+* Mainnet sync node deployment
+* Public test network Polaris sync node deployment
+* Single-host deployment
+* Multi-hosts deployment
 
-
-# Building
 
 # License
  MixbeeChain is licensed under the [GNU Lesser General Public License v3.0](https://www.gnu.org/licenses/lgpl-3.0.html), also included in LICENSE file in repository.
