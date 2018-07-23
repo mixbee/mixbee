@@ -3,7 +3,7 @@
 
 set -ev
 
-### account1,account2,account3,account4 is test
+### account1,account2,account3,account4  password is test
 
 
 docker-compose -f docker-compose.yml down

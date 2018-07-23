@@ -218,7 +218,7 @@ var MainNetConfig = &GenesisConfig{
 	SOLO: &SOLOConfig{},
 }
 
-var DefConfig = NewOntologyConfig()
+var DefConfig = NewMixbeeConfig()
 
 type GenesisConfig struct {
 	SeedList      []string
@@ -523,7 +523,7 @@ type MixbeeConfig struct {
 	Ws        *WebSocketConfig
 }
 
-func NewOntologyConfig() *MixbeeConfig {
+func NewMixbeeConfig() *MixbeeConfig {
 	return &MixbeeConfig{
 		Genesis: MainNetConfig,
 		Common: &CommonConfig{
