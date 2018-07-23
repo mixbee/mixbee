@@ -89,10 +89,10 @@ func GetNetworkName(id uint32) string {
 
 var PolarisConfig = &GenesisConfig{
 	SeedList: []string{
-		"polaris1.ont.io:20338",
-		"polaris2.ont.io:20338",
-		"polaris3.ont.io:20338",
-		"polaris4.ont.io:20338"},
+		"node1.example.com:20338",
+		"node2.example.com:20338",
+		"node3.example.com:20338",
+		"node4.example.com:20338"},
 	ConsensusType: CONSENSUS_TYPE_VBFT,
 	VBFT: &VBFTConfig{
 		N:                    7,
@@ -158,11 +158,10 @@ var PolarisConfig = &GenesisConfig{
 
 var MainNetConfig = &GenesisConfig{
 	SeedList: []string{
-		"seed1.ont.io:20338",
-		"seed2.ont.io:20338",
-		"seed3.ont.io:20338",
-		"seed4.ont.io:20338",
-		"seed5.ont.io:20338"},
+		"node1.example.com:20338",
+		"node2.example.com:20338",
+		"node3.example.com:20338",
+		"node4.example.com:20338"},
 	ConsensusType: CONSENSUS_TYPE_VBFT,
 	VBFT: &VBFTConfig{
 		N:                    7,
