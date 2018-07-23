@@ -1,5 +1,5 @@
 
-FROM ubuntu:14.04
+FROM tianon/ubuntu-core:14.04
 ENV MIXBEE_PATH /var/mixbee
 RUN mkdir -p $MIXBEE_PATH
 COPY mixbee /usr/local/bin
