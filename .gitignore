@@ -13,13 +13,9 @@ GoOnchain.iml
 .DS_Store
 *.orig
 *.rej
-vendor/*
 !vendor/github.com/mixbee/mixbee-crypto/*
 Chain/*
 /config/*
-nodectl
-ontology
-wallet.dat
 cscope*
 *.exe
 **/*.log

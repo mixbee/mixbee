@@ -1,6 +1,6 @@
 {
   "SeedList": [
-    ":20338"
+    "127.0.0.1:20338"
   ],
   "ConsensusType":"dbft",
   "DBFT":{
