@@ -30,7 +30,7 @@ abi:
 
 tools: sigsvr abi
 
-all: mixbee tools
+all: mixbee tools docker
 
 mixbee-cross: mixbee-windows mixbee-linux mixbee-darwin
 
