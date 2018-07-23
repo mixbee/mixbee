@@ -23,5 +23,6 @@ cscope*
 neosnapshot/*
 glide.lock
 *.iml
+tools/*
 mixbee
-tools
+node/
