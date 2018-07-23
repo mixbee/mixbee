@@ -65,17 +65,18 @@ all-cross: mixbee-cross tools-cross abi
 format:
 	$(GOFMT) -w main.go
 
-$(WALLET_FILE):
-	@if [ ! -e $(WALLET_FILE) ]; then $(error Please create wallet file first) ; fi
+# $(WALLET_FILE):
+# 	@if [ ! -e $(WALLET_FILE) ]; then $(error Please create wallet file first) ; fi
 
-docker/payload: docker/build/bin/mixbee docker/Dockerfile $(ONT_CFG_IN_DOCKER) $(WALLET_FILE)
+# docker/payload: docker/build/bin/mixbee docker/Dockerfile $(ONT_CFG_IN_DOCKER) $(WALLET_FILE)
+docker/payload: docker/build/bin/mixbee docker/Dockerfile
 	@echo "Building mixbee payload"
 	@mkdir -p $@
 	@cp docker/Dockerfile $@
 	@cp docker/build/bin/mixbee $@
-	@cp -f $(ONT_CFG_IN_DOCKER) $@/config.json
-	@cp -f $(WALLET_FILE) $@
-	@tar czf $@/config.tgz -C $@ config.json $(WALLET_FILE)
+	# @cp -f $(ONT_CFG_IN_DOCKER) $@/config.json
+	# @cp -f $(WALLET_FILE) $@
+	# @tar czf $@/config.tgz -C $@ config.json $(WALLET_FILE)
 	@touch $@
 
 docker/build/bin/%: Makefile

@@ -1,0 +1,43 @@
+
+version: '2'
+
+
+services:
+  node1.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --enableconsensus --networkid 4 --config ./config.json --password test
+    container_name: node1.example.com
+    volumes:
+      - ./config/node1/:/var/mixbee
+
+
+  node2.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee  --enableconsensus --networkid 4 --config ./config.json --password test
+    container_name: node2.example.com
+    volumes:
+      - ./config/node2/:/var/mixbee
+
+  node3.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command:  mixbee --enableconsensus --networkid 4 --config ./config.json --password test
+    container_name: node3.example.com
+    volumes:
+      - ./config/node3/:/var/mixbee
+
+
+  node4.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20438"
+    command: mixbee  --enableconsensus --networkid 4 --config ./config.json --password test
+    container_name: node4.example.com
+    volumes:
+      - ./config/node4/:/var/mixbee
+
