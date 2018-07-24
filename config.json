@@ -1,0 +1,19 @@
+{
+  "SeedList": [
+    "0.0.0.0:32815",
+    "0.0.0.0:32814",
+    "0.0.0.0:32813",
+    "0.0.0.0:32812"
+
+  ],
+  "ConsensusType":"dbft",
+  "DBFT":{
+    "Bookkeepers": [
+      "02af0eafe6835fe2bbdfe0c68363b0426db71e0712a22142458c8d82d54c3f7e59",
+      "022d9d9601a7d37b6bd394dfe645e57a891bafba14f1d35f5f5afcb4a58b3c26e8",
+      "021643516a54b03d7f566d0a0dfebfcaa6e9ac1a86a91191fe41d0b0df3608db45",
+      "02898e2a41d1eb0797caf9af13e77d134c90633471d5b6f8da3e5cdadb9c15a688"
+    ],
+    "GenBlockTime":6
+  }
+}
