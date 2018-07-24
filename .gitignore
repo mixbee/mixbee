@@ -26,4 +26,5 @@ glide.lock
 tools/*
 mixbee
 node/
+docker/payload/*
 Chain/*
