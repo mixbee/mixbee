@@ -34,6 +34,8 @@ Project is developing, please look forward to it ....
 * multi-hosts deployment
 * single-host deployment
 
+# Documentation
+[DOC](https://github.com/mixbee/mixbee/wiki)
 
 # Getting the source
 Clone the repository
