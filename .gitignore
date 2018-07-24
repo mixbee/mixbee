@@ -27,3 +27,4 @@ tools/*
 mixbee
 node/
 docker/payload/*
+Chain/*

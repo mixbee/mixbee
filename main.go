@@ -44,8 +44,8 @@ import (
 func setupAPP() *cli.App {
 	// https://github.com/urfave/cli, 使用 urfave/cli 命令行工具包
 	app := cli.NewApp()
-	app.Usage = "Ontology CLI"
-	app.Action = startOntology  // 服务的起点
+	app.Usage = "Mixbee CLI"
+	app.Action = startMixbee  // 服务的起点
 	app.Version = config.Version
 	app.Copyright = "Copyright in 2018 The Mixbee Authors"
 	app.Commands = []cli.Command{
@@ -115,7 +115,7 @@ func main() {
 	}
 }
 
-func startOntology(ctx *cli.Context) {
+func startMixbee(ctx *cli.Context) {
 	initLog(ctx)
 
 	// 配置初始化
@@ -192,7 +192,7 @@ func initLog(ctx *cli.Context) {
 }
 
 func initConfig(ctx *cli.Context) (*config.MixbeeConfig, error) {
-	//init ontology config from cli
+	//init mixbee config from cli
 	cfg, err := cmd.SetMixbeeConfig(ctx)
 	if err != nil {
 		return nil, err
@@ -447,7 +447,7 @@ func waitToExit() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	go func() {
 		for sig := range sc {
-			log.Infof("Ontology received exit signal:%v.", sig.String())
+			log.Infof("Mixbee received exit signal:%v.", sig.String())
 			close(exit)
 			break
 		}

@@ -104,38 +104,38 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 
 func newGoverningToken() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.OntContractAddress[:], "ONT", "1.0",
-		"Ontology Team", "contact@ont.io", "Ontology Network ONT Token", true)
+		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONT Token", true)
 	return tx
 }
 
 func newUtilityToken() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.OngContractAddress[:], "ONG", "1.0",
-		"Ontology Team", "contact@ont.io", "Ontology Network ONG Token", true)
+		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONG Token", true)
 	return tx
 }
 
 func newParamContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.ParamContractAddress[:],
-		"ParamConfig", "1.0", "Ontology Team", "contact@ont.io",
+		"ParamConfig", "1.0", "Mixbee Team", "jianlongcui23t@gmail.com",
 		"Chain Global Environment Variables Manager ", true)
 	return tx
 }
 
 func newConfig() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.GovernanceContractAddress[:], "CONFIG", "1.0",
-		"Ontology Team", "contact@ont.io", "Ontology Network Consensus Config", true)
+		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network Consensus Config", true)
 	return tx
 }
 
 func deployAuthContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.AuthContractAddress[:], "AuthContract", "1.0",
-		"Ontology Team", "contact@ont.io", "Ontology Network Authorization Contract", true)
+		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network Authorization Contract", true)
 	return tx
 }
 
 func deployOntIDContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.OntIDContractAddress[:], "OID", "1.0",
-		"Ontology Team", "contact@ont.io", "Ontology Network ONT ID", true)
+		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONT ID", true)
 	return tx
 }
 
