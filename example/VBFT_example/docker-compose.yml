@@ -10,7 +10,7 @@ services:
     command: mixbee --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test
     container_name: node1.example.com
     volumes:
-      - ./config/node1/:/var/mixbee
+      - ./node1/:/var/mixbee
 
 
   node2.example.com:
@@ -20,7 +20,7 @@ services:
     command: mixbee  --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test
     container_name: node2.example.com
     volumes:
-      - ./config/node2/:/var/mixbee
+      - ./node2/:/var/mixbee
 
   node3.example.com:
     image: mixbee/mixbee:latest
@@ -29,7 +29,7 @@ services:
     command:  mixbee --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test
     container_name: node3.example.com
     volumes:
-      - ./config/node3/:/var/mixbee
+      - ./node3/:/var/mixbee
 
 
   node4.example.com:
@@ -39,7 +39,7 @@ services:
     command: mixbee --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test
     container_name: node4.example.com
     volumes:
-      - ./config/node4/:/var/mixbee
+      - ./node4/:/var/mixbee
 
   node5.example.com:
     image: mixbee/mixbee:latest
@@ -48,6 +48,6 @@ services:
     command: mixbee --networkid 1 --config ./config.json --password test
     container_name: node5.example.com
     volumes:
-      - ./config/node5/:/var/mixbee
+      - ./node5/:/var/mixbee
 
 
