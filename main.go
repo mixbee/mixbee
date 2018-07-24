@@ -338,7 +338,6 @@ func initConsensus(ctx *cli.Context, p2pPid *actor.PID, txpoolSvr *proc.TXPoolSe
 }
 
 func initRpc(ctx *cli.Context) error {
-	// todo 这边不是很懂
 	if !config.DefConfig.Rpc.EnableHttpJsonRpc {
 		return nil
 	}
