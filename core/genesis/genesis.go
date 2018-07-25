@@ -21,6 +21,7 @@ import (
 	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
 	nutils "github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/neovm"
+	"log"
 )
 
 const (
@@ -158,6 +159,7 @@ func newGoverningInit() *types.Transaction {
 		addr  common.Address
 		value uint64
 	}{{addr, constants.ONT_TOTAL_SUPPLY}}
+	log.Println("govern genesis block address", addr.ToBase58())
 
 	args := bytes.NewBuffer(nil)
 	nutils.WriteVarUint(args, uint64(len(distribute)))
