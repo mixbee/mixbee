@@ -79,6 +79,6 @@ services:
     command: mixbee --networkid 1 --config ./config.json --password test
     container_name: node8.example.com
     volumes:
-      - ./node5/:/var/mixbee
+      - ./node8/:/var/mixbee
 
 
