@@ -145,6 +145,9 @@ func newGoverningInit() *types.Transaction {
 	bookkeepers, _ := config.DefConfig.GetBookkeepers()
 
 	var addr common.Address
+	addr = types.AddressFromPubKey(bookkeepers[0])
+
+	/*
 	if len(bookkeepers) == 1 {
 		addr = types.AddressFromPubKey(bookkeepers[0])
 	} else {
@@ -155,6 +158,7 @@ func newGoverningInit() *types.Transaction {
 		}
 		addr = temp
 	}
+	*/
 
 	distribute := []struct {
 		addr  common.Address
