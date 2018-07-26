@@ -1,0 +1,13 @@
+
+version: '2'
+
+
+services:
+  node.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --testmode --networkid 3 --password test
+    container_name: node.example.com
+    volumes:
+      - ./node/:/var/mixbee

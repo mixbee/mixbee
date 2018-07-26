@@ -99,6 +99,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 			govConfig,
 		},
 	}
+	log.Println("genesisBlock")
 	genesisBlock.RebuildMerkleRoot()
 	return genesisBlock, nil
 }
