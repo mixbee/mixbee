@@ -99,6 +99,6 @@ docker: Makefile docker/payload docker/Dockerfile
 
 clean:
 	rm -rf *.8 *.o *.out *.6 *exe
-	rm -rf mixbee tools docker/payload docker/build
+	rm -rf mixbee tools Log Chain docker/payload docker/build
 	docker rmi mixbee/mixbee
 

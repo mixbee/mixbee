@@ -7,8 +7,8 @@ services:
     image: mixbee/mixbee:latest
     ports:
       - "20338"
-      - "20334:20334"
-    command: mixbee --enableconsensus --rest --disablerpc  --disableeventlog --networkid 1 --config ./config.json --password test
+      - "20336:20336"
+    command: mixbee --enableconsensus  --disableeventlog --networkid 1 --config ./config.json --password test
     container_name: node1.example.com
     volumes:
       - ./node1/:/var/mixbee
@@ -46,7 +46,8 @@ services:
     image: mixbee/mixbee:latest
     ports:
       - "20338"
-    command: mixbee --networkid 1  --config ./config.json --password test
+      - "20334:20334"
+    command: mixbee   --rest --networkid 1  --config ./config.json --password test
     container_name: node5.example.com
     volumes:
       - ./node5/:/var/mixbee
