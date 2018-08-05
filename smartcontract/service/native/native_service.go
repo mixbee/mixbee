@@ -53,6 +53,7 @@ func (this *NativeService) Invoke() (interface{}, error) {
 	if !ok {
 		return false, fmt.Errorf("Native contract address %x haven't been registered.", contract.Address)
 	}
+
 	services(this)
 	service, ok := this.ServiceMap[contract.Method]
 	if !ok {

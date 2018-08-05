@@ -8,6 +8,7 @@ import (
 
 	"github.com/mixbee/mixbee/common/constants"
 	"github.com/stretchr/testify/assert"
+	"fmt"
 )
 
 func TestCalcUnbindOng(t *testing.T) {
@@ -15,6 +16,8 @@ func TestCalcUnbindOng(t *testing.T) {
 	assert.Equal(t, CalcUnbindOng(1, 0, TIME_INTERVAL), GENERATION_AMOUNT[0]*uint64(TIME_INTERVAL))
 	assert.Equal(t, CalcUnbindOng(1, 0, TIME_INTERVAL+1),
 		GENERATION_AMOUNT[1]+GENERATION_AMOUNT[0]*uint64(TIME_INTERVAL))
+
+	fmt.Println(CrossChainContractAddress.ToBase58())
 }
 
 // test identity: unbound[t1, t3) = unbound[t1, t2) + unbound[t2, t3)

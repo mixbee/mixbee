@@ -16,6 +16,8 @@ import (
 	bcomn "github.com/mixbee/mixbee/http/base/common"
 	berr "github.com/mixbee/mixbee/http/base/error"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
+	"strconv"
+	"github.com/mixbee/mixbee/crosschain"
 )
 
 func GetGenerateBlockTime(params []interface{}) map[string]interface{} {
@@ -538,4 +540,60 @@ func GetUnboundOng(params []interface{}) map[string]interface{} {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
 	return responseSuccess(rsp)
+}
+
+// A JSON example for registerSubChainNode method as following:
+//   {"jsonrpc": "2.0", "method": "registerSubChainNode", "params": ["netWorkId","host:port"], "id": 0}
+func RegisterSubChainNode(params []interface{}) map[string]interface{} {
+
+	if !config.DefConfig.CrossChain.EnableCrossChainVerify {
+		return responsePack(berr.INVALID_PARAMS, "this node not support cross chain verify")
+	}
+	if len(params) < 2 {
+		return responsePack(berr.INVALID_PARAMS, "")
+	}
+	netWorkId, ok := params[0].(string)
+	if !ok {
+		return responsePack(berr.INVALID_PARAMS, "")
+	}
+	id,err := strconv.Atoi(netWorkId)
+	if err != nil {
+		responsePack(berr.INVALID_PARAMS,"networkId is a uint32")
+	}
+	nid := uint32(id)
+
+	host, ok := params[1].(string)
+	if !ok {
+		return responsePack(berr.INVALID_PARAMS, "")
+	}
+	log.Infof("RegisterSubChainNode nid=%d,path=%s",nid,host)
+	info,ok := config.DefConfig.CrossChain.SubChainNode[nid]
+	if !ok {
+			info = []string{}
+			config.DefConfig.CrossChain.SubChainNode[nid] = info
+	}
+	info = append(info,host)
+	config.DefConfig.CrossChain.SubChainNode[nid] = info
+
+	return responseSuccess("success")
+}
+
+// A JSON example for pushCrossChainTxInfo method as following:
+//   {"jsonrpc": "2.0", "method": "pushCrossChainTxInfo", "params": ["addrA","addrB","aAmount","bAmount","aNetId","bNetId","txHash","seqId",timestamp,nonce], "id": 0}
+func PushCrossChainTxInfo(params []interface{}) map[string]interface{} {
+
+	if !config.DefConfig.CrossChain.EnableCrossChainVerify {
+		return responsePack(berr.INVALID_PARAMS, "this node not support cross chain verify")
+	}
+
+	if len(params) < 10 {
+		return responsePack(berr.INVALID_PARAMS, "")
+	}
+	log.Infof("PushCrossChainTxInfo %#v\n",params)
+	err := crosschain.CtxServer.PushCtxToPool(params)
+	if err != nil {
+		return responsePack(berr.INVALID_PARAMS, err.Error())
+	}
+
+	return responseSuccess("success")
 }

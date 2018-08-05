@@ -178,7 +178,7 @@ func (self *WsServer) registryMethod() {
 		"getgasprice":               {handler: rest.GetGasPrice},
 		"getunboundong":             {handler: rest.GetUnboundOng},
 		"getmempooltxcount":         {handler: rest.GetMemPoolTxCount},
-		"getmempooltxstate":         {handler: rest.GetMemPoolTxState},
+ 		"getmempooltxstate":         {handler: rest.GetMemPoolTxState},
 		"getversion":                {handler: rest.GetNodeVersion},
 
 		"getsessioncount": {handler: getsessioncount},

@@ -60,3 +60,36 @@ func sendRpcRequest(method string, params []interface{}) ([]byte, error) {
 	}
 	return rpcRsp.Result, nil
 }
+
+func SendRpcRequestWithAddr(addr,method string, params []interface{}) ([]byte, error) {
+	rpcReq := &JsonRpcRequest{
+		Version: JSON_RPC_VERSION,
+		Id:      "cli",
+		Method:  method,
+		Params:  params,
+	}
+	data, err := json.Marshal(rpcReq)
+	if err != nil {
+		return nil, fmt.Errorf("JsonRpcRequest json.Marsha error:%s", err)
+	}
+
+	resp, err := http.Post(addr, "application/json", strings.NewReader(string(data)))
+	if err != nil {
+		return nil, fmt.Errorf("http post request:%s error:%s", data, err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read rpc response body error:%s", err)
+	}
+	rpcRsp := &JsonRpcResponse{}
+	err = json.Unmarshal(body, rpcRsp)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal JsonRpcResponse:%s error:%s", body, err)
+	}
+	if rpcRsp.Error != 0 {
+		return nil, fmt.Errorf("error code:%d desc:%s", rpcRsp.Error, rpcRsp.Desc)
+	}
+	return rpcRsp.Result, nil
+}

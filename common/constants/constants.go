@@ -28,6 +28,12 @@ const (
 	ONG_TOTAL_SUPPLY = uint64(1000000000000000000)
 )
 
+// mix asset test constants
+const (
+	MIXT_NAME  = "MIX TEST ASSET"
+	MIXT_SYMBOL = "MIXT"
+)
+
 // ont/ong unbound model constants
 const UNBOUND_TIME_INTERVAL = uint32(31536000)
 

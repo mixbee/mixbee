@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"math/rand"
 	"os"
+	"net"
+	"fmt"
 )
 
 // GetNonce returns random nonce
@@ -36,4 +38,22 @@ func ToArrayReverse(arr []byte) []byte {
 func FileExisted(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
+}
+
+func GetLocalIp() (string,error){
+
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "",err
+	}
+	for _, address := range addrs {
+		// 检查ip地址判断是否回环地址
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(),nil
+			}
+
+		}
+	}
+	return "",fmt.Errorf("not get local ip")
 }

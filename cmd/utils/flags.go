@@ -1,5 +1,3 @@
-
-
 package utils
 
 import (
@@ -12,8 +10,9 @@ import (
 )
 
 const (
-	DEFAULT_EXPORT_FILE = "./blocks.dat"
-	DEFAULT_ABI_PATH    = "./abi"
+	DEFAULT_EXPORT_FILE             = "./blocks.dat"
+	DEFAULT_ABI_PATH                = "./abi"
+	DEFAULT_CROSS_CHAIN_DEPLOY_TIME = 60 * 60 * 2
 )
 
 var (
@@ -414,6 +413,77 @@ var (
 	NonOptionFlag = cli.StringFlag{
 		Name:  "option",
 		Usage: "this command does not need option, please run directly",
+	}
+
+	//EnableCrossChainVerify setting
+	EnableCrossChainVerifyFlag = cli.BoolFlag{
+		Name:  "enablecrosschainverify",
+		Usage: "If set enablecrosschainverify, will start cross chain verify module on mainchain",
+	}
+
+	//EnableCrossChainInteractive setting
+	EnableCrossChainInteractiveFlag = cli.BoolFlag{
+		Name:  "enablecrosschaininter",
+		Usage: "If set enablecrosschaininter, will start cross chain verify module in subchain",
+	}
+
+	//CrossChainVerifyNode setting
+	CrossChainVerifyNode = cli.StringSliceFlag{
+		Name:  "crosschainnode",
+		Usage: "If set enablecrosschaininter true,crosschainnode must not nil, example:node1:port1",
+	}
+
+	//key value
+	MixTestKeyFlag = cli.StringFlag{
+		Name:  "key",
+		Usage: "mix test contract setkey key",
+	}
+
+	MixTestValueFlag = cli.StringFlag{
+		Name:  "value",
+		Usage: "mix test contract setkey value",
+	}
+
+	CrossChainAValueFlag = cli.StringFlag{
+		Name:  "aamount",
+		Usage: "cross chain amount while from send to toAddress",
+	}
+
+	CrossChainBValueFlag = cli.StringFlag{
+		Name:  "bamount",
+		Usage: "cross chain amount while from want to obtain",
+	}
+
+	CrossChainBChainIdFlag = cli.StringFlag{
+		Name:  "bchainid",
+		Usage: "cross chain other chain id",
+	}
+
+	CrossChainAChainIdFlag = cli.StringFlag{
+		Name:  "achainid",
+		Usage: "cross chain from chain id",
+	}
+
+	CrossChainDelayTimeFlag = cli.UintFlag{
+		Name:  "delaytime",
+		Usage: "cross chain delay time >= 60*60*2 second",
+		Value: DEFAULT_CROSS_CHAIN_DEPLOY_TIME,
+	}
+
+	CrossChainNonceFlag = cli.UintFlag{
+		Name:  "nonce",
+		Usage: "cross chain nonce default 0",
+		Value: 0,
+	}
+
+	CrossChainSeqIdFlag = cli.StringFlag{
+		Name:  "seqid",
+		Usage: "cross chain seqId",
+	}
+
+	CrossChainVerifyPublicKeyFlag = cli.StringFlag{
+		Name:  "cpbk",
+		Usage: "cross chain, main chain verify node public key",
 	}
 )
 

@@ -5,7 +5,6 @@ package ont
 import (
 	"bytes"
 	"fmt"
-
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/config"
 	"github.com/mixbee/mixbee/common/serialization"
@@ -30,6 +29,9 @@ const (
 	TOTALSUPPLY_NAME    = "totalSupply"
 	BALANCEOF_NAME      = "balanceOf"
 	ALLOWANCE_NAME      = "allowance"
+
+	SET_KEY             = "setkey"
+	GET_KEY             = "getkey"
 )
 
 func AddNotifications(native *native.NativeService, contract common.Address, state *State) {
@@ -62,12 +64,26 @@ func Transfer(native *native.NativeService, contract common.Address, state *Stat
 		return 0, 0, errors.NewErr("authentication failed!")
 	}
 
-	fromBalance, err := fromTransfer(native, GenBalanceKey(contract, state.From), state.Value)
+	fromBalance, err := FromTransfer(native, GenBalanceKey(contract, state.From), state.Value)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	toBalance, err := toTransfer(native, GenBalanceKey(contract, state.To), state.Value)
+	toBalance, err := ToTransfer(native, GenBalanceKey(contract, state.To), state.Value)
+	if err != nil {
+		return 0, 0, err
+	}
+	return fromBalance, toBalance, nil
+}
+
+func TransferForCrossChainContract(native *native.NativeService, contract common.Address, state *State) (uint64, uint64, error) {
+
+	fromBalance, err := FromTransfer(native, GenBalanceKey(contract, state.From), state.Value)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	toBalance, err := ToTransfer(native, GenBalanceKey(contract, state.To), state.Value)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -88,12 +104,12 @@ func TransferedFrom(native *native.NativeService, currentContract common.Address
 		return 0, 0, err
 	}
 
-	fromBalance, err := fromTransfer(native, GenBalanceKey(currentContract, state.From), state.Value)
+	fromBalance, err := FromTransfer(native, GenBalanceKey(currentContract, state.From), state.Value)
 	if err != nil {
 		return 0, 0, err
 	}
 
-	toBalance, err := toTransfer(native, GenBalanceKey(currentContract, state.To), state.Value)
+	toBalance, err := ToTransfer(native, GenBalanceKey(currentContract, state.To), state.Value)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -128,7 +144,7 @@ func fromApprove(native *native.NativeService, fromApproveKey []byte, value uint
 	return nil
 }
 
-func fromTransfer(native *native.NativeService, fromKey []byte, value uint64) (uint64, error) {
+func FromTransfer(native *native.NativeService, fromKey []byte, value uint64) (uint64, error) {
 	fromBalance, err := utils.GetStorageUInt64(native, fromKey)
 	if err != nil {
 		return 0, err
@@ -145,7 +161,7 @@ func fromTransfer(native *native.NativeService, fromKey []byte, value uint64) (u
 	return fromBalance, nil
 }
 
-func toTransfer(native *native.NativeService, toKey []byte, value uint64) (uint64, error) {
+func ToTransfer(native *native.NativeService, toKey []byte, value uint64) (uint64, error) {
 	toBalance, err := utils.GetStorageUInt64(native, toKey)
 	if err != nil {
 		return 0, err

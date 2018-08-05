@@ -221,6 +221,45 @@ func (self *StateStore) HandleInvokeTransaction(store store.LedgerStore, stateBa
 	return nil
 }
 
+func (self *StateStore) HandleCrossChainTransaction(store store.LedgerStore, stateBatch *statestore.StateBatch,
+	tx *types.Transaction, block *types.Block, notify *event.ExecuteNotify) error {
+	invoke := tx.Payload.(*payload.InvokeCode)
+	//code := invoke.Code
+
+	// init smart contract configuration info
+	sconfig := &smartcontract.Config {
+		Time:   block.Header.Timestamp,
+		Height: block.Header.Height,
+		Tx:     tx,
+	}
+
+	cache := storage.NewCloneCache(stateBatch)
+
+	//init smart contract info
+	sc := smartcontract.SmartContract{
+		Config:     sconfig,
+		CloneCache: cache,
+		Store:      store,
+	}
+
+	//start the smart contract executive function
+	engine, _ := sc.NewExecuteEngine(invoke.Code)
+
+	_, err := engine.Invoke()
+	if err != nil {
+		return err
+	}
+
+	var notifies []*event.NotifyEventInfo
+
+	notify.Notify = append(notify.Notify, sc.Notifications...)
+	notify.Notify = append(notify.Notify, notifies...)
+	notify.GasConsumed = 0
+	notify.State = event.CONTRACT_STATE_SUCCESS
+	sc.CloneCache.Commit()
+	return nil
+}
+
 func SaveNotify(eventStore scommon.EventStore, txHash common.Uint256, notify *event.ExecuteNotify) error {
 	if !config.DefConfig.Common.EnableEventLog {
 		return nil

@@ -79,6 +79,7 @@ var (
 	VM_EXEC_STEP_EXCEED   = errors.NewErr("[NeoVmService] vm execute step exceed!")
 	CONTRACT_NOT_EXIST    = errors.NewErr("[NeoVmService] Get contract code from db fail")
 	DEPLOYCODE_TYPE_ERROR = errors.NewErr("[NeoVmService] DeployCode type error!")
+	ERR_EXECUTE_ENGINE_OPCODE      = errors.NewErr("[NeoVmService] vm execute engine opcode invalid!")
 )
 
 type (
@@ -109,6 +110,10 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 	if len(this.Code) == 0 {
 		return nil, ERR_EXECUTE_CODE
 	}
+	//if this.Tx.TxType == types.CrossChain && this.Engine.OpCode != vm.SYSCALL {
+	//	return nil, ERR_EXECUTE_ENGINE_OPCODE
+	//}
+
 	this.ContextRef.PushContext(&context.Context{ContractAddress: types.AddressFromVmCode(this.Code), Code: this.Code})
 	this.Engine.PushContext(vm.NewExecutionContext(this.Engine, this.Code))
 	for {
@@ -130,6 +135,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, ERR_CHECK_STACK_SIZE
 			}
 		}
+
 		if this.Engine.OpCode >= vm.PUSHBYTES1 && this.Engine.OpCode <= vm.PUSHBYTES75 {
 			if !this.ContextRef.CheckUseGas(OPCODE_GAS) {
 				return nil, ERR_GAS_INSUFFICIENT
@@ -146,6 +152,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, ERR_GAS_INSUFFICIENT
 			}
 		}
+
 		switch this.Engine.OpCode {
 		case vm.VERIFY:
 			if vm.EvaluationStackCount(this.Engine) < 3 {
@@ -215,6 +222,7 @@ func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 	if !ok {
 		return errors.NewErr(fmt.Sprintf("[SystemCall] service not support: %s", serviceName))
 	}
+
 	price, err := GasPrice(engine, serviceName)
 	if err != nil {
 		return err

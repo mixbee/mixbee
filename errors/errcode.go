@@ -34,6 +34,8 @@ const (
 	ErrNetUnPackFail        ErrCode = 45018
 	ErrNetVerifyFail        ErrCode = 45019
 	ErrGasPrice             ErrCode = 45020
+	ErrDuplicatedSeqId      ErrCode = 45021
+	ErrNotExsit             ErrCode = 45022
 )
 
 func (err ErrCode) Error() string {

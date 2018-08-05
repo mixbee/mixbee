@@ -28,3 +28,4 @@ mixbee
 node/
 docker/payload/*
 Chain/*
+wallet.dat

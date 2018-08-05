@@ -1,5 +1,3 @@
-
-
 package utils
 
 import (
@@ -25,15 +23,25 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mixtest"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosschain"
 )
 
 const (
-	VERSION_TRANSACTION    = byte(0)
-	VERSION_CONTRACT_ONT   = byte(0)
-	VERSION_CONTRACT_ONG   = byte(0)
-	CONTRACT_TRANSFER      = "transfer"
-	CONTRACT_TRANSFER_FROM = "transferFrom"
-	CONTRACT_APPROVE       = "approve"
+	VERSION_TRANSACTION          = byte(0)
+	VERSION_CONTRACT_ONT         = byte(0)
+	VERSION_CONTRACT_ONG         = byte(0)
+	VERSION_CONTRACT_MIXT        = byte(0)
+	VERSION_CONTRACT_CROSS_CHAIN = byte(0)
+	CONTRACT_TRANSFER            = "transfer"
+	CONTRACT_TRANSFER_FROM       = "transferFrom"
+	CONTRACT_APPROVE             = "approve"
+
+	CONTRACT_SETKEY = "setkey"
+
+	CONTRACT_CROSS_TRANSFER = "crossTranfer"
+	CONTRACT_CROSS_UNLOCK   = "crossUnlock"
+	CONTRACT_CROSS_RELEASE  = "crossRelease"
 
 	ASSET_ONT = "ont"
 	ASSET_ONG = "ong"
@@ -53,6 +61,96 @@ func GetBalance(address string) (*httpcom.BalanceOfRsp, error) {
 	return balance, nil
 }
 
+func CrossQuery(seqId string) (*httpcom.MixTestOfRsp, error) {
+	result, err := sendRpcRequest("crossQuery", []interface{}{seqId})
+	if err != nil {
+		return nil, fmt.Errorf("sendRpcRequest error:%s", err)
+	}
+
+	rsp := &httpcom.MixTestOfRsp{}
+	err = json.Unmarshal(result, rsp)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal error:%s", err)
+	}
+	return rsp, nil
+}
+
+func CrossHistory(from string) (*httpcom.MixTestOfRsp, error) {
+	result, err := sendRpcRequest("crossHistory", []interface{}{from})
+	if err != nil {
+		return nil, fmt.Errorf("sendRpcRequest error:%s", err)
+	}
+
+	rsp := &httpcom.MixTestOfRsp{}
+	err = json.Unmarshal(result, rsp)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal error:%s", err)
+	}
+	return rsp, nil
+}
+
+func GetKey(key string) (*httpcom.MixTestOfRsp, error) {
+	result, err := sendRpcRequest("getkey", []interface{}{key})
+	if err != nil {
+		return nil, fmt.Errorf("sendRpcRequest error:%s", err)
+	}
+
+	rsp := &httpcom.MixTestOfRsp{}
+	err = json.Unmarshal(result, rsp)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal error:%s", err)
+	}
+	return rsp, nil
+}
+
+func SetKey(gasPrice, gasLimit uint64, signer *account.Account, key, value string) (string, error) {
+	transferTx, err := SetKeyTx(gasPrice, gasLimit, signer.Address.ToBase58(), key, value)
+	if err != nil {
+		return "", err
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SignTransaction error:%s", err)
+	}
+	txHash, err := SendRawTransaction(transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SendTransaction error:%s", err)
+	}
+	return txHash, nil
+}
+
+func CrossUnlockOrRelease(gasPrice, gasLimit uint64, signer *account.Account, seqId string, method string) (string, error) {
+	transferTx, err := CrossUnlockTx(gasPrice, gasLimit, seqId, method)
+	if err != nil {
+		return "", err
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SignTransaction error:%s", err)
+	}
+	txHash, err := SendRawTransaction(transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SendTransaction error:%s", err)
+	}
+	return txHash, nil
+}
+
+func CrossChainReleaseAssetByMainChain(signer *account.Account, addr, seqId string, sign []byte) (string, error) {
+	transferTx, err := BuildCrossReleaseTx(seqId, sign)
+	if err != nil {
+		return "", err
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SignTransaction error:%s", err)
+	}
+	txHash, err := SendRawTransactionWithAddr(transferTx, addr)
+	if err != nil {
+		return "", fmt.Errorf("SendTransaction error:%s", err)
+	}
+	return txHash, nil
+}
+
 func GetAllowance(asset, from, to string) (string, error) {
 	result, err := sendRpcRequest("getallowance", []interface{}{asset, from, to})
 	if err != nil {
@@ -64,6 +162,23 @@ func GetAllowance(asset, from, to string) (string, error) {
 		return "", fmt.Errorf("json.Unmarshal error:%s", err)
 	}
 	return balance, nil
+}
+
+//tranfer asset cross chain
+func CrossTransfer(gasPrice, gasLimit uint64, signer *account.Account, asset, to string, aAmount, bAmount, aChainId, bChainID, delayTime, nonce uint64, verifyPublicKey string) (string, string, error) {
+	transferTx, seqId, err := CrossChainTransferTx(gasPrice, gasLimit, asset, signer.Address.ToBase58(), to, aAmount, bAmount, aChainId, bChainID, delayTime, nonce, verifyPublicKey)
+	if err != nil {
+		return "", "", err
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return "", "", fmt.Errorf("SignTransaction error:%s", err)
+	}
+	txHash, err := SendRawTransaction(transferTx)
+	if err != nil {
+		return "", "", fmt.Errorf("SendTransaction error:%s", err)
+	}
+	return txHash, seqId, nil
 }
 
 //Transfer ont|ong from account to another account
@@ -157,6 +272,126 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil
+}
+
+func SetKeyTx(gasPrice, gasLimit uint64, from, key, value string) (*types.Transaction, error) {
+	fromAddr, err := common.AddressFromBase58(from)
+	if err != nil {
+		return nil, fmt.Errorf("from address:%s invalid:%s", from, err)
+	}
+
+	var sts []*mixtest.State
+	sts = append(sts, &mixtest.State{
+		From:  fromAddr,
+		Key:   key,
+		Value: value,
+	})
+	contractAddr := utils.MixTestContractAddress
+	version := VERSION_CONTRACT_MIXT
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, CONTRACT_SETKEY, []interface{}{sts})
+	if err != nil {
+		return nil, fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: gasPrice,
+		GasLimit: gasLimit,
+		TxType:   types.Invoke,
+		Nonce:    uint32(time.Now().Unix()),
+		Payload:  invokePayload,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, nil
+}
+
+func CrossUnlockTx(gasPrice, gasLimit uint64, seqId string, method string) (*types.Transaction, error) {
+
+	contractAddr := utils.CrossChainContractAddress
+	version := VERSION_CONTRACT_CROSS_CHAIN
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, method, []interface{}{seqId})
+	if err != nil {
+		return nil, fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: gasPrice,
+		GasLimit: gasLimit,
+		TxType:   types.Invoke,
+		Nonce:    uint32(time.Now().Unix()),
+		Payload:  invokePayload,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, nil
+}
+
+func BuildCrossReleaseTx(seqId string, sig []byte) (*types.Transaction, error) {
+	sigHex := hex.EncodeToString(sig)
+	fmt.Println("BuildCrossReleaseTx sig=", sigHex)
+	param := seqId + ":" + sigHex
+	contractAddr := utils.CrossChainContractAddress
+	version := VERSION_CONTRACT_CROSS_CHAIN
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crosschain.CROSS_RELEASE, []interface{}{param})
+	if err != nil {
+		return nil, fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: 0,
+		GasLimit: 20000,
+		TxType:   types.Invoke,
+		Nonce:    uint32(time.Now().Unix()),
+		Payload:  invokePayload,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, nil
+}
+
+func CrossChainTransferTx(gasPrice, gasLimit uint64, asset, from, to string, aAmount, bAmount, aChainId, bChainId, delayTime, nonce uint64, verifyPublicKey string) (*types.Transaction, string, error) {
+	fromAddr, err := common.AddressFromBase58(from)
+	if err != nil {
+		return nil, "", fmt.Errorf("from address:%s invalid:%s", from, err)
+	}
+	toAddr, err := common.AddressFromBase58(to)
+	if err != nil {
+		return nil, "", fmt.Errorf("To address:%s invalid:%s", to, err)
+	}
+
+	crossState := &crosschain.CrossChainState{
+		From:            fromAddr,
+		To:              toAddr,
+		AValue:          aAmount,
+		BValue:          bAmount,
+		AChainId:        uint32(aChainId),
+		BChainId:        uint32(bChainId),
+		Type:            0,
+		Timestamp:       uint32(time.Now().Unix() + int64(delayTime)),
+		Nonce:           uint32(nonce),
+		VerifyPublicKey: verifyPublicKey,
+	}
+	crossState.SeqId = crosschain.GetSeqId(crossState)
+
+	invokeCode, err := httpcom.BuildNativeInvokeCode(utils.CrossChainContractAddress, VERSION_CONTRACT_CROSS_CHAIN, CONTRACT_CROSS_TRANSFER, []interface{}{crossState})
+	if err != nil {
+		return nil, "", fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: gasPrice,
+		GasLimit: gasLimit,
+		TxType:   types.Invoke,
+		Nonce:    uint32(time.Now().Unix()),
+		Payload:  invokePayload,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, crossState.SeqId, nil
 }
 
 func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64) (*types.Transaction, error) {
@@ -260,12 +495,12 @@ func SignTransaction(signer *account.Account, tx *types.Transaction) error {
 	if err != nil {
 		return fmt.Errorf("sign error:%s", err)
 	}
-	sig := &types.Sig{
+	sigInfo := &types.Sig{
 		PubKeys: []keypair.PublicKey{signer.PublicKey},
 		M:       1,
 		SigData: [][]byte{sigData},
 	}
-	tx.Sigs = []*types.Sig{sig}
+	tx.Sigs = []*types.Sig{sigInfo}
 	return nil
 }
 
@@ -291,6 +526,25 @@ func SendRawTransaction(tx *types.Transaction) (string, error) {
 	}
 	txData := hex.EncodeToString(buffer.Bytes())
 	data, err := sendRpcRequest("sendrawtransaction", []interface{}{txData})
+	if err != nil {
+		return "", err
+	}
+	hexHash := ""
+	err = json.Unmarshal(data, &hexHash)
+	if err != nil {
+		return "", fmt.Errorf("json.Unmarshal hash:%s error:%s", data, err)
+	}
+	return hexHash, nil
+}
+
+func SendRawTransactionWithAddr(tx *types.Transaction, addr string) (string, error) {
+	var buffer bytes.Buffer
+	err := tx.Serialize(&buffer)
+	if err != nil {
+		return "", fmt.Errorf("Serialize error:%s", err)
+	}
+	txData := hex.EncodeToString(buffer.Bytes())
+	data, err := SendRpcRequestWithAddr(addr, "sendrawtransaction", []interface{}{txData})
 	if err != nil {
 		return "", err
 	}

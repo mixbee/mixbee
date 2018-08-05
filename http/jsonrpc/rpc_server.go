@@ -42,6 +42,17 @@ func StartRPCServer() error {
 	rpc.HandleFunc("getgasprice", rpc.GetGasPrice)
 	rpc.HandleFunc("getunboundong", rpc.GetUnboundOng)
 
+	//cross chain
+	rpc.HandleFunc("registerSubChainNode", rpc.RegisterSubChainNode)
+	rpc.HandleFunc("pushCrossChainTxInfo", rpc.PushCrossChainTxInfo)
+
+	// 查询mix test key
+	rpc.HandleFunc("getkey", rpc.GetKey)
+
+	//查询 cross chain 信息
+	rpc.HandleFunc("crossQuery", rpc.CrossChainQuery)
+	rpc.HandleFunc("crossHistory", rpc.CrossChainHistory)
+
 	err := http.ListenAndServe(":"+strconv.Itoa(int(cfg.DefConfig.Rpc.HttpJsonPort)), nil)
 	if err != nil {
 		return fmt.Errorf("ListenAndServe error:%s", err)

@@ -38,11 +38,45 @@ func SetMixbeeConfig(ctx *cli.Context) (*config.MixbeeConfig, error) {
 		cfg.Ws.EnableHttpWs = true
 		cfg.Restful.EnableHttpRestful = true
 		cfg.Consensus.EnableConsensus = true
-		cfg.P2PNode.NetworkId = config.NETWORK_ID_SOLO_NET  // solo模式，network 模式为3
+		cfg.P2PNode.NetworkId = config.NETWORK_ID_SOLO_NET // solo模式，network 模式为3
 		cfg.P2PNode.NetworkName = config.GetNetworkName(cfg.P2PNode.NetworkId)
 		cfg.P2PNode.NetworkMagic = config.GetNetworkMagic(cfg.P2PNode.NetworkId)
 	}
+	if netWorkId > 0 {
+		cfg.P2PNode.NetworkId = uint32(netWorkId)
+	}
+
+	err = setCrossChainConfig(ctx, cfg.CrossChain)
+	if err != nil {
+		return nil, fmt.Errorf("setCrossChain error:%s", err)
+	}
+
 	return cfg, nil
+}
+
+func setCrossChainConfig(ctx *cli.Context, verifyConfig *config.CrossChainVerifyConfig) error {
+
+	if ctx.GlobalBool(utils.GetFlagName(utils.EnableCrossChainVerifyFlag)) == false && ctx.GlobalBool(utils.GetFlagName(utils.EnableCrossChainInteractiveFlag)) == false {
+		return nil
+	}
+
+	verifyConfig.EnableCrossChainVerify = ctx.GlobalBool(utils.GetFlagName(utils.EnableCrossChainVerifyFlag))
+	verifyConfig.EnableCrossChainInteractive = ctx.GlobalBool(utils.GetFlagName(utils.EnableCrossChainInteractiveFlag))
+	if ctx.GlobalBool(utils.GetFlagName(utils.EnableCrossChainInteractiveFlag)) {
+		node := ctx.GlobalStringSlice(utils.GetFlagName(utils.CrossChainVerifyNode))
+		if len(node) == 0 {
+			return fmt.Errorf("if set enablecrosschaininter is true,crosschainnode must be set ")
+		}
+		verifyConfig.MainVerifyNode = node
+
+		if ctx.GlobalUint64(utils.GetFlagName(utils.GasPriceFlag)) > 0 {
+			return fmt.Errorf("if set enablecrosschaininter is true,min gasprice must be 0 ")
+		}
+	}
+
+	//verifyConfig.SubChainNode[3] = []string{"http://localhost:20336"}
+	//verifyConfig.SubChainNode[5] = []string{"http://localhost:20336"}
+	return nil
 }
 
 func setGenesis(ctx *cli.Context, cfg *config.GenesisConfig) error {
@@ -86,7 +120,7 @@ func setGenesis(ctx *cli.Context, cfg *config.GenesisConfig) error {
 		if cfg.DBFT.GenBlockTime <= 0 {
 			cfg.DBFT.GenBlockTime = config.DEFAULT_GEN_BLOCK_TIME
 		}
-	case config.CONSENSUS_TYPE_VBFT:  // vbft
+	case config.CONSENSUS_TYPE_VBFT: // vbft
 		err = governance.CheckVBFTConfig(cfg.VBFT)
 		if err != nil {
 			return fmt.Errorf("VBFT config error %v", err)

@@ -758,14 +758,14 @@ func (this *LedgerStoreImp) PreExecuteContract(tx *types.Transaction) (*sstate.P
 		return &sstate.PreExecResult{State: event.CONTRACT_STATE_FAIL, Gas: neovm.MIN_TRANSACTION_GAS, Result: nil}, err
 	}
 
-	config := &smartcontract.Config{
+	cfg := &smartcontract.Config{
 		Time:   header.Timestamp,
 		Height: header.Height,
 		Tx:     tx,
 	}
 
 	cache := storage.NewCloneCache(this.stateStore.NewStateBatch())
-	preGas, err := this.getPreGas(config, cache)
+	preGas, err := this.getPreGas(cfg, cache)
 	if err != nil {
 		return &sstate.PreExecResult{State: event.CONTRACT_STATE_FAIL, Gas: neovm.MIN_TRANSACTION_GAS, Result: nil}, err
 	}
@@ -774,7 +774,7 @@ func (this *LedgerStoreImp) PreExecuteContract(tx *types.Transaction) (*sstate.P
 		invoke := tx.Payload.(*payload.InvokeCode)
 
 		sc := smartcontract.SmartContract{
-			Config:     config,
+			Config:     cfg,
 			Store:      this,
 			CloneCache: cache,
 			Gas:        math.MaxUint64 - calcGasByCodeLen(len(invoke.Code), preGas[neovm.UINT_INVOKE_CODE_LEN_NAME]),

@@ -32,6 +32,10 @@ tools: sigsvr abi
 
 all: mixbee tools docker
 
+.PHONY:mixbee
+.PHONY:docker
+.PHONY:tools
+
 mixbee-cross: mixbee-windows mixbee-linux mixbee-darwin
 
 mixbee-windows:

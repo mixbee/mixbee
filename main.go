@@ -39,13 +39,16 @@ import (
 	"github.com/mixbee/mixbee/validator/stateful"
 	"github.com/mixbee/mixbee/validator/stateless"
 	"github.com/urfave/cli"
+	"github.com/mixbee/mixbee/crosschain"
+	"strconv"
+	cmdutils "github.com/mixbee/mixbee/cmd/utils"
 )
 
 func setupAPP() *cli.App {
 	// https://github.com/urfave/cli, 使用 urfave/cli 命令行工具包
 	app := cli.NewApp()
 	app.Usage = "Mixbee CLI"
-	app.Action = startMixbee  // 服务的起点
+	app.Action = startMixbee // 服务的起点
 	app.Version = config.Version
 	app.Copyright = "Copyright in 2018 The Mixbee Authors"
 	app.Commands = []cli.Command{
@@ -100,6 +103,10 @@ func setupAPP() *cli.App {
 		//ws setting
 		utils.WsEnabledFlag,
 		utils.WsPortFlag,
+		//cross chain setting
+		utils.EnableCrossChainVerifyFlag,
+		utils.EnableCrossChainInteractiveFlag,
+		utils.CrossChainVerifyNode,
 	}
 	app.Before = func(context *cli.Context) error {
 		runtime.GOMAXPROCS(runtime.NumCPU())
@@ -116,6 +123,25 @@ func main() {
 }
 
 func startMixbee(ctx *cli.Context) {
+	//TODO golang IDE 本地调试设置默认参数
+	//test 模式
+	//ctx.Set(utils.EnableTestModeFlag.Name, "true")
+	////wallet 密码
+	//ctx.GlobalSet(utils.GetFlagName(utils.AccountPassFlag), "123456")
+	////启动清除原来数据
+	//ctx.GlobalSet(utils.GetFlagName(utils.ClearTestModeDataFlag), "true")
+	////开启跨链验证模块
+	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainVerifyFlag), "true")
+	////子链跨链协议开启
+	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainInteractiveFlag), "true")
+	////主链的node信息
+	//ctx.GlobalSet(utils.GetFlagName(utils.CrossChainVerifyNode), "http://localhost:20336")
+	//开启debug日志级别
+	ctx.GlobalSet(utils.GetFlagName(utils.LogLevelFlag), "0")
+	//networkId
+	//ctx.GlobalSet(utils.GetFlagName(utils.NetworkIdFlag), "3")
+
+	//日志模块初始化
 	initLog(ctx)
 
 	// 配置初始化
@@ -179,9 +205,40 @@ func startMixbee(ctx *cli.Context) {
 	initWs(ctx)
 	initNodeInfo(ctx, p2pSvr)
 
+	//跨链协议初始化
+	initCrossChain(ctx, acc)
+
 	// 一直打印当前区块高度
 	go logCurrBlockHeight()
 	waitToExit()
+}
+
+func initCrossChain(context *cli.Context, acc *account.Account) {
+
+	//初始化主链验证节点
+	if config.DefConfig.CrossChain.EnableCrossChainVerify {
+		crosschain.NewCTxPoolServer(2, acc)
+		go crosschain.CtxServer.Start()
+	}
+
+	if config.DefConfig.CrossChain.EnableCrossChainInteractive {
+		log.Infof("initCrossChain||EnableCrossChainInteractive init config")
+		//启动子链服务
+		crosschain.StartSubChainServer()
+		//子链向主链验证节点注册
+		ip, err := common.GetLocalIp()
+		if err != nil {
+			log.Errorf("get local ip err:%s", err.Error())
+		}
+		port := config.DefConfig.Rpc.HttpJsonPort
+		portStr := strconv.FormatUint(uint64(port), 10)
+		subhost := "http://" + ip + ":" + portStr
+		subNetId := strconv.FormatUint(uint64(config.DefConfig.P2PNode.NetworkId), 10)
+
+		mainHost := config.DefConfig.CrossChain.MainVerifyNode[0]
+		result,err := cmdutils.SendRpcRequestWithAddr(mainHost, "registerSubChainNode", []interface{}{subNetId, subhost})
+		log.Infof("initCrossChain||registerSubChainNode result = %s",result)
+	}
 }
 
 func initLog(ctx *cli.Context) {

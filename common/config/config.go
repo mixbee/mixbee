@@ -14,13 +14,14 @@ import (
 var Version = "" //Set value when build project
 
 const (
-	DEFAULT_CONFIG_FILE_NAME = "./config.json"
-	DEFAULT_WALLET_FILE_NAME = "./wallet.dat"
-	MIN_GEN_BLOCK_TIME       = 2
-	DEFAULT_GEN_BLOCK_TIME   = 6
-	DBFT_MIN_NODE_NUM        = 4 //min node number of dbft consensus
-	SOLO_MIN_NODE_NUM        = 1 //min node number of solo consensus
-	VBFT_MIN_NODE_NUM        = 4 //min node number of vbft consensus
+	DEFAULT_CONFIG_FILE_NAME        = "./config.json"
+	DEFAULT_WALLET_FILE_NAME        = "./wallet.dat"
+	MIN_GEN_BLOCK_TIME              = 2
+	DEFAULT_GEN_BLOCK_TIME          = 6
+	DEFAULT_CROSS_CHAIN_VERIFY_TIME = 10
+	DBFT_MIN_NODE_NUM               = 4 //min node number of dbft consensus
+	SOLO_MIN_NODE_NUM               = 1 //min node number of solo consensus
+	VBFT_MIN_NODE_NUM               = 4 //min node number of vbft consensus
 
 	CONSENSUS_TYPE_DBFT = "dbft"
 	CONSENSUS_TYPE_SOLO = "solo"
@@ -468,6 +469,16 @@ type ConsensusConfig struct {
 	MaxTxInBlock    uint
 }
 
+type CrossChainVerifyConfig struct {
+	//主链配置
+	EnableCrossChainVerify bool                //用于主链是否开启跨链验证
+	SubChainNode           map[uint32][]string //主链连接上的子链节点，用于验证交易完成度
+
+	//子链配置
+	EnableCrossChainInteractive bool     //用于子链是否开启跨链协议
+	MainVerifyNode              []string //子链配置主链验证节点
+}
+
 type P2PRsvConfig struct {
 	ReservedPeers []string `json:"reserved"`
 	MaskPeers     []string `json:"mask"`
@@ -514,13 +525,14 @@ type WebSocketConfig struct {
 }
 
 type MixbeeConfig struct {
-	Genesis   *GenesisConfig
-	Common    *CommonConfig
-	Consensus *ConsensusConfig
-	P2PNode   *P2PNodeConfig
-	Rpc       *RpcConfig
-	Restful   *RestfulConfig
-	Ws        *WebSocketConfig
+	Genesis    *GenesisConfig
+	Common     *CommonConfig
+	Consensus  *ConsensusConfig
+	P2PNode    *P2PNodeConfig
+	Rpc        *RpcConfig
+	Restful    *RestfulConfig
+	Ws         *WebSocketConfig
+	CrossChain *CrossChainVerifyConfig
 }
 
 func NewMixbeeConfig() *MixbeeConfig {
@@ -569,19 +581,25 @@ func NewMixbeeConfig() *MixbeeConfig {
 			EnableHttpWs: true,
 			HttpWsPort:   DEFAULT_WS_PORT,
 		},
+		CrossChain: &CrossChainVerifyConfig{
+			EnableCrossChainVerify:      false,
+			EnableCrossChainInteractive: true,
+			SubChainNode:                make(map[uint32][]string),
+			MainVerifyNode:              []string{},
+		},
 	}
 }
 
 func (this *MixbeeConfig) GetBookkeepers() ([]keypair.PublicKey, error) {
 	var bookKeepers []string
 	switch this.Genesis.ConsensusType {
-	case CONSENSUS_TYPE_VBFT:  // VBFT
+	case CONSENSUS_TYPE_VBFT: // VBFT
 		for _, peer := range this.Genesis.VBFT.Peers {
 			bookKeepers = append(bookKeepers, peer.PeerPubkey)
 		}
-	case CONSENSUS_TYPE_DBFT:  // dbft
+	case CONSENSUS_TYPE_DBFT: // dbft
 		bookKeepers = this.Genesis.DBFT.Bookkeepers
-	case CONSENSUS_TYPE_SOLO:  // solo
+	case CONSENSUS_TYPE_SOLO: // solo
 		bookKeepers = this.Genesis.SOLO.Bookkeepers
 	default:
 		return nil, fmt.Errorf("Does not support %s consensus", this.Genesis.ConsensusType)

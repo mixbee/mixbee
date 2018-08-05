@@ -77,26 +77,32 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	}
 
 	//block
-	ont := newGoverningToken()
+	ontTx := newGoverningToken()
 	ong := newUtilityToken()
 	param := newParamContract()
 	oid := deployOntIDContract()
 	auth := deployAuthContract()
-	config := newConfig()
+	configTx := newConfig()
+	mix := deployMixTestContract()
+	cross := deployCrossChainContract()
 
 	genesisBlock := &types.Block{
 		Header: genesisHeader,
 		Transactions: []*types.Transaction{
-			ont,
+			ontTx,
 			ong,
 			param,
 			oid,
 			auth,
-			config,
+			configTx,
+			mix,
+			cross,
 			newGoverningInit(),
 			newUtilityInit(),
 			newParamInit(),
 			govConfig,
+			newMixTest(),
+			newCrossChain(),
 		},
 	}
 	genesisBlock.RebuildMerkleRoot()
@@ -140,6 +146,18 @@ func deployOntIDContract() *types.Transaction {
 	return tx
 }
 
+func deployMixTestContract() *types.Transaction {
+	tx := utils.NewDeployTransaction(nutils.MixTestContractAddress[:], "MIXT", "1.0",
+		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee test", true)
+	return tx
+}
+
+func deployCrossChainContract() *types.Transaction {
+	tx := utils.NewDeployTransaction(nutils.CrossChainContractAddress[:], "MIXT", "1.0",
+		"Mixbee Team", "jianlongcui23@gmail.com", "cross chain ledger", true)
+	return tx
+}
+
 func newGoverningInit() *types.Transaction {
 	bookkeepers, _ := config.DefConfig.GetBookkeepers()
 
@@ -173,6 +191,14 @@ func newGoverningInit() *types.Transaction {
 
 func newUtilityInit() *types.Transaction {
 	return utils.BuildNativeTransaction(nutils.OngContractAddress, ont.INIT_NAME, []byte{})
+}
+
+func newMixTest() *types.Transaction {
+	return utils.BuildNativeTransaction(nutils.MixTestContractAddress, ont.INIT_NAME, []byte{})
+}
+
+func newCrossChain() *types.Transaction {
+	return utils.BuildNativeTransaction(nutils.CrossChainContractAddress, ont.INIT_NAME, []byte{})
 }
 
 func newParamInit() *types.Transaction {

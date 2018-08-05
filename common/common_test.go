@@ -4,6 +4,7 @@ package common
 import (
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"fmt"
 )
 
 func TestHexAndBytesTransfer(t *testing.T) {
@@ -26,4 +27,10 @@ func TestFileExisted(t *testing.T) {
 	assert.False(t, FileExisted("../log/log.og"))
 	assert.False(t, FileExisted("../log/log.go"))
 	assert.True(t, FileExisted("./log/log.go"))
+}
+
+func TestGetLocalIp(t *testing.T) {
+	ip,err := GetLocalIp()
+	assert.Nil(t,err)
+	fmt.Println("IP：",ip)
 }

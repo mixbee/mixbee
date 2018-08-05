@@ -1,0 +1,22 @@
+
+version: '2'
+
+
+services:
+  node1.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --enableconsensus --networkid 4 --password test --testmode --enablecrosschainverify --enablecrosschaininter --crosschainnode http://node1.example.com:20336
+    container_name: node1.example.com
+    volumes:
+      - ./net1/:/var/mixbee
+
+  node2.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --enableconsensus --networkid 5 --password test  --testmode --enablecrosschaininter --crosschainnode http://node1.example.com:20336
+    container_name: node2.example.com
+    volumes:
+      - ./net2/:/var/mixbee

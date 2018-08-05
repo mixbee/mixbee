@@ -243,6 +243,7 @@ func GetBalance(address common.Address) (*BalanceOfRsp, error) {
 	ont, err := GetContractBalance(0, utils.OntContractAddress, address)
 	if err != nil {
 		return nil, fmt.Errorf("get ont balance error:%s", err)
+
 	}
 	ong, err := GetContractBalance(0, utils.OngContractAddress, address)
 	if err != nil {

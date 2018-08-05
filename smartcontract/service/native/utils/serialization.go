@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/serialization"
 	"github.com/mixbee/mixbee/vm/neovm/types"
@@ -31,11 +30,34 @@ func ReadVarUint(r io.Reader) (uint64, error) {
 	return v.Uint64(), nil
 }
 
+func ReadVarUint32(r io.Reader) (uint32, error) {
+	value,err := ReadVarUint(r)
+	if err != nil {
+		return 0,err
+	}
+	return uint32(value),nil
+}
+
 func WriteAddress(w io.Writer, address common.Address) error {
 	if err := serialization.WriteVarBytes(w, address[:]); err != nil {
 		return fmt.Errorf("serialize value error:%v", err)
 	}
 	return nil
+}
+
+func WriteString(w io.Writer, str string) error {
+	if err := serialization.WriteVarBytes(w, []byte(str)); err != nil {
+		return fmt.Errorf("serialize value error:%v", err)
+	}
+	return nil
+}
+
+func ReadString(r io.Reader) (string, error) {
+	from, err := serialization.ReadVarBytes(r)
+	if err != nil {
+		return "", fmt.Errorf("[State] deserialize from error:%v", err)
+	}
+	return string(from),nil
 }
 
 func ReadAddress(r io.Reader) (common.Address, error) {
