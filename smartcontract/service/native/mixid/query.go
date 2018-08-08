@@ -1,5 +1,5 @@
 
-package ontid
+package mixid
 
 import (
 	"bytes"

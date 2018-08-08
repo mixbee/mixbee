@@ -80,7 +80,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	ontTx := newGoverningToken()
 	ong := newUtilityToken()
 	param := newParamContract()
-	oid := deployOntIDContract()
+	oid := deployMixIDContract()
 	auth := deployAuthContract()
 	configTx := newConfig()
 	mix := deployMixTestContract()
@@ -140,8 +140,8 @@ func deployAuthContract() *types.Transaction {
 	return tx
 }
 
-func deployOntIDContract() *types.Transaction {
-	tx := utils.NewDeployTransaction(nutils.OntIDContractAddress[:], "OID", "1.0",
+func deployMixIDContract() *types.Transaction {
+	tx := utils.NewDeployTransaction(nutils.MixIDContractAddress[:], "OID", "1.0",
 		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONT ID", true)
 	return tx
 }

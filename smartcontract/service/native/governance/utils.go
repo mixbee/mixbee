@@ -520,10 +520,10 @@ func putSplitCurve(native *native.NativeService, contract common.Address, splitC
 	return nil
 }
 
-func appCallInitContractAdmin(native *native.NativeService, adminOntID []byte) error {
+func appCallInitContractAdmin(native *native.NativeService, adminMixID []byte) error {
 	bf := new(bytes.Buffer)
 	params := &auth.InitContractAdminParam{
-		AdminOntID: adminOntID,
+		AdminMixID: adminMixID,
 	}
 	err := params.Serialize(bf)
 	if err != nil {

@@ -23,7 +23,7 @@ func registerCandidate(native *native.NativeService, flag string) error {
 	}
 	contract := native.ContextRef.CurrentContext().ContractAddress
 
-	//check auth of OntID
+	//check auth of MixID
 	err := appCallVerifyToken(native, contract, params.Caller, REGISTER_CANDIDATE, uint64(params.KeyNo))
 	if err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallVerifyToken, verifyToken failed!")

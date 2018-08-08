@@ -1,5 +1,5 @@
 
-package ontid
+package mixid
 
 import (
 	"github.com/mixbee/mixbee/smartcontract/service/native"
@@ -7,7 +7,7 @@ import (
 )
 
 func Init() {
-	native.Contracts[utils.OntIDContractAddress] = RegisterIDContract
+	native.Contracts[utils.MixIDContractAddress] = RegisterIDContract
 }
 
 func RegisterIDContract(srvc *native.NativeService) {

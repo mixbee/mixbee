@@ -14,11 +14,11 @@ import (
 
 /* **********************************************   */
 type InitContractAdminParam struct {
-	AdminOntID []byte
+	AdminMixID []byte
 }
 
 func (this *InitContractAdminParam) Serialize(w io.Writer) error {
-	if err := serialization.WriteVarBytes(w, this.AdminOntID); err != nil {
+	if err := serialization.WriteVarBytes(w, this.AdminMixID); err != nil {
 		return err
 	}
 	return nil
@@ -26,7 +26,7 @@ func (this *InitContractAdminParam) Serialize(w io.Writer) error {
 
 func (this *InitContractAdminParam) Deserialize(rd io.Reader) error {
 	var err error
-	if this.AdminOntID, err = serialization.ReadVarBytes(rd); err != nil {
+	if this.AdminMixID, err = serialization.ReadVarBytes(rd); err != nil {
 		return err
 	}
 	return nil
@@ -35,7 +35,7 @@ func (this *InitContractAdminParam) Deserialize(rd io.Reader) error {
 /* **********************************************   */
 type TransferParam struct {
 	ContractAddr  common.Address
-	NewAdminOntID []byte
+	NewAdminMixID []byte
 	KeyNo         uint64
 }
 
@@ -43,7 +43,7 @@ func (this *TransferParam) Serialize(w io.Writer) error {
 	if err := serializeAddress(w, this.ContractAddr); err != nil {
 		return err
 	}
-	if err := serialization.WriteVarBytes(w, this.NewAdminOntID); err != nil {
+	if err := serialization.WriteVarBytes(w, this.NewAdminMixID); err != nil {
 		return err
 	}
 	if err := utils.WriteVarUint(w, this.KeyNo); err != nil {
@@ -57,7 +57,7 @@ func (this *TransferParam) Deserialize(rd io.Reader) error {
 	if this.ContractAddr, err = utils.ReadAddress(rd); err != nil {
 		return err
 	}
-	if this.NewAdminOntID, err = serialization.ReadVarBytes(rd); err != nil {
+	if this.NewAdminMixID, err = serialization.ReadVarBytes(rd); err != nil {
 		return err
 	}
 	if this.KeyNo, err = utils.ReadVarUint(rd); err != nil {
@@ -69,7 +69,7 @@ func (this *TransferParam) Deserialize(rd io.Reader) error {
 /* **********************************************   */
 type FuncsToRoleParam struct {
 	ContractAddr common.Address
-	AdminOntID   []byte
+	AdminMixID   []byte
 	Role         []byte
 	FuncNames    []string
 	KeyNo        uint64
@@ -79,7 +79,7 @@ func (this *FuncsToRoleParam) Serialize(w io.Writer) error {
 	if err := serializeAddress(w, this.ContractAddr); err != nil {
 		return err
 	}
-	if err := serialization.WriteVarBytes(w, this.AdminOntID); err != nil {
+	if err := serialization.WriteVarBytes(w, this.AdminMixID); err != nil {
 		return err
 	}
 	if err := serialization.WriteVarBytes(w, this.Role); err != nil {
@@ -107,7 +107,7 @@ func (this *FuncsToRoleParam) Deserialize(rd io.Reader) error {
 	if this.ContractAddr, err = utils.ReadAddress(rd); err != nil {
 		return err
 	}
-	if this.AdminOntID, err = serialization.ReadVarBytes(rd); err != nil {
+	if this.AdminMixID, err = serialization.ReadVarBytes(rd); err != nil {
 		return err
 	}
 	if this.Role, err = serialization.ReadVarBytes(rd); err != nil {
@@ -130,19 +130,19 @@ func (this *FuncsToRoleParam) Deserialize(rd io.Reader) error {
 	return nil
 }
 
-type OntIDsToRoleParam struct {
+type MixIDsToRoleParam struct {
 	ContractAddr common.Address
-	AdminOntID   []byte
+	AdminMixID   []byte
 	Role         []byte
 	Persons      [][]byte
 	KeyNo        uint64
 }
 
-func (this *OntIDsToRoleParam) Serialize(w io.Writer) error {
+func (this *MixIDsToRoleParam) Serialize(w io.Writer) error {
 	if err := serializeAddress(w, this.ContractAddr); err != nil {
 		return err
 	}
-	if err := serialization.WriteVarBytes(w, this.AdminOntID); err != nil {
+	if err := serialization.WriteVarBytes(w, this.AdminMixID); err != nil {
 		return err
 	}
 	if err := serialization.WriteVarBytes(w, this.Role); err != nil {
@@ -162,13 +162,13 @@ func (this *OntIDsToRoleParam) Serialize(w io.Writer) error {
 	return nil
 }
 
-func (this *OntIDsToRoleParam) Deserialize(rd io.Reader) error {
+func (this *MixIDsToRoleParam) Deserialize(rd io.Reader) error {
 	var err error
 	var pLen uint64
 	if this.ContractAddr, err = utils.ReadAddress(rd); err != nil {
 		return err
 	}
-	if this.AdminOntID, err = serialization.ReadVarBytes(rd); err != nil {
+	if this.AdminMixID, err = serialization.ReadVarBytes(rd); err != nil {
 		return err
 	}
 	if this.Role, err = serialization.ReadVarBytes(rd); err != nil {

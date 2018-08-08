@@ -35,7 +35,7 @@ func init() {
 }
 func TestSerialization_Init(t *testing.T) {
 	param := &InitContractAdminParam{
-		AdminOntID: admin,
+		AdminMixID: admin,
 	}
 	bf := new(bytes.Buffer)
 	if err := param.Serialize(bf); err != nil {
@@ -48,7 +48,7 @@ func TestSerialization_Init(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if bytes.Compare(param.AdminOntID, param2.AdminOntID) != 0 {
+	if bytes.Compare(param.AdminMixID, param2.AdminMixID) != 0 {
 		t.Fatalf("failed")
 	}
 }
@@ -56,7 +56,7 @@ func TestSerialization_Init(t *testing.T) {
 func TestSerialization_Transfer(t *testing.T) {
 	param := &TransferParam{
 		ContractAddr:  OntContractAddr,
-		NewAdminOntID: newAdmin,
+		NewAdminMixID: newAdmin,
 	}
 	bf := new(bytes.Buffer)
 	if err := param.Serialize(bf); err != nil {
@@ -75,7 +75,7 @@ func TestSerialization_Transfer(t *testing.T) {
 func TestSerialization_AssignFuncs(t *testing.T) {
 	param := &FuncsToRoleParam{
 		ContractAddr: OntContractAddr,
-		AdminOntID:   admin,
+		AdminMixID:   admin,
 		Role:         []byte("role"),
 		FuncNames:    funcs,
 	}
@@ -93,10 +93,10 @@ func TestSerialization_AssignFuncs(t *testing.T) {
 	assert.Equal(t, param, param2)
 }
 
-func TestSerialization_AssignOntIDs(t *testing.T) {
-	param := &OntIDsToRoleParam{
+func TestSerialization_AssignMixIDs(t *testing.T) {
+	param := &MixIDsToRoleParam{
 		ContractAddr: OntContractAddr,
-		AdminOntID:   admin,
+		AdminMixID:   admin,
 		Role:         []byte(role),
 		Persons:      [][]byte{[]byte{0x03, 0x04, 0x05, 0x06}, []byte{0x07, 0x08, 0x09, 0x0a}},
 	}
@@ -105,7 +105,7 @@ func TestSerialization_AssignOntIDs(t *testing.T) {
 		t.Fatal(err)
 	}
 	rd := bytes.NewReader(bf.Bytes())
-	param2 := new(OntIDsToRoleParam)
+	param2 := new(MixIDsToRoleParam)
 	if err := param2.Deserialize(rd); err != nil {
 		t.Fatal(err)
 	}

@@ -42,9 +42,9 @@ func getContractAdmin(native *native.NativeService, contractAddr common.Address)
 	return item.Value, nil
 }
 
-func putContractAdmin(native *native.NativeService, contractAddr common.Address, adminOntID []byte) error {
+func putContractAdmin(native *native.NativeService, contractAddr common.Address, adminMixID []byte) error {
 	key := concatContractAdminKey(native, contractAddr)
-	utils.PutBytes(native, key, adminOntID)
+	utils.PutBytes(native, key, adminMixID)
 	return nil
 }
 
@@ -87,18 +87,18 @@ func putRoleFunc(native *native.NativeService, contractAddr common.Address, role
 	return nil
 }
 
-//type(this.contractAddr.RoleP.ontID) = roleTokens
-func concatOntIDTokenKey(native *native.NativeService, contractAddr common.Address, ontID []byte) []byte {
+//type(this.contractAddr.RoleP.mixID) = roleTokens
+func concatMixIDTokenKey(native *native.NativeService, contractAddr common.Address, mixID []byte) []byte {
 	this := native.ContextRef.CurrentContext().ContractAddress
 	tokenKey := append(this[:], contractAddr[:]...)
 	tokenKey = append(tokenKey, PreRoleToken...)
-	tokenKey = append(tokenKey, ontID...)
+	tokenKey = append(tokenKey, mixID...)
 
 	return tokenKey
 }
 
-func getOntIDToken(native *native.NativeService, contractAddr common.Address, ontID []byte) (*roleTokens, error) {
-	key := concatOntIDTokenKey(native, contractAddr, ontID)
+func getMixIDToken(native *native.NativeService, contractAddr common.Address, mixID []byte) (*roleTokens, error) {
+	key := concatMixIDTokenKey(native, contractAddr, mixID)
 	item, err := utils.GetStorageItem(native, key)
 	if err != nil {
 		return nil, err
@@ -115,8 +115,8 @@ func getOntIDToken(native *native.NativeService, contractAddr common.Address, on
 	return rT, nil
 }
 
-func putOntIDToken(native *native.NativeService, contractAddr common.Address, ontID []byte, tokens *roleTokens) error {
-	key := concatOntIDTokenKey(native, contractAddr, ontID)
+func putMixIDToken(native *native.NativeService, contractAddr common.Address, mixID []byte, tokens *roleTokens) error {
+	key := concatMixIDTokenKey(native, contractAddr, mixID)
 	bf := new(bytes.Buffer)
 	err := tokens.Serialize(bf)
 	if err != nil {
@@ -126,18 +126,18 @@ func putOntIDToken(native *native.NativeService, contractAddr common.Address, on
 	return nil
 }
 
-//type(this.contractAddr.DelegateStatus.ontID)
-func concatDelegateStatusKey(native *native.NativeService, contractAddr common.Address, ontID []byte) []byte {
+//type(this.contractAddr.DelegateStatus.mixID)
+func concatDelegateStatusKey(native *native.NativeService, contractAddr common.Address, mixID []byte) []byte {
 	this := native.ContextRef.CurrentContext().ContractAddress
 	key := append(this[:], contractAddr[:]...)
 	key = append(key, PreDelegateStatus...)
-	key = append(key, ontID...)
+	key = append(key, mixID...)
 
 	return key
 }
 
-func getDelegateStatus(native *native.NativeService, contractAddr common.Address, ontID []byte) (*Status, error) {
-	key := concatDelegateStatusKey(native, contractAddr, ontID)
+func getDelegateStatus(native *native.NativeService, contractAddr common.Address, mixID []byte) (*Status, error) {
+	key := concatDelegateStatusKey(native, contractAddr, mixID)
 	item, err := utils.GetStorageItem(native, key)
 	if err != nil {
 		return nil, err
@@ -154,8 +154,8 @@ func getDelegateStatus(native *native.NativeService, contractAddr common.Address
 	return status, nil
 }
 
-func putDelegateStatus(native *native.NativeService, contractAddr common.Address, ontID []byte, status *Status) error {
-	key := concatDelegateStatusKey(native, contractAddr, ontID)
+func putDelegateStatus(native *native.NativeService, contractAddr common.Address, mixID []byte, status *Status) error {
+	key := concatDelegateStatusKey(native, contractAddr, mixID)
 	bf := new(bytes.Buffer)
 	err := status.Serialize(bf)
 	if err != nil {

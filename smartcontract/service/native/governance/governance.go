@@ -255,8 +255,8 @@ func InitConfig(native *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putSplitCurve, put splitCurve error!")
 	}
 
-	//init admin OntID
-	err = appCallInitContractAdmin(native, []byte(configuration.AdminOntID))
+	//init admin MixID
+	err = appCallInitContractAdmin(native, []byte(configuration.AdminMixID))
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallInitContractAdmin error!")
 	}
