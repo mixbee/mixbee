@@ -154,7 +154,6 @@ func verifyBlock(s *CTXPoolServer) {
 					log.Errorf("verifyBlock signature err %v", err.Error())
 				}
 				v.First.Sig = sig
-				v.First.Pubk = s.VerifyerAccount.PublicKey
 			}
 		}
 
@@ -175,7 +174,6 @@ func verifyBlock(s *CTXPoolServer) {
 					log.Errorf("verifyBlock signature err %v", err.Error())
 				}
 				v.Second.Sig = sig
-				v.Second.Pubk = s.VerifyerAccount.PublicKey
 			}
 		}
 
@@ -322,7 +320,7 @@ func (s *CTXPoolServer) PushCtxToPool(params []interface{}) error {
 	}
 	publickKey, ok := params[10].(string)
 	if !ok {
-		return fmt.Errorf("param-7 invalid %v", params[7])
+		return fmt.Errorf("param-7 invalid %v", params[10])
 	}
 
 	nodeinfo, ok := config.DefConfig.CrossChain.SubChainNode[uint32(aNId)]
