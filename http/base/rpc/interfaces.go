@@ -257,12 +257,12 @@ func SendRawTransaction(params []interface{}) map[string]interface{} {
 	switch params[0].(type) {
 	case string:
 		str := params[0].(string)
-		hex, err := common.HexToBytes(str)
+		hexInfo, err := common.HexToBytes(str)
 		if err != nil {
 			return responsePack(berr.INVALID_PARAMS, "")
 		}
 		var txn types.Transaction
-		if err := txn.Deserialize(bytes.NewReader(hex)); err != nil {
+		if err := txn.Deserialize(bytes.NewReader(hexInfo)); err != nil {
 			return responsePack(berr.INVALID_TRANSACTION, "")
 		}
 		if len(params) > 1 {
@@ -579,14 +579,14 @@ func RegisterSubChainNode(params []interface{}) map[string]interface{} {
 }
 
 // A JSON example for pushCrossChainTxInfo method as following:
-//   {"jsonrpc": "2.0", "method": "pushCrossChainTxInfo", "params": ["addrA","addrB","aAmount","bAmount","aNetId","bNetId","txHash","seqId",timestamp,nonce], "id": 0}
+//   {"jsonrpc": "2.0", "method": "pushCrossChainTxInfo", "params": ["addrA","addrB","aAmount","bAmount","aNetId","bNetId","txHash","seqId",timestamp,nonce,"verifyPublicKey"], "id": 0}
 func PushCrossChainTxInfo(params []interface{}) map[string]interface{} {
 
 	if !config.DefConfig.CrossChain.EnableCrossChainVerify {
 		return responsePack(berr.INVALID_PARAMS, "this node not support cross chain verify")
 	}
 
-	if len(params) < 10 {
+	if len(params) < 11 {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
 	log.Infof("PushCrossChainTxInfo %#v\n",params)

@@ -1,4 +1,3 @@
-
 // Package proc provides functions for handle messages from
 // consensus/ledger/net/http/validators
 package proc
@@ -323,7 +322,7 @@ func (s *TXPoolServer) assignRspToWorker(rsp *types.CheckResponse) bool {
 		return false
 	}
 
-	if rsp.WorkerId >= 0 && rsp.WorkerId < uint8(len(s.workers)) {
+	if rsp.WorkerId < uint8(len(s.workers)) {
 		s.workers[rsp.WorkerId].rspCh <- rsp
 	}
 

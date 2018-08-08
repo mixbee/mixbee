@@ -323,13 +323,13 @@ func (ds *DbftService) NewConsensusPayload(payload *p2pmsg.ConsensusPayload) {
 		return
 	}
 
-	message, err := DeserializeMessage(payload.Data)
+	payloadMessage, err := DeserializeMessage(payload.Data)
 	if err != nil {
 		log.Error(fmt.Sprintf("DeserializeMessage failed: %s\n", err))
 		return
 	}
 
-	if message.ViewNumber() != ds.context.ViewNumber && message.Type() != ChangeViewMsg {
+	if payloadMessage.ViewNumber() != ds.context.ViewNumber && payloadMessage.Type() != ChangeViewMsg {
 		return
 	}
 
@@ -339,24 +339,24 @@ func (ds *DbftService) NewConsensusPayload(payload *p2pmsg.ConsensusPayload) {
 		return
 	}
 
-	switch message.Type() {
+	switch payloadMessage.Type() {
 	case ChangeViewMsg:
-		if cv, ok := message.(*ChangeView); ok {
+		if cv, ok := payloadMessage.(*ChangeView); ok {
 			ds.ChangeViewReceived(payload, cv)
 		}
 		break
 	case PrepareRequestMsg:
-		if pr, ok := message.(*PrepareRequest); ok {
+		if pr, ok := payloadMessage.(*PrepareRequest); ok {
 			ds.PrepareRequestReceived(payload, pr)
 		}
 		break
 	case PrepareResponseMsg:
-		if pres, ok := message.(*PrepareResponse); ok {
+		if pres, ok := payloadMessage.(*PrepareResponse); ok {
 			ds.PrepareResponseReceived(payload, pres)
 		}
 		break
 	case BlockSignaturesMsg:
-		if blockSigs, ok := message.(*BlockSignatures); ok {
+		if blockSigs, ok := payloadMessage.(*BlockSignatures); ok {
 			ds.BlockSignaturesReceived(payload, blockSigs)
 		}
 		break

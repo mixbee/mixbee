@@ -65,7 +65,7 @@ func pushCrossChainTxToMainChain(bools map[string]bool, notify bcomn.ExecuteNoti
 		json.Unmarshal([]byte(infoStr),&info)
 		addr := config.DefConfig.CrossChain.MainVerifyNode[0]
 		//["addrA","addrB","aAmount","bAmount","aNetId","bNetId","txHash","seqId","timestamp"]
-		params := []interface{}{info.From,info.To,info.AValue,info.BValue,info.AChainId,info.BChainId,notify.TxHash,info.SeqId,info.Timestamp,info.Nonce}
+		params := []interface{}{info.From,info.To,info.AValue,info.BValue,info.AChainId,info.BChainId,notify.TxHash,info.SeqId,info.Timestamp,info.Nonce,info.VerifyPublicKey}
 		result,err := cmdutils.SendRpcRequestWithAddr(addr,"pushCrossChainTxInfo",params)
 		if err != nil {
 			log.Errorf("pushCrossChainTxToMainChain error %s",err.Error())

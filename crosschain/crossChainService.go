@@ -320,6 +320,10 @@ func (s *CTXPoolServer) PushCtxToPool(params []interface{}) error {
 	if !ok {
 		return fmt.Errorf("param-9 invalid %v", params[9])
 	}
+	publickKey, ok := params[10].(string)
+	if !ok {
+		return fmt.Errorf("param-7 invalid %v", params[7])
+	}
 
 	nodeinfo, ok := config.DefConfig.CrossChain.SubChainNode[uint32(aNId)]
 	if !ok || len(nodeinfo) == 0 {
@@ -342,6 +346,7 @@ func (s *CTXPoolServer) PushCtxToPool(params []interface{}) error {
 		SeqId:      seqId,
 		TimeStamp:  uint32(timestamp),
 		Nonce:      uint32(nonce),
+		Pubk:       publickKey,
 	}
 
 	s.txPool.push(entry)
