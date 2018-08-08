@@ -522,7 +522,7 @@ func GetGasPrice(params []interface{}) map[string]interface{} {
 	return responseSuccess(result)
 }
 
-func GetUnboundOng(params []interface{}) map[string]interface{} {
+func GetUnboundMbg(params []interface{}) map[string]interface{} {
 	if len(params) < 1 {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
@@ -534,8 +534,8 @@ func GetUnboundOng(params []interface{}) map[string]interface{} {
 	if err != nil {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
-	fromAddr := utils.OntContractAddress
-	rsp, err := bcomn.GetAllowance("ong", fromAddr, toAddr)
+	fromAddr := utils.MbcContractAddress
+	rsp, err := bcomn.GetAllowance("mbg", fromAddr, toAddr)
 	if err != nil {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}

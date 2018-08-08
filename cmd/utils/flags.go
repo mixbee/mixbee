@@ -249,7 +249,7 @@ var (
 	}
 	IdentityFlag = cli.BoolFlag{
 		Name:  "mixid",
-		Usage: "create an ONT ID instead of account",
+		Usage: "create an MBC ID instead of account",
 	}
 
 	//SmartContract setting
@@ -318,8 +318,8 @@ var (
 	//Transfer setting
 	TransactionAssetFlag = cli.StringFlag{
 		Name:  "asset",
-		Usage: "Using to specifies the transfer asset `<ont|ong>`",
-		Value: ASSET_ONT,
+		Usage: "Using to specifies the transfer asset `<mbc|mbg>`",
+		Value: ASSET_MBC,
 	}
 	TransactionFromFlag = cli.StringFlag{
 		Name:  "from",
@@ -344,7 +344,7 @@ var (
 	}
 	TransactionGasLimitFlag = cli.Uint64Flag{
 		Name:  "gaslimit",
-		Usage: "Using to specifies the gas limit of the transaction. The gas limit of the transaction cannot be less than the minimum gas limit set by the node's transaction pool, otherwise the transaction will be rejected. Gasprice * gaslimit is actual ONG costs.",
+		Usage: "Using to specifies the gas limit of the transaction. The gas limit of the transaction cannot be less than the minimum gas limit set by the node's transaction pool, otherwise the transaction will be rejected. Gasprice * gaslimit is actual MBG costs.",
 		Value: neovm.MIN_TRANSACTION_GAS,
 	}
 
@@ -359,8 +359,8 @@ var (
 	}
 	ApproveAssetFlag = cli.StringFlag{
 		Name:  "asset",
-		Usage: "Using to specifies the transfer asset <ont|ong> for approve",
-		Value: "ont",
+		Usage: "Using to specifies the transfer asset <mbc|mbg> for approve",
+		Value: "mbc",
 	}
 	ApproveAmountFlag = cli.StringFlag{
 		Name:  "amount",

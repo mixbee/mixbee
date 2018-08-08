@@ -8,7 +8,7 @@ import (
 	"github.com/mixbee/mixbee/errors"
 	cstates "github.com/mixbee/mixbee/core/states"
 	"github.com/mixbee/mixbee/smartcontract/service/native"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"bytes"
 	"github.com/mixbee/mixbee/common/log"
@@ -22,11 +22,11 @@ func InitMixTest() {
 }
 
 func RegisterMixTestContract(native *native.NativeService) {
-	native.Register(ont.INIT_NAME, MixTestInit)
-	native.Register(ont.SET_KEY, MixTestSetKey)
-	native.Register(ont.NAME_NAME, MixTestName)
-	native.Register(ont.SYMBOL_NAME, MixTestSymbol)
-	native.Register(ont.GET_KEY, MixTestGetKey)
+	native.Register(mbc.INIT_NAME, MixTestInit)
+	native.Register(mbc.SET_KEY, MixTestSetKey)
+	native.Register(mbc.NAME_NAME, MixTestName)
+	native.Register(mbc.SYMBOL_NAME, MixTestSymbol)
+	native.Register(mbc.GET_KEY, MixTestGetKey)
 }
 
 func MixTestInit(native *native.NativeService) ([]byte, error) {
@@ -37,9 +37,9 @@ func MixTestInit(native *native.NativeService) ([]byte, error) {
 	native.CloneCache.Add(scommon.ST_STORAGE, append(utils.MixTestContractAddress[:]), item)
 
 	log.Infof("mix test contract address:%s",utils.MixTestContractAddress.ToBase58())
-	ont.ToTransfer(native, ont.GenBalanceKey(utils.OntContractAddress, utils.MixTestContractAddress),1000)
+	mbc.ToTransfer(native, mbc.GenBalanceKey(utils.MbcContractAddress, utils.MixTestContractAddress),1000)
 
-	ont.FromTransfer(native, ont.GenBalanceKey(utils.OntContractAddress, utils.MixTestContractAddress),100)
+	mbc.FromTransfer(native, mbc.GenBalanceKey(utils.MbcContractAddress, utils.MixTestContractAddress),100)
 
 	return utils.BYTE_TRUE, nil
 }
@@ -56,7 +56,7 @@ func MixTestSetKey(native *native.NativeService) ([]byte, error) {
 		native.CloneCache.Add(scommon.ST_STORAGE,GenMixTestKey2(contract,v.From.ToBase58() + v.Key), &cstates.StorageItem{Value: []byte(v.Value)})
 	}
 
-	ont.ToTransfer(native, ont.GenBalanceKey(utils.OntContractAddress, utils.MixTestContractAddress),1000)
+	mbc.ToTransfer(native, mbc.GenBalanceKey(utils.MbcContractAddress, utils.MixTestContractAddress),1000)
 
 	return utils.BYTE_TRUE, nil
 }

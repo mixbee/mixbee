@@ -51,7 +51,7 @@ const (
 	UPDATE_SPLIT_CURVE               = "updateSplitCurve"
 	CALL_SPLIT                       = "callSplit"
 	TRANSFER_PENALTY                 = "transferPenalty"
-	WITHDRAW_ONG                     = "withdrawOng"
+	WITHDRAW_ONG                     = "withdrawMbg"
 
 	//key prefix
 	GLOBAL_PARAM    = "globalParam"
@@ -70,8 +70,8 @@ const (
 	PRECISE = 1000000
 )
 
-// candidate fee must >= 1 ONG
-var MinCandidateFee = uint64(math.Pow(10, constants.ONG_DECIMALS))
+// candidate fee must >= 1 MBG
+var MinCandidateFee = uint64(math.Pow(10, constants.MBG_DECIMALS))
 
 var Xi = []uint32{
 	0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000,
@@ -97,7 +97,7 @@ func RegisterGovernanceContract(native *native.NativeService) {
 	native.Register(UNVOTE_FOR_PEER, UnVoteForPeer)
 	native.Register(WITHDRAW, Withdraw)
 	native.Register(QUIT_NODE, QuitNode)
-	native.Register(WITHDRAW_ONG, WithdrawOng)
+	native.Register(WITHDRAW_ONG, WithdrawMbg)
 
 	native.Register(INIT_CONFIG, InitConfig)
 	native.Register(APPROVE_CANDIDATE, ApproveCandidate)
@@ -864,10 +864,10 @@ func Withdraw(native *native.NativeService) ([]byte, error) {
 		}
 	}
 
-	//ont transfer
-	err = appCallTransferOnt(native, utils.GovernanceContractAddress, address, total)
+	//mbc transfer
+	err = appCallTransferMbc(native, utils.GovernanceContractAddress, address, total)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, ont transfer error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, mbc transfer error!")
 	}
 
 	//update total stake
@@ -1142,8 +1142,8 @@ func TransferPenalty(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func WithdrawOng(native *native.NativeService) ([]byte, error) {
-	param := new(WithdrawOngParam)
+func WithdrawMbg(native *native.NativeService) ([]byte, error) {
+	param := new(WithdrawMbgParam)
 	if err := param.Deserialize(bytes.NewBuffer(native.Input)); err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "deserialize, deserialize transferPenaltyParam error!")
 	}
@@ -1152,13 +1152,13 @@ func WithdrawOng(native *native.NativeService) ([]byte, error) {
 	//check witness
 	err := utils.ValidateOwner(native, param.Address)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "withdrawOng, checkWitness error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "withdrawMbg, checkWitness error!")
 	}
 
-	// ont transfer to trigger unboundong
-	err = appCallTransferOnt(native, utils.GovernanceContractAddress, utils.GovernanceContractAddress, 1)
+	// mbc transfer to trigger unboundong
+	err = appCallTransferMbc(native, utils.GovernanceContractAddress, utils.GovernanceContractAddress, 1)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, ont transfer error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, mbc transfer error!")
 	}
 
 	totalStake, err := getTotalStake(native, contract, param.Address)
@@ -1169,10 +1169,10 @@ func WithdrawOng(native *native.NativeService) ([]byte, error) {
 	preTimeOffset := totalStake.TimeOffset
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
-	amount := utils.CalcUnbindOng(totalStake.Stake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, totalStake.Address, amount)
+	amount := utils.CalcUnbindMbg(totalStake.Stake, preTimeOffset, timeOffset)
+	err = appCallTransferFromMbg(native, utils.GovernanceContractAddress, utils.MbcContractAddress, totalStake.Address, amount)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOng, transfer from ong error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbg, transfer from mbg error!")
 	}
 
 	totalStake.TimeOffset = timeOffset

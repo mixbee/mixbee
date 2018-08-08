@@ -14,14 +14,14 @@ import (
 var AssetCommand = cli.Command{
 	Name:        "asset",
 	Usage:       "Handle assets",
-	Description: "Asset management commands can check account balance, ONT/ONG transfers, extract ONGs, and view unbound ONGs, and so on.",
+	Description: "Asset management commands can check account balance, MBC/MBG transfers, extract MBGs, and view unbound MBGs, and so on.",
 	Subcommands: []cli.Command{
 		{
 			Action:      transfer,
 			Name:        "transfer",
-			Usage:       "Transfer ont or ong to another account",
+			Usage:       "Transfer mbc or mbg to another account",
 			ArgsUsage:   " ",
-			Description: "Transfer ont or ong to another account. If from address does not specified, using default account",
+			Description: "Transfer mbc or mbg to another account. If from address does not specified, using default account",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
 				utils.TransactionGasPriceFlag,
@@ -69,7 +69,7 @@ var AssetCommand = cli.Command{
 		{
 			Action:    getBalance,
 			Name:      "balance",
-			Usage:     "Show balance of ont and ong of specified account",
+			Usage:     "Show balance of mbc and mbg of specified account",
 			ArgsUsage: "<address|label|index>",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
@@ -79,7 +79,7 @@ var AssetCommand = cli.Command{
 		{
 			Action: getAllowance,
 			Name:   "allowance",
-			Usage:  "Show approve balance of ont or ong of specified account",
+			Usage:  "Show approve balance of mbc or mbg of specified account",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
 				utils.ApproveAssetFlag,
@@ -89,9 +89,9 @@ var AssetCommand = cli.Command{
 			},
 		},
 		{
-			Action:    unboundOng,
-			Name:      "unboundong",
-			Usage:     "Show the balance of unbound ONG",
+			Action:    unboundMbg,
+			Name:      "unboundmbg",
+			Usage:     "Show the balance of unbound MBG",
 			ArgsUsage: "<address|label|index>",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
@@ -99,9 +99,9 @@ var AssetCommand = cli.Command{
 			},
 		},
 		{
-			Action:    withdrawOng,
-			Name:      "withdrawong",
-			Usage:     "Withdraw ONG",
+			Action:    withdrawMbg,
+			Name:      "withdrawMbg",
+			Usage:     "Withdraw MBG",
 			ArgsUsage: "<address|label|index>",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
@@ -216,7 +216,7 @@ func transfer(ctx *cli.Context) error {
 
 	asset := ctx.String(utils.GetFlagName(utils.TransactionAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_MBC
 	}
 	from := ctx.String(utils.TransactionFromFlag.Name)
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
@@ -232,12 +232,12 @@ func transfer(ctx *cli.Context) error {
 	var amount uint64
 	amountStr := ctx.String(utils.TransactionAmountFlag.Name)
 	switch strings.ToLower(asset) {
-	case "ont":
-		amount = utils.ParseOnt(amountStr)
-		amountStr = utils.FormatOnt(amount)
-	case "ong":
-		amount = utils.ParseOng(amountStr)
-		amountStr = utils.FormatOng(amount)
+	case "mbc":
+		amount = utils.ParseMbc(amountStr)
+		amountStr = utils.FormatMbc(amount)
+	case "mbg":
+		amount = utils.ParseMbg(amountStr)
+		amountStr = utils.FormatMbg(amount)
 	default:
 		return fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -247,7 +247,7 @@ func transfer(ctx *cli.Context) error {
 		return err
 	}
 
-	gasPrice := ctx.Uint64(utils.TransactionGasPriceFlag.Name)
+	gasPrice := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
 	gasLimit := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
 
 	var signer *account.Account
@@ -285,7 +285,7 @@ func crossTranfer(ctx *cli.Context) error {
 
 	asset := ctx.String(utils.GetFlagName(utils.TransactionAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_MBC
 	}
 	from := ctx.String(utils.TransactionFromFlag.Name)
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
@@ -300,13 +300,13 @@ func crossTranfer(ctx *cli.Context) error {
 
 	var aAmount uint64
 	aAmountStr := ctx.String(utils.CrossChainAValueFlag.Name)
-	aAmount = utils.ParseOnt(aAmountStr)
-	aAmountStr = utils.FormatOnt(aAmount)
+	aAmount = utils.ParseMbc(aAmountStr)
+	aAmountStr = utils.FormatMbc(aAmount)
 
 	var bAmount uint64
 	bAmountStr := ctx.String(utils.CrossChainBValueFlag.Name)
-	bAmount = utils.ParseOnt(bAmountStr)
-	bAmountStr = utils.FormatOnt(bAmount)
+	bAmount = utils.ParseMbc(bAmountStr)
+	bAmountStr = utils.FormatMbc(bAmount)
 
 	err = utils.CheckAssetAmount(asset, aAmount)
 	if err != nil {
@@ -369,7 +369,7 @@ func crossUnlock(ctx *cli.Context) error {
 
 	asset := ctx.String(utils.GetFlagName(utils.TransactionAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_MBC
 	}
 	from := ctx.String(utils.TransactionFromFlag.Name)
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
@@ -410,7 +410,7 @@ func crossRelease(ctx *cli.Context) error {
 
 	asset := ctx.String(utils.GetFlagName(utils.TransactionAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_MBC
 	}
 	from := ctx.String(utils.TransactionFromFlag.Name)
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
@@ -556,13 +556,13 @@ func getBalance(ctx *cli.Context) error {
 		return err
 	}
 
-	ong, err := strconv.ParseUint(balance.Ong, 10, 64)
+	mbg, err := strconv.ParseUint(balance.Mbg, 10, 64)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("BalanceOf:%s\n", accAddr)
-	fmt.Printf("  ONT:%s\n", balance.Ont)
-	fmt.Printf("  ONG:%s\n", utils.FormatOng(ong))
+	fmt.Printf("  MBC:%s\n", balance.Mbc)
+	fmt.Printf("  MBG:%s\n", utils.FormatMbg(mbg))
 	return nil
 }
 
@@ -577,7 +577,7 @@ func getAllowance(ctx *cli.Context) error {
 	}
 	asset := ctx.String(utils.GetFlagName(utils.ApproveAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_MBC
 	}
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
 	if err != nil {
@@ -592,13 +592,13 @@ func getAllowance(ctx *cli.Context) error {
 		return err
 	}
 	switch strings.ToLower(asset) {
-	case "ont":
-	case "ong":
+	case "mbc":
+	case "mbg":
 		balance, err := strconv.ParseUint(balanceStr, 10, 64)
 		if err != nil {
 			return err
 		}
-		balanceStr = utils.FormatOng(balance)
+		balanceStr = utils.FormatMbg(balance)
 	default:
 		return fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -633,12 +633,12 @@ func approve(ctx *cli.Context) error {
 	}
 	var amount uint64
 	switch strings.ToLower(asset) {
-	case "ont":
-		amount = utils.ParseOnt(amountStr)
-		amountStr = utils.FormatOnt(amount)
-	case "ong":
-		amount = utils.ParseOng(amountStr)
-		amountStr = utils.FormatOng(amount)
+	case "mbc":
+		amount = utils.ParseMbc(amountStr)
+		amountStr = utils.FormatMbc(amount)
+	case "mbg":
+		amount = utils.ParseMbg(amountStr)
+		amountStr = utils.FormatMbg(amount)
 	default:
 		return fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -715,12 +715,12 @@ func transferFrom(ctx *cli.Context) error {
 
 	var amount uint64
 	switch strings.ToLower(asset) {
-	case "ont":
-		amount = utils.ParseOnt(amountStr)
-		amountStr = utils.FormatOnt(amount)
-	case "ong":
-		amount = utils.ParseOng(amountStr)
-		amountStr = utils.FormatOng(amount)
+	case "mbc":
+		amount = utils.ParseMbc(amountStr)
+		amountStr = utils.FormatMbc(amount)
+	case "mbg":
+		amount = utils.ParseMbg(amountStr)
+		amountStr = utils.FormatMbg(amount)
 	default:
 		return fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -750,7 +750,7 @@ func transferFrom(ctx *cli.Context) error {
 	return nil
 }
 
-func unboundOng(ctx *cli.Context) error {
+func unboundMbg(ctx *cli.Context) error {
 	SetRpcPort(ctx)
 	if ctx.NArg() < 1 {
 		fmt.Println("Missing argument. Account address, label or index expected.\n")
@@ -762,8 +762,8 @@ func unboundOng(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fromAddr := nutils.OntContractAddress.ToBase58()
-	balanceStr, err := utils.GetAllowance("ong", fromAddr, accAddr)
+	fromAddr := nutils.MbcContractAddress.ToBase58()
+	balanceStr, err := utils.GetAllowance("mbg", fromAddr, accAddr)
 	if err != nil {
 		return err
 	}
@@ -771,14 +771,14 @@ func unboundOng(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	balanceStr = utils.FormatOng(balance)
-	fmt.Printf("Unbound ONG:\n")
+	balanceStr = utils.FormatMbg(balance)
+	fmt.Printf("Unbound MBG:\n")
 	fmt.Printf("  Account:%s\n", accAddr)
-	fmt.Printf("  ONG:%s\n", balanceStr)
+	fmt.Printf("  MBG:%s\n", balanceStr)
 	return nil
 }
 
-func withdrawOng(ctx *cli.Context) error {
+func withdrawMbg(ctx *cli.Context) error {
 	SetRpcPort(ctx)
 	if ctx.NArg() < 1 {
 		fmt.Println("Missing argument. Account address, label or index expected.\n")
@@ -790,8 +790,8 @@ func withdrawOng(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fromAddr := nutils.OntContractAddress.ToBase58()
-	balance, err := utils.GetAllowance("ong", fromAddr, accAddr)
+	fromAddr := nutils.MbcContractAddress.ToBase58()
+	balance, err := utils.GetAllowance("mbg", fromAddr, accAddr)
 	if err != nil {
 		return err
 	}
@@ -801,7 +801,7 @@ func withdrawOng(ctx *cli.Context) error {
 		return err
 	}
 	if amount <= 0 {
-		return fmt.Errorf("Don't have unbound ong\n")
+		return fmt.Errorf("Don't have unbound mbg\n")
 	}
 
 	var signer *account.Account
@@ -813,14 +813,14 @@ func withdrawOng(ctx *cli.Context) error {
 	gasPrice := ctx.Uint64(utils.TransactionGasPriceFlag.Name)
 	gasLimit := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
 
-	txHash, err := utils.TransferFrom(gasPrice, gasLimit, signer, "ong", accAddr, fromAddr, accAddr, amount)
+	txHash, err := utils.TransferFrom(gasPrice, gasLimit, signer, "mbg", accAddr, fromAddr, accAddr, amount)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Withdraw ONG:\n")
+	fmt.Printf("Withdraw MBG:\n")
 	fmt.Printf("  Account:%s\n", accAddr)
-	fmt.Printf("  Amount:%s\n", utils.FormatOng(amount))
+	fmt.Printf("  Amount:%s\n", utils.FormatMbg(amount))
 	fmt.Printf("  TxHash:%s\n", txHash)
 	fmt.Printf("\nTip:\n")
 	fmt.Printf("  Using './mixbee info status %s' to query transaction status\n", txHash)

@@ -91,28 +91,28 @@ func registerCandidate(native *native.NativeService, flag string) error {
 
 	switch flag {
 	case "transfer":
-		//ont transfer
-		err = appCallTransferOnt(native, params.Address, utils.GovernanceContractAddress, uint64(params.InitPos))
+		//mbc transfer
+		err = appCallTransferMbc(native, params.Address, utils.GovernanceContractAddress, uint64(params.InitPos))
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, ont transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, mbc transfer error!")
 		}
 
-		//ong transfer
-		err = appCallTransferOng(native, params.Address, utils.GovernanceContractAddress, globalParam.CandidateFee)
+		//mbg transfer
+		err = appCallTransferMbg(native, params.Address, utils.GovernanceContractAddress, globalParam.CandidateFee)
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOng, ong transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbg, mbg transfer error!")
 		}
 	case "transferFrom":
-		//ont transfer from
-		err = appCallTransferFromOnt(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, uint64(params.InitPos))
+		//mbc transfer from
+		err = appCallTransferFromMbc(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, uint64(params.InitPos))
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOnt, ont transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbc, mbc transfer error!")
 		}
 
-		//ong transfer from
-		err = appCallTransferFromOng(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, globalParam.CandidateFee)
+		//mbg transfer from
+		err = appCallTransferFromMbg(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, globalParam.CandidateFee)
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOng, ong transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbg, mbg transfer error!")
 		}
 	}
 
@@ -196,16 +196,16 @@ func voteForPeer(native *native.NativeService, flag string) error {
 
 	switch flag {
 	case "transfer":
-		//ont transfer
-		err = appCallTransferOnt(native, params.Address, utils.GovernanceContractAddress, total)
+		//mbc transfer
+		err = appCallTransferMbc(native, params.Address, utils.GovernanceContractAddress, total)
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, ont transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, mbc transfer error!")
 		}
 	case "transferFrom":
-		//ont transfer from
-		err = appCallTransferFromOnt(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, total)
+		//mbc transfer from
+		err = appCallTransferFromMbc(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, total)
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOnt, ont transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbc, mbc transfer error!")
 		}
 	}
 
@@ -269,10 +269,10 @@ func normalQuit(native *native.NativeService, contract common.Address, peerPoolI
 }
 
 func blackQuit(native *native.NativeService, contract common.Address, peerPoolItem *PeerPoolItem) error {
-	// ont transfer to trigger unboundong
-	err := appCallTransferOnt(native, utils.GovernanceContractAddress, utils.GovernanceContractAddress, peerPoolItem.InitPos)
+	// mbc transfer to trigger unboundong
+	err := appCallTransferMbc(native, utils.GovernanceContractAddress, utils.GovernanceContractAddress, peerPoolItem.InitPos)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, ont transfer error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, mbc transfer error!")
 	}
 
 	//update total stake
@@ -509,10 +509,10 @@ func depositTotalStake(native *native.NativeService, contract common.Address, ad
 	preTimeOffset := totalStake.TimeOffset
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
-	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, totalStake.Address, amount)
+	amount := utils.CalcUnbindMbg(preStake, preTimeOffset, timeOffset)
+	err = appCallTransferFromMbg(native, utils.GovernanceContractAddress, utils.MbcContractAddress, totalStake.Address, amount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOng, transfer from ong error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbg, transfer from mbg error!")
 	}
 
 	totalStake.Stake = preStake + stake
@@ -531,17 +531,17 @@ func withdrawTotalStake(native *native.NativeService, contract common.Address, a
 		return errors.NewDetailErr(err, errors.ErrNoCode, "getTotalStake, get totalStake error!")
 	}
 	if totalStake.Stake < stake {
-		return errors.NewErr("withdraw, ont deposit is not enough!")
+		return errors.NewErr("withdraw, mbc deposit is not enough!")
 	}
 
 	preStake := totalStake.Stake
 	preTimeOffset := totalStake.TimeOffset
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
-	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, totalStake.Address, amount)
+	amount := utils.CalcUnbindMbg(preStake, preTimeOffset, timeOffset)
+	err = appCallTransferFromMbg(native, utils.GovernanceContractAddress, utils.MbcContractAddress, totalStake.Address, amount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOng, transfer from ong error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbg, transfer from mbg error!")
 	}
 
 	totalStake.Stake = preStake - stake
@@ -567,7 +567,7 @@ func depositPenaltyStake(native *native.NativeService, contract common.Address, 
 	preAmount := penaltyStake.Amount
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
-	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
+	amount := utils.CalcUnbindMbg(preStake, preTimeOffset, timeOffset)
 
 	penaltyStake.Amount = preAmount + amount
 	penaltyStake.InitPos = preInitPos + initPos
@@ -592,17 +592,17 @@ func withdrawPenaltyStake(native *native.NativeService, contract common.Address,
 	preAmount := penaltyStake.Amount
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
-	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
+	amount := utils.CalcUnbindMbg(preStake, preTimeOffset, timeOffset)
 
-	//ont transfer
-	err = appCallTransferOnt(native, utils.GovernanceContractAddress, address, preStake)
+	//mbc transfer
+	err = appCallTransferMbc(native, utils.GovernanceContractAddress, address, preStake)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, ont transfer error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, mbc transfer error!")
 	}
-	//ong approve
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, address, amount+preAmount)
+	//mbg approve
+	err = appCallTransferFromMbg(native, utils.GovernanceContractAddress, utils.MbcContractAddress, address, amount+preAmount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOng, transfer from ong error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbg, transfer from mbg error!")
 	}
 
 	peerPubkeyPrefix, err := hex.DecodeString(peerPubkey)
@@ -755,9 +755,9 @@ func executeCommitDpos(native *native.NativeService, contract common.Address, co
 }
 
 func executeSplit(native *native.NativeService, contract common.Address, peerPoolMap *PeerPoolMap) error {
-	balance, err := getOngBalance(native, utils.GovernanceContractAddress)
+	balance, err := getMbgBalance(native, utils.GovernanceContractAddress)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "executeSplit, getOngBalance error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "executeSplit, getMbgBalance error!")
 	}
 	//get globalParam
 	globalParam, err := getGlobalParam(native, contract)
@@ -821,9 +821,9 @@ func executeSplit(native *native.NativeService, contract common.Address, peerPoo
 	for i := int(config.K) - 1; i >= 0; i-- {
 		nodeAmount := balance * uint64(globalParam.A) / 100 * peersCandidate[i].S / sumS
 		address := peersCandidate[i].Address
-		err = appCallTransferOng(native, utils.GovernanceContractAddress, address, nodeAmount)
+		err = appCallTransferMbg(native, utils.GovernanceContractAddress, address, nodeAmount)
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "executeSplit, ong transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "executeSplit, mbg transfer error!")
 		}
 	}
 
@@ -839,9 +839,9 @@ func executeSplit(native *native.NativeService, contract common.Address, peerPoo
 	for i := int(config.K); i < len(peersCandidate); i++ {
 		nodeAmount := balance * uint64(globalParam.B) / 100 * peersCandidate[i].Stake / sum
 		address := peersCandidate[i].Address
-		err = appCallTransferOng(native, utils.GovernanceContractAddress, address, nodeAmount)
+		err = appCallTransferMbg(native, utils.GovernanceContractAddress, address, nodeAmount)
 		if err != nil {
-			return errors.NewDetailErr(err, errors.ErrNoCode, "executeSplit, ong transfer error!")
+			return errors.NewDetailErr(err, errors.ErrNoCode, "executeSplit, mbg transfer error!")
 		}
 	}
 

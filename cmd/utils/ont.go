@@ -15,7 +15,7 @@ import (
 	"github.com/mixbee/mixbee/core/types"
 	httpcom "github.com/mixbee/mixbee/http/base/common"
 	rpccommon "github.com/mixbee/mixbee/http/base/common"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/wasmvm"
 	cstates "github.com/mixbee/mixbee/smartcontract/states"
@@ -29,8 +29,8 @@ import (
 
 const (
 	VERSION_TRANSACTION          = byte(0)
-	VERSION_CONTRACT_ONT         = byte(0)
-	VERSION_CONTRACT_ONG         = byte(0)
+	VERSION_CONTRACT_MBC         = byte(0)
+	VERSION_CONTRACT_MBG         = byte(0)
 	VERSION_CONTRACT_MIXT        = byte(0)
 	VERSION_CONTRACT_CROSS_CHAIN = byte(0)
 	CONTRACT_TRANSFER            = "transfer"
@@ -43,8 +43,8 @@ const (
 	CONTRACT_CROSS_UNLOCK   = "crossUnlock"
 	CONTRACT_CROSS_RELEASE  = "crossRelease"
 
-	ASSET_ONT = "ont"
-	ASSET_ONG = "ong"
+	ASSET_MBC = "mbc"
+	ASSET_MBG = "mbg"
 )
 
 //Return balance of address in base58 code
@@ -181,7 +181,7 @@ func CrossTransfer(gasPrice, gasLimit uint64, signer *account.Account, asset, to
 	return txHash, seqId, nil
 }
 
-//Transfer ont|ong from account to another account
+//Transfer mbc|mbg from account to another account
 func Transfer(gasPrice, gasLimit uint64, signer *account.Account, asset, from, to string, amount uint64) (string, error) {
 	transferTx, err := TransferTx(gasPrice, gasLimit, asset, signer.Address.ToBase58(), to, amount)
 	if err != nil {
@@ -239,7 +239,7 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 	if err != nil {
 		return nil, fmt.Errorf("To address:%s invalid:%s", to, err)
 	}
-	var state = &ont.State{
+	var state = &mbc.State{
 		From:  fromAddr,
 		To:    toAddr,
 		Value: amount,
@@ -247,12 +247,12 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 	var version byte
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case ASSET_ONT:
-		version = VERSION_CONTRACT_ONT
-		contractAddr = utils.OntContractAddress
-	case ASSET_ONG:
-		version = VERSION_CONTRACT_ONG
-		contractAddr = utils.OngContractAddress
+	case ASSET_MBC:
+		version = VERSION_CONTRACT_MBC
+		contractAddr = utils.MbcContractAddress
+	case ASSET_MBG:
+		version = VERSION_CONTRACT_MBG
+		contractAddr = utils.MbgContractAddress
 	default:
 		return nil, fmt.Errorf("Unsupport asset:%s", asset)
 	}
@@ -403,8 +403,8 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 	if err != nil {
 		return nil, fmt.Errorf("To address:%s invalid:%s", to, err)
 	}
-	var sts []*ont.State
-	sts = append(sts, &ont.State{
+	var sts []*mbc.State
+	sts = append(sts, &mbc.State{
 		From:  fromAddr,
 		To:    toAddr,
 		Value: amount,
@@ -412,12 +412,12 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 	var version byte
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case ASSET_ONT:
-		version = VERSION_CONTRACT_ONT
-		contractAddr = utils.OntContractAddress
-	case ASSET_ONG:
-		version = VERSION_CONTRACT_ONG
-		contractAddr = utils.OngContractAddress
+	case ASSET_MBC:
+		version = VERSION_CONTRACT_MBC
+		contractAddr = utils.MbcContractAddress
+	case ASSET_MBG:
+		version = VERSION_CONTRACT_MBG
+		contractAddr = utils.MbgContractAddress
 	default:
 		return nil, fmt.Errorf("Unsupport asset:%s", asset)
 	}
@@ -452,7 +452,7 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 	if err != nil {
 		return nil, fmt.Errorf("To address:%s invalid:%s", to, err)
 	}
-	transferFrom := &ont.TransferFrom{
+	transferFrom := &mbc.TransferFrom{
 		Sender: senderAddr,
 		From:   fromAddr,
 		To:     toAddr,
@@ -461,12 +461,12 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 	var version byte
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case ASSET_ONT:
-		version = VERSION_CONTRACT_ONT
-		contractAddr = utils.OntContractAddress
-	case ASSET_ONG:
-		version = VERSION_CONTRACT_ONG
-		contractAddr = utils.OngContractAddress
+	case ASSET_MBC:
+		version = VERSION_CONTRACT_MBC
+		contractAddr = utils.MbcContractAddress
+	case ASSET_MBG:
+		version = VERSION_CONTRACT_MBG
+		contractAddr = utils.MbgContractAddress
 	default:
 		return nil, fmt.Errorf("Unsupport asset:%s", asset)
 	}

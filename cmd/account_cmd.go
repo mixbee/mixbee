@@ -174,11 +174,11 @@ func accountCreate(ctx *cli.Context) error {
 	}
 	defer common.ClearPasswd(pass)
 	if ctx.Bool(utils.IdentityFlag.Name) {
-		// create ONT ID
+		// create MBC ID
 		wd := wallet.GetWalletData()
 		id, err := account.NewIdentity(optionLabel, keyType, curve, pass)
 		if err != nil {
-			return fmt.Errorf("Create ONT ID error: %s", err)
+			return fmt.Errorf("Create MBC ID error: %s", err)
 		}
 		wd.AddIdentity(id)
 		err = wd.Save(optionFile)
@@ -186,7 +186,7 @@ func accountCreate(ctx *cli.Context) error {
 			return fmt.Errorf("Save to %s error: %s", optionFile, err)
 		}
 		fmt.Println("")
-		fmt.Println("ONT ID created:", id.ID)
+		fmt.Println("MBC ID created:", id.ID)
 		fmt.Println("Bind public key:", id.Control[0].Public)
 		return nil
 	}

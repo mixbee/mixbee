@@ -26,8 +26,8 @@ import (
 const MAX_SEARCH_HEIGHT uint32 = 100
 
 type BalanceOfRsp struct {
-	Ont string `json:"ont"`
-	Ong string `json:"ong"`
+	Mbc string `json:"mcb"`
+	Mbg string `json:"mbg"`
 }
 
 type MerkleProof struct {
@@ -240,28 +240,28 @@ func GetBlockInfo(block *types.Block) BlockInfo {
 }
 
 func GetBalance(address common.Address) (*BalanceOfRsp, error) {
-	ont, err := GetContractBalance(0, utils.OntContractAddress, address)
+	mbc, err := GetContractBalance(0, utils.MbcContractAddress, address)
 	if err != nil {
-		return nil, fmt.Errorf("get ont balance error:%s", err)
+		return nil, fmt.Errorf("get mbc balance error:%s", err)
 
 	}
-	ong, err := GetContractBalance(0, utils.OngContractAddress, address)
+	mbg, err := GetContractBalance(0, utils.MbgContractAddress, address)
 	if err != nil {
-		return nil, fmt.Errorf("get ont balance error:%s", err)
+		return nil, fmt.Errorf("get mbc balance error:%s", err)
 	}
 	return &BalanceOfRsp{
-		Ont: fmt.Sprintf("%d", ont),
-		Ong: fmt.Sprintf("%d", ong),
+		Mbc: fmt.Sprintf("%d", mbc),
+		Mbg: fmt.Sprintf("%d", mbg),
 	}, nil
 }
 
 func GetAllowance(asset string, from, to common.Address) (string, error) {
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case "ont":
-		contractAddr = utils.OntContractAddress
-	case "ong":
-		contractAddr = utils.OngContractAddress
+	case "mbc":
+		contractAddr = utils.MbcContractAddress
+	case "mbg":
+		contractAddr = utils.MbgContractAddress
 	default:
 		return "", fmt.Errorf("unsupport asset")
 	}

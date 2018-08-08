@@ -12,7 +12,7 @@ import (
 	"github.com/mixbee/mixbee/core/genesis"
 	"github.com/mixbee/mixbee/core/payload"
 	"github.com/mixbee/mixbee/core/types"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	cstates "github.com/mixbee/mixbee/smartcontract/states"
 	"testing"
 	"time"
@@ -339,13 +339,13 @@ func TestBlock(t *testing.T) {
 
 func transferTx(from, to common.Address, amount uint64) (*types.Transaction, error) {
 	buf := bytes.NewBuffer(nil)
-	var sts []*ont.State
-	sts = append(sts, &ont.State{
+	var sts []*mbc.State
+	sts = append(sts, &mbc.State{
 		From:  from,
 		To:    to,
 		Value: amount,
 	})
-	transfers := &ont.Transfers{
+	transfers := &mbc.Transfers{
 		States: sts,
 	}
 	err := transfers.Serialize(buf)
@@ -353,7 +353,7 @@ func transferTx(from, to common.Address, amount uint64) (*types.Transaction, err
 		return nil, fmt.Errorf("transfers.Serialize error %s", err)
 	}
 	var cversion byte
-	return invokeSmartContractTx(0, 30000, vmtypes.Native, cversion, genesis.OntContractAddress, "transfer", buf.Bytes())
+	return invokeSmartContractTx(0, 30000, vmtypes.Native, cversion, genesis.MbcContractAddress, "transfer", buf.Bytes())
 }
 
 func invokeSmartContractTx(gasPrice,

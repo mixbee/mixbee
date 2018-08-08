@@ -18,7 +18,7 @@ import (
 	"github.com/mixbee/mixbee/core/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/native/global_params"
 	"github.com/mixbee/mixbee/smartcontract/service/native/governance"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	nutils "github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/neovm"
 	"log"
@@ -30,10 +30,10 @@ const (
 )
 
 var (
-	ONTToken   = newGoverningToken()
-	ONGToken   = newUtilityToken()
-	ONTTokenID = ONTToken.Hash()
-	ONGTokenID = ONGToken.Hash()
+	MBCToken   = newGoverningToken()
+	MBGToken   = newUtilityToken()
+	MBCTokenID = MBCToken.Hash()
+	MBGTokenID = MBGToken.Hash()
 )
 
 var GenBlockTime = (config.DEFAULT_GEN_BLOCK_TIME * time.Second)
@@ -77,8 +77,8 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	}
 
 	//block
-	ontTx := newGoverningToken()
-	ong := newUtilityToken()
+	mbcTx := newGoverningToken()
+	mbg := newUtilityToken()
 	param := newParamContract()
 	oid := deployMixIDContract()
 	auth := deployAuthContract()
@@ -89,8 +89,8 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	genesisBlock := &types.Block{
 		Header: genesisHeader,
 		Transactions: []*types.Transaction{
-			ontTx,
-			ong,
+			mbcTx,
+			mbg,
 			param,
 			oid,
 			auth,
@@ -110,51 +110,51 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 }
 
 func newGoverningToken() *types.Transaction {
-	tx := utils.NewDeployTransaction(nutils.OntContractAddress[:], "ONT", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONT Token", true)
+	tx := utils.NewDeployTransaction(nutils.MbcContractAddress[:], "MBC", "1.0",
+		"Mixbee Team", "mixbee@gmail.com", "Mixbee Network MBC Token", true)
 	return tx
 }
 
 func newUtilityToken() *types.Transaction {
-	tx := utils.NewDeployTransaction(nutils.OngContractAddress[:], "ONG", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONG Token", true)
+	tx := utils.NewDeployTransaction(nutils.MbgContractAddress[:], "MBG", "1.0",
+		"Mixbee Team", "mixbee@gmail.com", "Mixbee Network MBG Token", true)
 	return tx
 }
 
 func newParamContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.ParamContractAddress[:],
-		"ParamConfig", "1.0", "Mixbee Team", "jianlongcui23t@gmail.com",
+		"ParamConfig", "1.0", "Mixbee Team", "mixbee@gmail.com",
 		"Chain Global Environment Variables Manager ", true)
 	return tx
 }
 
 func newConfig() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.GovernanceContractAddress[:], "CONFIG", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network Consensus Config", true)
+		"Mixbee Team", "mixbee@gmail.com", "Mixbee Network Consensus Config", true)
 	return tx
 }
 
 func deployAuthContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.AuthContractAddress[:], "AuthContract", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network Authorization Contract", true)
+		"Mixbee Team", "mixbee@gmail.com", "Mixbee Network Authorization Contract", true)
 	return tx
 }
 
 func deployMixIDContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.MixIDContractAddress[:], "OID", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee Network ONT ID", true)
+		"Mixbee Team", "mixbee@gmail.com", "Mixbee Network MBC ID", true)
 	return tx
 }
 
 func deployMixTestContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.MixTestContractAddress[:], "MIXT", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "Mixbee test", true)
+		"Mixbee Team", "mixbee@gmail.com", "Mixbee test", true)
 	return tx
 }
 
 func deployCrossChainContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.CrossChainContractAddress[:], "MIXT", "1.0",
-		"Mixbee Team", "jianlongcui23@gmail.com", "cross chain ledger", true)
+		"Mixbee Team", "mixbee@gmail.com", "cross chain ledger", true)
 	return tx
 }
 
@@ -176,7 +176,7 @@ func newGoverningInit() *types.Transaction {
 	distribute := []struct {
 		addr  common.Address
 		value uint64
-	}{{addr, constants.ONT_TOTAL_SUPPLY}}
+	}{{addr, constants.MBC_TOTAL_SUPPLY}}
 	log.Println("govern genesis block address", addr.ToBase58())
 
 	args := bytes.NewBuffer(nil)
@@ -186,19 +186,19 @@ func newGoverningInit() *types.Transaction {
 		nutils.WriteVarUint(args, part.value)
 	}
 
-	return utils.BuildNativeTransaction(nutils.OntContractAddress, ont.INIT_NAME, args.Bytes())
+	return utils.BuildNativeTransaction(nutils.MbcContractAddress, mbc.INIT_NAME, args.Bytes())
 }
 
 func newUtilityInit() *types.Transaction {
-	return utils.BuildNativeTransaction(nutils.OngContractAddress, ont.INIT_NAME, []byte{})
+	return utils.BuildNativeTransaction(nutils.MbgContractAddress, mbc.INIT_NAME, []byte{})
 }
 
 func newMixTest() *types.Transaction {
-	return utils.BuildNativeTransaction(nutils.MixTestContractAddress, ont.INIT_NAME, []byte{})
+	return utils.BuildNativeTransaction(nutils.MixTestContractAddress, mbc.INIT_NAME, []byte{})
 }
 
 func newCrossChain() *types.Transaction {
-	return utils.BuildNativeTransaction(nutils.CrossChainContractAddress, ont.INIT_NAME, []byte{})
+	return utils.BuildNativeTransaction(nutils.CrossChainContractAddress, mbc.INIT_NAME, []byte{})
 }
 
 func newParamInit() *types.Transaction {

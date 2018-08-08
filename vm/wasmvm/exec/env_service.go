@@ -65,15 +65,15 @@ func NewInteropService() *InteropService {
 	service.Register("SHA256", hashSha256)
 
 	//parameter apis
-	service.Register("ONT_ReadInt32Param", readInt32Param)
-	service.Register("ONT_ReadInt64Param", readInt64Param)
-	service.Register("ONT_ReadStringParam", readStringParam)
-	service.Register("ONT_JsonUnmashalInput", jsonUnmashal)
-	service.Register("ONT_JsonMashalResult", jsonMashal)
-	service.Register("ONT_JsonMashalParams", jsonMashalParams)
-	service.Register("ONT_RawMashalParams", rawMashalParams)
-	service.Register("ONT_GetCallerAddress", getCaller)
-	service.Register("ONT_GetSelfAddress", getContractAddress)
+	service.Register("MBC_ReadInt32Param", readInt32Param)
+	service.Register("MBC_ReadInt64Param", readInt64Param)
+	service.Register("MBC_ReadStringParam", readStringParam)
+	service.Register("MBC_JsonUnmashalInput", jsonUnmashal)
+	service.Register("MBC_JsonMashalResult", jsonMashal)
+	service.Register("MBC_JsonMashalParams", jsonMashalParams)
+	service.Register("MBC_RawMashalParams", rawMashalParams)
+	service.Register("MBC_GetCallerAddress", getCaller)
+	service.Register("MBC_GetSelfAddress", getContractAddress)
 
 	return &service
 }

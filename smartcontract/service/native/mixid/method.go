@@ -26,50 +26,50 @@ func regIdWithPublicKey(srvc *native.NativeService) ([]byte, error) {
 	// arg0: ID
 	arg0, err := serialization.ReadVarBytes(args)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: parsing argument 0 failed")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: parsing argument 0 failed")
 	} else if len(arg0) == 0 {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid length of argument 0")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid length of argument 0")
 	}
 	// arg1: public key
 	arg1, err := serialization.ReadVarBytes(args)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: parsing argument 1 failed")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: parsing argument 1 failed")
 	}
 
 	log.Debug("arg 0:", hex.EncodeToString(arg0), string(arg0))
 	log.Debug("arg 1:", hex.EncodeToString(arg1))
 
 	if len(arg0) == 0 || len(arg1) == 0 {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid argument")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid argument")
 	}
 
 	if !account.VerifyID(string(arg0)) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid ID")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid ID")
 	}
 
 	key, err := encodeID(arg0)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: " + err.Error())
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: " + err.Error())
 	}
 
 	if checkIDExistence(srvc, key) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: already registered")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: already registered")
 	}
 
 	public, err := keypair.DeserializePublicKey(arg1)
 	if err != nil {
 		log.Error(err)
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid public key")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid public key")
 	}
 	addr := types.AddressFromPubKey(public)
 	if !srvc.ContextRef.CheckWitness(addr) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: checking witness failed")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: checking witness failed")
 	}
 
 	// insert public key
 	_, err = insertPk(srvc, key, arg1)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: store public key error, " + err.Error())
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: store public key error, " + err.Error())
 	}
 	// set flags
 	srvc.CloneCache.Add(common.ST_STORAGE, key, &states.StorageItem{Value: []byte{flag_exist}})
@@ -90,7 +90,7 @@ func regIdWithAttributes(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("register ID with attributes error: argument 0 error, invalid length")
 	}
 	if !account.VerifyID(string(arg0)) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid ID")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid ID")
 	}
 
 	// arg1: public key

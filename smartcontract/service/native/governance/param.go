@@ -491,7 +491,7 @@ func (this *Configuration) Deserialize(r io.Reader) error {
 }
 
 type GlobalParam struct {
-	CandidateFee uint64 //unit: 10^-9 ong
+	CandidateFee uint64 //unit: 10^-9 mbg
 	MinInitStake uint32
 	CandidateNum uint32
 	PosLimit     uint32
@@ -662,18 +662,18 @@ func (this *TransferPenaltyParam) Deserialize(r io.Reader) error {
 	return nil
 }
 
-type WithdrawOngParam struct {
+type WithdrawMbgParam struct {
 	Address common.Address
 }
 
-func (this *WithdrawOngParam) Serialize(w io.Writer) error {
+func (this *WithdrawMbgParam) Serialize(w io.Writer) error {
 	if err := serialization.WriteVarBytes(w, this.Address[:]); err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "serialization.WriteVarBytes, address address error!")
 	}
 	return nil
 }
 
-func (this *WithdrawOngParam) Deserialize(r io.Reader) error {
+func (this *WithdrawMbgParam) Deserialize(r io.Reader) error {
 	address, err := utils.ReadAddress(r)
 	if err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "utils.ReadAddress, deserialize address error!")

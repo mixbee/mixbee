@@ -22,7 +22,7 @@ import (
 	"github.com/mixbee/mixbee/smartcontract/event"
 	"github.com/mixbee/mixbee/smartcontract/service/native/global_params"
 	ninit "github.com/mixbee/mixbee/smartcontract/service/native/init"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/neovm"
 	"github.com/mixbee/mixbee/smartcontract/storage"
@@ -272,13 +272,13 @@ func SaveNotify(eventStore scommon.EventStore, txHash common.Uint256, notify *ev
 }
 
 func genNativeTransferCode(from, to common.Address, value uint64) []byte {
-	transfer := ont.Transfers{States: []*ont.State{{From: from, To: to, Value: value}}}
+	transfer := mbc.Transfers{States: []*mbc.State{{From: from, To: to, Value: value}}}
 	tr := new(bytes.Buffer)
 	transfer.Serialize(tr)
 	return tr.Bytes()
 }
 
-// check whether payer ong balance sufficient
+// check whether payer mbg balance sufficient
 func isBalanceSufficient(payer common.Address, cache *storage.CloneCache, config *smartcontract.Config, store store.LedgerStore, gas uint64) (uint64, error) {
 	balance, err := getBalanceFromNative(config, cache, store, payer)
 	if err != nil {
@@ -303,7 +303,7 @@ func chargeCostGas(payer common.Address, gas uint64, config *smartcontract.Confi
 	}
 
 	service, _ := sc.NewNativeService()
-	_, err := service.NativeCall(utils.OngContractAddress, "transfer", params)
+	_, err := service.NativeCall(utils.MbgContractAddress, "transfer", params)
 	if err != nil {
 		return nil, err
 	}
@@ -366,7 +366,7 @@ func getBalanceFromNative(config *smartcontract.Config, cache *storage.CloneCach
 	}
 
 	service, _ := sc.NewNativeService()
-	result, err := service.NativeCall(utils.OngContractAddress, ont.BALANCEOF_NAME, bf.Bytes())
+	result, err := service.NativeCall(utils.MbgContractAddress, mbc.BALANCEOF_NAME, bf.Bytes())
 	if err != nil {
 		return 0, err
 	}

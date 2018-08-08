@@ -485,7 +485,7 @@ func GetAllowance(cmd map[string]interface{}) map[string]interface{} {
 	return resp
 }
 
-func GetUnboundOng(cmd map[string]interface{}) map[string]interface{} {
+func GetUnboundMbg(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(berr.SUCCESS)
 	toAddrStr, ok := cmd["Addr"].(string)
 	if !ok {
@@ -495,8 +495,8 @@ func GetUnboundOng(cmd map[string]interface{}) map[string]interface{} {
 	if err != nil {
 		return ResponsePack(berr.INVALID_PARAMS)
 	}
-	fromAddr := utils.OntContractAddress
-	rsp, err := bcomn.GetAllowance("ong", fromAddr, toAddr)
+	fromAddr := utils.MbcContractAddress
+	rsp, err := bcomn.GetAllowance("mbg", fromAddr, toAddr)
 	if err != nil {
 		return ResponsePack(berr.INVALID_PARAMS)
 	}

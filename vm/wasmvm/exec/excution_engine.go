@@ -515,11 +515,11 @@ func (e *ExecutionEngine) call(caller common.Address,
 }
 
 //FIXME NOT IN USE BUT DON'T DELETE IT
-//current we only support the ONT SYSTEM module import
+//current we only support the MBC SYSTEM module import
 //other imports will raise an error
 func importer(name string) (*wasm.Module, error) {
 	//TODO add the path into config file
-	if name != "ONT" {
+	if name != "MBC" {
 		return nil, errors.NewErr("import [" + name + "] is not supported! ")
 	}
 	f, err := os.Open(name + ".wasm")

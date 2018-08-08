@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 func TestSigRawTx(t *testing.T) {
 	acc := account.NewAccount("")
 	defAcc := clisvrcom.DefAccount
-	tx, err := utils.TransferTx(0, 0, "ont", defAcc.Address.ToBase58(), acc.Address.ToBase58(), 10)
+	tx, err := utils.TransferTx(0, 0, "mbc", defAcc.Address.ToBase58(), acc.Address.ToBase58(), 10)
 	if err != nil {
 		t.Errorf("TransferTx error:%s", err)
 		return

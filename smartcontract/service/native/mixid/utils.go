@@ -38,7 +38,7 @@ const (
 func encodeID(id []byte) ([]byte, error) {
 	length := len(id)
 	if length == 0 || length > 255 {
-		return nil, errors.New("encode ONT ID error: invalid ID length")
+		return nil, errors.New("encode MBC ID error: invalid ID length")
 	}
 	enc := []byte{byte(length)}
 	enc = append(enc, id...)
@@ -47,7 +47,7 @@ func encodeID(id []byte) ([]byte, error) {
 
 func decodeID(data []byte) ([]byte, error) {
 	if len(data) == 0 || len(data) != int(data[0])+1 {
-		return nil, errors.New("decode ONT ID error: invalid data length")
+		return nil, errors.New("decode MIX ID error: invalid data length")
 	}
 	return data[1:], nil
 }

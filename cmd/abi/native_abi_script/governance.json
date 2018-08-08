@@ -277,7 +277,7 @@
       "returnType":"Bool"
     },
     {
-      "name":"withdrawOng",
+      "name":"withdrawMbg",
       "parameters":
       [
         {

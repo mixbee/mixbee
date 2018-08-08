@@ -40,7 +40,7 @@ func StartRPCServer() error {
 	rpc.HandleFunc("getmerkleproof", rpc.GetMerkleProof)
 	rpc.HandleFunc("getblocktxsbyheight", rpc.GetBlockTxsByHeight)
 	rpc.HandleFunc("getgasprice", rpc.GetGasPrice)
-	rpc.HandleFunc("getunboundong", rpc.GetUnboundOng)
+	rpc.HandleFunc("getunboundmbg", rpc.GetUnboundMbg)
 
 	//cross chain
 	rpc.HandleFunc("registerSubChainNode", rpc.RegisterSubChainNode)

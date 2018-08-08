@@ -11,10 +11,10 @@ import (
 	"fmt"
 )
 
-func TestCalcUnbindOng(t *testing.T) {
-	assert.Equal(t, CalcUnbindOng(1, 0, 1), uint64(GENERATION_AMOUNT[0]))
-	assert.Equal(t, CalcUnbindOng(1, 0, TIME_INTERVAL), GENERATION_AMOUNT[0]*uint64(TIME_INTERVAL))
-	assert.Equal(t, CalcUnbindOng(1, 0, TIME_INTERVAL+1),
+func TestCalcUnbindMbg(t *testing.T) {
+	assert.Equal(t, CalcUnbindMbg(1, 0, 1), uint64(GENERATION_AMOUNT[0]))
+	assert.Equal(t, CalcUnbindMbg(1, 0, TIME_INTERVAL), GENERATION_AMOUNT[0]*uint64(TIME_INTERVAL))
+	assert.Equal(t, CalcUnbindMbg(1, 0, TIME_INTERVAL+1),
 		GENERATION_AMOUNT[1]+GENERATION_AMOUNT[0]*uint64(TIME_INTERVAL))
 
 	fmt.Println(CrossChainContractAddress.ToBase58())
@@ -28,23 +28,23 @@ func TestCumulative(t *testing.T) {
 		tend := tstart + rand.Uint32()
 		tmid := uint32((uint64(tstart) + uint64(tend)) / 2)
 
-		total := CalcUnbindOng(1, tstart, tend)
-		total2 := CalcUnbindOng(1, tstart, tmid) + CalcUnbindOng(1, tmid, tend)
+		total := CalcUnbindMbg(1, tstart, tend)
+		total2 := CalcUnbindMbg(1, tstart, tmid) + CalcUnbindMbg(1, tmid, tend)
 		assert.Equal(t, total, total2)
 	}
 }
 
-// test 1 balance will get ONT_TOTAL_SUPPLY eventually
+// test 1 balance will get MBC_TOTAL_SUPPLY eventually
 func TestTotalONG(t *testing.T) {
-	assert.Equal(t, CalcUnbindOng(1, 0, constants.UNBOUND_DEADLINE),
-		constants.ONT_TOTAL_SUPPLY)
+	assert.Equal(t, CalcUnbindMbg(1, 0, constants.UNBOUND_DEADLINE),
+		constants.MBC_TOTAL_SUPPLY)
 
-	assert.Equal(t, CalcUnbindOng(1, 0, TIME_INTERVAL*18),
-		constants.ONT_TOTAL_SUPPLY)
+	assert.Equal(t, CalcUnbindMbg(1, 0, TIME_INTERVAL*18),
+		constants.MBC_TOTAL_SUPPLY)
 
-	assert.Equal(t, CalcUnbindOng(1, 0, TIME_INTERVAL*108),
-		constants.ONT_TOTAL_SUPPLY)
+	assert.Equal(t, CalcUnbindMbg(1, 0, TIME_INTERVAL*108),
+		constants.MBC_TOTAL_SUPPLY)
 
-	assert.Equal(t, CalcUnbindOng(1, 0, ^uint32(0)),
-		constants.ONT_TOTAL_SUPPLY)
+	assert.Equal(t, CalcUnbindMbg(1, 0, ^uint32(0)),
+		constants.MBC_TOTAL_SUPPLY)
 }

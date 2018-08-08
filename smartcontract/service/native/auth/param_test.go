@@ -20,7 +20,7 @@ var (
 var (
 	funcs           = []string{"foo1", "foo2"}
 	role            = "role"
-	OntContractAddr = utils.OntContractAddress
+	MbcContractAddr = utils.MbcContractAddress
 )
 
 func init() {
@@ -55,7 +55,7 @@ func TestSerialization_Init(t *testing.T) {
 
 func TestSerialization_Transfer(t *testing.T) {
 	param := &TransferParam{
-		ContractAddr:  OntContractAddr,
+		ContractAddr:  MbcContractAddr,
 		NewAdminMixID: newAdmin,
 	}
 	bf := new(bytes.Buffer)
@@ -74,7 +74,7 @@ func TestSerialization_Transfer(t *testing.T) {
 
 func TestSerialization_AssignFuncs(t *testing.T) {
 	param := &FuncsToRoleParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: MbcContractAddr,
 		AdminMixID:   admin,
 		Role:         []byte("role"),
 		FuncNames:    funcs,
@@ -95,7 +95,7 @@ func TestSerialization_AssignFuncs(t *testing.T) {
 
 func TestSerialization_AssignMixIDs(t *testing.T) {
 	param := &MixIDsToRoleParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: MbcContractAddr,
 		AdminMixID:   admin,
 		Role:         []byte(role),
 		Persons:      [][]byte{[]byte{0x03, 0x04, 0x05, 0x06}, []byte{0x07, 0x08, 0x09, 0x0a}},
@@ -115,7 +115,7 @@ func TestSerialization_AssignMixIDs(t *testing.T) {
 
 func TestSerialization_Delegate(t *testing.T) {
 	param := &DelegateParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: MbcContractAddr,
 		From:         p1,
 		To:           p2,
 		Role:         []byte(role),
@@ -136,7 +136,7 @@ func TestSerialization_Delegate(t *testing.T) {
 
 func TestSerialization_Withdraw(t *testing.T) {
 	param := &WithdrawParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: MbcContractAddr,
 		Initiator:    p1,
 		Delegate:     p2,
 		Role:         []byte(role),
@@ -155,7 +155,7 @@ func TestSerialization_Withdraw(t *testing.T) {
 
 func TestSerialization_VerifyToken(t *testing.T) {
 	param := &VerifyTokenParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: MbcContractAddr,
 		Caller:       p1,
 		Fn:           "foo1",
 	}

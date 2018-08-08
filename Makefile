@@ -8,7 +8,7 @@ DBUILD=docker build
 DRUN=docker run
 DOCKER_NS ?= mixbee
 DOCKER_TAG=$(ARCH)-$(VERSION)
-ONT_CFG_IN_DOCKER=config.json
+MBC_CFG_IN_DOCKER=config.json
 WALLET_FILE=wallet.dat
 
 SRC_FILES = $(shell git ls-files | grep -e .go$ | grep -v _test.go)
@@ -72,13 +72,13 @@ format:
 # $(WALLET_FILE):
 # 	@if [ ! -e $(WALLET_FILE) ]; then $(error Please create wallet file first) ; fi
 
-# docker/payload: docker/build/bin/mixbee docker/Dockerfile $(ONT_CFG_IN_DOCKER) $(WALLET_FILE)
+# docker/payload: docker/build/bin/mixbee docker/Dockerfile $(MBC_CFG_IN_DOCKER) $(WALLET_FILE)
 docker/payload: docker/build/bin/mixbee docker/Dockerfile
 	@echo "Building mixbee payload"
 	@mkdir -p $@
 	@cp docker/Dockerfile $@
 	@cp docker/build/bin/mixbee $@
-	# @cp -f $(ONT_CFG_IN_DOCKER) $@/config.json
+	# @cp -f $(MBC_CFG_IN_DOCKER) $@/config.json
 	# @cp -f $(WALLET_FILE) $@
 	# @tar czf $@/config.tgz -C $@ config.json $(WALLET_FILE)
 	@touch $@
@@ -103,6 +103,6 @@ docker: Makefile docker/payload docker/Dockerfile
 
 clean:
 	rm -rf *.8 *.o *.out *.6 *exe
-	rm -rf mixbee tools docker/payload docker/build
+	rm -rf mixbee tools docker/payload docker/build Chain tools Log
 	docker rmi mixbee/mixbee
 

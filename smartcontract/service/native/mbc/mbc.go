@@ -1,6 +1,6 @@
 
 
-package ont
+package mbc
 
 import (
 	"bytes"
@@ -23,24 +23,24 @@ const (
 	APPROVE_FLAG  byte = 2
 )
 
-func InitOnt() {
-	native.Contracts[utils.OntContractAddress] = RegisterOntContract
+func InitMbc() {
+	native.Contracts[utils.MbcContractAddress] = RegisterMbcContract
 }
 
-func RegisterOntContract(native *native.NativeService) {
-	native.Register(INIT_NAME, OntInit)
-	native.Register(TRANSFER_NAME, OntTransfer)
-	native.Register(APPROVE_NAME, OntApprove)
-	native.Register(TRANSFERFROM_NAME, OntTransferFrom)
-	native.Register(NAME_NAME, OntName)
-	native.Register(SYMBOL_NAME, OntSymbol)
-	native.Register(DECIMALS_NAME, OntDecimals)
-	native.Register(TOTALSUPPLY_NAME, OntTotalSupply)
-	native.Register(BALANCEOF_NAME, OntBalanceOf)
-	native.Register(ALLOWANCE_NAME, OntAllowance)
+func RegisterMbcContract(native *native.NativeService) {
+	native.Register(INIT_NAME, MbcInit)
+	native.Register(TRANSFER_NAME, MbcTransfer)
+	native.Register(APPROVE_NAME, MbcApprove)
+	native.Register(TRANSFERFROM_NAME, MbcTransferFrom)
+	native.Register(NAME_NAME, MbcName)
+	native.Register(SYMBOL_NAME, MbcSymbol)
+	native.Register(DECIMALS_NAME, MbcDecimals)
+	native.Register(TOTALSUPPLY_NAME, MbcTotalSupply)
+	native.Register(BALANCEOF_NAME, MbcBalanceOf)
+	native.Register(ALLOWANCE_NAME, MbcAllowance)
 }
 
-func OntInit(native *native.NativeService) ([]byte, error) {
+func MbcInit(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	amount, err := utils.GetStorageUInt64(native, GenTotalSupplyKey(contract))
 	if err != nil {
@@ -48,7 +48,7 @@ func OntInit(native *native.NativeService) ([]byte, error) {
 	}
 
 	if amount > 0 {
-		return utils.BYTE_FALSE, errors.NewErr("Init ont has been completed!")
+		return utils.BYTE_FALSE, errors.NewErr("Init mbc has been completed!")
 	}
 
 	distribute := make(map[common.Address]uint64)
@@ -78,8 +78,8 @@ func OntInit(native *native.NativeService) ([]byte, error) {
 		}
 		distribute[addr] += value
 	}
-	if sum != constants.ONT_TOTAL_SUPPLY {
-		return utils.BYTE_FALSE, fmt.Errorf("wrong config. total supply %d != %d", sum, constants.ONT_TOTAL_SUPPLY)
+	if sum != constants.MBC_TOTAL_SUPPLY {
+		return utils.BYTE_FALSE, fmt.Errorf("wrong config. total supply %d != %d", sum, constants.MBC_TOTAL_SUPPLY)
 	}
 
 	for addr, val := range distribute {
@@ -88,12 +88,12 @@ func OntInit(native *native.NativeService) ([]byte, error) {
 		native.CloneCache.Add(scommon.ST_STORAGE, balanceKey, item)
 		AddNotifications(native, contract, &State{To: addr, Value: val})
 	}
-	native.CloneCache.Add(scommon.ST_STORAGE, GenTotalSupplyKey(contract), utils.GenUInt64StorageItem(constants.ONT_TOTAL_SUPPLY))
+	native.CloneCache.Add(scommon.ST_STORAGE, GenTotalSupplyKey(contract), utils.GenUInt64StorageItem(constants.MBC_TOTAL_SUPPLY))
 
 	return utils.BYTE_TRUE, nil
 }
 
-func OntTransfer(native *native.NativeService) ([]byte, error) {
+func MbcTransfer(native *native.NativeService) ([]byte, error) {
 	transfers := new(Transfers)
 	if err := transfers.Deserialize(bytes.NewBuffer(native.Input)); err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[Transfer] Transfers deserialize error!")
@@ -103,19 +103,19 @@ func OntTransfer(native *native.NativeService) ([]byte, error) {
 		if v.Value == 0 {
 			continue
 		}
-		if v.Value > constants.ONT_TOTAL_SUPPLY {
-			return utils.BYTE_FALSE, fmt.Errorf("transfer ont amount:%d over totalSupply:%d", v.Value, constants.ONT_TOTAL_SUPPLY)
+		if v.Value > constants.MBC_TOTAL_SUPPLY {
+			return utils.BYTE_FALSE, fmt.Errorf("transfer mbc amount:%d over totalSupply:%d", v.Value, constants.MBC_TOTAL_SUPPLY)
 		}
 		fromBalance, toBalance, err := Transfer(native, contract, v)
 		if err != nil {
 			return utils.BYTE_FALSE, err
 		}
 
-		if err := grantOng(native, contract, v.From, fromBalance); err != nil {
+		if err := grantMbg(native, contract, v.From, fromBalance); err != nil {
 			return utils.BYTE_FALSE, err
 		}
 
-		if err := grantOng(native, contract, v.To, toBalance); err != nil {
+		if err := grantMbg(native, contract, v.To, toBalance); err != nil {
 			return utils.BYTE_FALSE, err
 		}
 
@@ -124,42 +124,42 @@ func OntTransfer(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func OntTransferFrom(native *native.NativeService) ([]byte, error) {
+func MbcTransferFrom(native *native.NativeService) ([]byte, error) {
 	state := new(TransferFrom)
 	if err := state.Deserialize(bytes.NewBuffer(native.Input)); err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[OntTransferFrom] State deserialize error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[MbcTransferFrom] State deserialize error!")
 	}
 	if state.Value == 0 {
 		return utils.BYTE_FALSE, nil
 	}
-	if state.Value > constants.ONT_TOTAL_SUPPLY {
-		return utils.BYTE_FALSE, fmt.Errorf("transferFrom ont amount:%d over totalSupply:%d", state.Value, constants.ONT_TOTAL_SUPPLY)
+	if state.Value > constants.MBC_TOTAL_SUPPLY {
+		return utils.BYTE_FALSE, fmt.Errorf("transferFrom mbc amount:%d over totalSupply:%d", state.Value, constants.MBC_TOTAL_SUPPLY)
 	}
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	fromBalance, toBalance, err := TransferedFrom(native, contract, state)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
-	if err := grantOng(native, contract, state.From, fromBalance); err != nil {
+	if err := grantMbg(native, contract, state.From, fromBalance); err != nil {
 		return utils.BYTE_FALSE, err
 	}
-	if err := grantOng(native, contract, state.To, toBalance); err != nil {
+	if err := grantMbg(native, contract, state.To, toBalance); err != nil {
 		return utils.BYTE_FALSE, err
 	}
 	AddNotifications(native, contract, &State{From: state.From, To: state.To, Value: state.Value})
 	return utils.BYTE_TRUE, nil
 }
 
-func OntApprove(native *native.NativeService) ([]byte, error) {
+func MbcApprove(native *native.NativeService) ([]byte, error) {
 	state := new(State)
 	if err := state.Deserialize(bytes.NewBuffer(native.Input)); err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[OngApprove] state deserialize error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[MbgApprove] state deserialize error!")
 	}
 	if state.Value == 0 {
 		return utils.BYTE_FALSE, nil
 	}
-	if state.Value > constants.ONT_TOTAL_SUPPLY {
-		return utils.BYTE_FALSE, fmt.Errorf("approve ont amount:%d over totalSupply:%d", state.Value, constants.ONT_TOTAL_SUPPLY)
+	if state.Value > constants.MBC_TOTAL_SUPPLY {
+		return utils.BYTE_FALSE, fmt.Errorf("approve mbc amount:%d over totalSupply:%d", state.Value, constants.MBC_TOTAL_SUPPLY)
 	}
 	if native.ContextRef.CheckWitness(state.From) == false {
 		return utils.BYTE_FALSE, errors.NewErr("authentication failed!")
@@ -169,32 +169,32 @@ func OntApprove(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func OntName(native *native.NativeService) ([]byte, error) {
-	return []byte(constants.ONT_NAME), nil
+func MbcName(native *native.NativeService) ([]byte, error) {
+	return []byte(constants.MBC_NAME), nil
 }
 
-func OntDecimals(native *native.NativeService) ([]byte, error) {
-	return types.BigIntToBytes(big.NewInt(int64(constants.ONT_DECIMALS))), nil
+func MbcDecimals(native *native.NativeService) ([]byte, error) {
+	return types.BigIntToBytes(big.NewInt(int64(constants.MBC_DECIMALS))), nil
 }
 
-func OntSymbol(native *native.NativeService) ([]byte, error) {
-	return []byte(constants.ONT_SYMBOL), nil
+func MbcSymbol(native *native.NativeService) ([]byte, error) {
+	return []byte(constants.MBC_SYMBOL), nil
 }
 
-func OntTotalSupply(native *native.NativeService) ([]byte, error) {
+func MbcTotalSupply(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	amount, err := utils.GetStorageUInt64(native, GenTotalSupplyKey(contract))
 	if err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[OntTotalSupply] get totalSupply error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[MbcTotalSupply] get totalSupply error!")
 	}
 	return types.BigIntToBytes(big.NewInt(int64(amount))), nil
 }
 
-func OntBalanceOf(native *native.NativeService) ([]byte, error) {
+func MbcBalanceOf(native *native.NativeService) ([]byte, error) {
 	return GetBalanceValue(native, TRANSFER_FLAG)
 }
 
-func OntAllowance(native *native.NativeService) ([]byte, error) {
+func MbcAllowance(native *native.NativeService) ([]byte, error) {
 	return GetBalanceValue(native, APPROVE_FLAG)
 }
 
@@ -222,7 +222,7 @@ func GetBalanceValue(native *native.NativeService, flag byte) ([]byte, error) {
 	return types.BigIntToBytes(big.NewInt(int64(amount))), nil
 }
 
-func grantOng(native *native.NativeService, contract, address common.Address, balance uint64) error {
+func grantMbg(native *native.NativeService, contract, address common.Address, balance uint64) error {
 	startOffset, err := getUnboundOffset(native, contract, address)
 	if err != nil {
 		return err
@@ -232,7 +232,7 @@ func grantOng(native *native.NativeService, contract, address common.Address, ba
 	}
 	endOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 	if endOffset < startOffset {
-		errstr := fmt.Sprintf("grant Ong error: wrong timestamp endOffset: %d < startOffset: %d", endOffset, startOffset)
+		errstr := fmt.Sprintf("grant Mbg error: wrong timestamp endOffset: %d < startOffset: %d", endOffset, startOffset)
 		log.Error(errstr)
 		return errors.NewErr(errstr)
 	} else if endOffset == startOffset {
@@ -240,14 +240,14 @@ func grantOng(native *native.NativeService, contract, address common.Address, ba
 	}
 
 	if balance != 0 {
-		value := utils.CalcUnbindOng(balance, startOffset, endOffset)
+		value := utils.CalcUnbindMbg(balance, startOffset, endOffset)
 
-		args, err := getApproveArgs(native, contract, utils.OngContractAddress, address, value)
+		args, err := getApproveArgs(native, contract, utils.MbgContractAddress, address, value)
 		if err != nil {
 			return err
 		}
 
-		if _, err := native.NativeCall(utils.OngContractAddress, "approve", args); err != nil {
+		if _, err := native.NativeCall(utils.MbgContractAddress, "approve", args); err != nil {
 			return err
 		}
 	}

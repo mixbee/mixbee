@@ -12,8 +12,8 @@ import (
 	"github.com/mixbee/mixbee/smartcontract/service/native/auth"
 	params "github.com/mixbee/mixbee/smartcontract/service/native/global_params"
 	"github.com/mixbee/mixbee/smartcontract/service/native/governance"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ong"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbg"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mixid"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/neovm"
@@ -27,8 +27,8 @@ var (
 )
 
 func init() {
-	ong.InitOng()
-	ont.InitOnt()
+	mbg.InitMbg()
+	mbc.InitMbc()
 	params.InitGlobalParams()
 	mixid.Init()
 	auth.Init()

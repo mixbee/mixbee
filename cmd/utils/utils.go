@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	PRECISION_ONG = 9
-	PRECISION_ONT = 0
+	PRECISION_MBG = 9
+	PRECISION_MBC = 0
 )
 
 //FormatAssetAmount return asset amount multiplied by math.Pow10(precision) to raw float string
@@ -43,31 +43,31 @@ func ParseAssetAmount(rawAmount string, precision byte) uint64 {
 	return amount
 }
 
-func FormatOng(amount uint64) string {
-	return FormatAssetAmount(amount, PRECISION_ONG)
+func FormatMbg(amount uint64) string {
+	return FormatAssetAmount(amount, PRECISION_MBG)
 }
 
-func ParseOng(rawAmount string) uint64 {
-	return ParseAssetAmount(rawAmount, PRECISION_ONG)
+func ParseMbg(rawAmount string) uint64 {
+	return ParseAssetAmount(rawAmount, PRECISION_MBG)
 }
 
-func FormatOnt(amount uint64) string {
-	return FormatAssetAmount(amount, PRECISION_ONT)
+func FormatMbc(amount uint64) string {
+	return FormatAssetAmount(amount, PRECISION_MBC)
 }
 
-func ParseOnt(rawAmount string) uint64 {
-	return ParseAssetAmount(rawAmount, PRECISION_ONT)
+func ParseMbc(rawAmount string) uint64 {
+	return ParseAssetAmount(rawAmount, PRECISION_MBC)
 }
 
 func CheckAssetAmount(asset string, amount uint64) error {
 	switch strings.ToLower(asset) {
-	case "ont":
-		if amount > constants.ONT_TOTAL_SUPPLY {
-			return fmt.Errorf("Amount:%d larger than ONT total supply:%d", amount, constants.ONT_TOTAL_SUPPLY)
+	case "mbc":
+		if amount > constants.MBC_TOTAL_SUPPLY {
+			return fmt.Errorf("Amount:%d larger than MBC total supply:%d", amount, constants.MBC_TOTAL_SUPPLY)
 		}
-	case "ong":
-		if amount > constants.ONG_TOTAL_SUPPLY {
-			return fmt.Errorf("Amount:%d larger than ONG total supply:%d", amount, constants.ONG_TOTAL_SUPPLY)
+	case "mbg":
+		if amount > constants.MBG_TOTAL_SUPPLY {
+			return fmt.Errorf("Amount:%d larger than MBG total supply:%d", amount, constants.MBG_TOTAL_SUPPLY)
 		}
 	default:
 		return fmt.Errorf("unknown asset:%s", asset)

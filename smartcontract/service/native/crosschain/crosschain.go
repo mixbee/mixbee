@@ -6,7 +6,7 @@ import (
 	"github.com/mixbee/mixbee/errors"
 	cstates "github.com/mixbee/mixbee/core/states"
 	"github.com/mixbee/mixbee/smartcontract/service/native"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"bytes"
 	"github.com/mixbee/mixbee/common/log"
@@ -27,9 +27,9 @@ func InitCrossChain() {
 }
 
 func RegisterCrossChainContract(native *native.NativeService) {
-	native.Register(ont.INIT_NAME, Init)
-	native.Register(ont.NAME_NAME, CName)
-	native.Register(ont.SYMBOL_NAME, CSymbol)
+	native.Register(mbc.INIT_NAME, Init)
+	native.Register(mbc.NAME_NAME, CName)
+	native.Register(mbc.SYMBOL_NAME, CSymbol)
 	native.Register(CROSS_TRANSFER, CTransfer)
 	native.Register(CROSS_QUERY, CQueryBySeqId)
 	native.Register(CROSS_HISTORY, CQueryHistory)
@@ -79,8 +79,8 @@ func CTransfer(native *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[CrossChain] build deposit address error!")
 	}
-	ontState := &ont.State{From: state.From, To: toAddress, Value: state.AValue}
-	_, _, err = ont.Transfer(native, utils.OntContractAddress, ontState)
+	ontState := &mbc.State{From: state.From, To: toAddress, Value: state.AValue}
+	_, _, err = mbc.Transfer(native, utils.MbcContractAddress, ontState)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[CrossChain] CTransfer asset error!")
 	}
@@ -153,8 +153,8 @@ func CrossRelease(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	toAddress := info.To
 	fromAddress, err := BuildDepositAddress(contract, info.From)
-	ontState := &ont.State{From: fromAddress, To: toAddress, Value: info.AValue}
-	_, _, err = ont.TransferForCrossChainContract(native, utils.OntContractAddress, ontState)
+	ontState := &mbc.State{From: fromAddress, To: toAddress, Value: info.AValue}
+	_, _, err = mbc.TransferForCrossChainContract(native, utils.MbcContractAddress, ontState)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[CrossChain] CrossRelease asset error!")
 	}
@@ -205,8 +205,8 @@ func CUnlock(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	toAddress := info.From
 	fromAddress, err := BuildDepositAddress(contract, info.From)
-	ontState := &ont.State{From: fromAddress, To: toAddress, Value: info.AValue}
-	_, _, err = ont.TransferForCrossChainContract(native, utils.OntContractAddress, ontState)
+	ontState := &mbc.State{From: fromAddress, To: toAddress, Value: info.AValue}
+	_, _, err = mbc.TransferForCrossChainContract(native, utils.MbcContractAddress, ontState)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[CrossChain] CUnlock asset error!")
 	}

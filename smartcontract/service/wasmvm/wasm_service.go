@@ -17,7 +17,7 @@ import (
 	//sccommon "github.com/mixbee/mixbee/smartcontract/common"
 	"github.com/mixbee/mixbee/smartcontract/context"
 	"github.com/mixbee/mixbee/smartcontract/event"
-	//nstates "github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	//nstates "github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	//"github.com/mixbee/mixbee/smartcontract/states"
 	"github.com/mixbee/mixbee/smartcontract/storage"
 	//"github.com/mixbee/mixbee/vm/neovm"
@@ -39,54 +39,54 @@ type WasmVmService struct {
 //func (this *WasmVmService) Invoke() (interface{}, error) {
 //	stateMachine := NewWasmStateMachine()
 //	//register the "CallContract" function
-//	stateMachine.Register("ONT_CallContract", this.callContract)
-//	stateMachine.Register("ONT_MarshalNativeParams", this.marshalNativeParams)
-//	stateMachine.Register("ONT_MarshalNeoParams", this.marshalNeoParams)
+//	stateMachine.Register("MBC_CallContract", this.callContract)
+//	stateMachine.Register("MBC_MarshalNativeParams", this.marshalNativeParams)
+//	stateMachine.Register("MBC_MarshalNeoParams", this.marshalNeoParams)
 //	//runtime
-//	stateMachine.Register("ONT_Runtime_CheckWitness", this.runtimeCheckWitness)
-//	stateMachine.Register("ONT_Runtime_Notify", this.runtimeNotify)
-//	stateMachine.Register("ONT_Runtime_CheckSig", this.runtimeCheckSig)
-//	stateMachine.Register("ONT_Runtime_GetTime", this.runtimeGetTime)
-//	stateMachine.Register("ONT_Runtime_Log", this.runtimeLog)
+//	stateMachine.Register("MBC_Runtime_CheckWitness", this.runtimeCheckWitness)
+//	stateMachine.Register("MBC_Runtime_Notify", this.runtimeNotify)
+//	stateMachine.Register("MBC_Runtime_CheckSig", this.runtimeCheckSig)
+//	stateMachine.Register("MBC_Runtime_GetTime", this.runtimeGetTime)
+//	stateMachine.Register("MBC_Runtime_Log", this.runtimeLog)
 //	//attribute
-//	stateMachine.Register("ONT_Attribute_GetUsage", this.attributeGetUsage)
-//	stateMachine.Register("ONT_Attribute_GetData", this.attributeGetData)
+//	stateMachine.Register("MBC_Attribute_GetUsage", this.attributeGetUsage)
+//	stateMachine.Register("MBC_Attribute_GetData", this.attributeGetData)
 //	//block
-//	stateMachine.Register("ONT_Block_GetCurrentHeaderHash", this.blockGetCurrentHeaderHash)
-//	stateMachine.Register("ONT_Block_GetCurrentHeaderHeight", this.blockGetCurrentHeaderHeight)
-//	stateMachine.Register("ONT_Block_GetCurrentBlockHash", this.blockGetCurrentBlockHash)
-//	stateMachine.Register("ONT_Block_GetCurrentBlockHeight", this.blockGetCurrentBlockHeight)
-//	stateMachine.Register("ONT_Block_GetTransactionByHash", this.blockGetTransactionByHash)
-//	stateMachine.Register("ONT_Block_GetTransactionCount", this.blockGetTransactionCount)
-//	stateMachine.Register("ONT_Block_GetTransactions", this.blockGetTransactions)
+//	stateMachine.Register("MBC_Block_GetCurrentHeaderHash", this.blockGetCurrentHeaderHash)
+//	stateMachine.Register("MBC_Block_GetCurrentHeaderHeight", this.blockGetCurrentHeaderHeight)
+//	stateMachine.Register("MBC_Block_GetCurrentBlockHash", this.blockGetCurrentBlockHash)
+//	stateMachine.Register("MBC_Block_GetCurrentBlockHeight", this.blockGetCurrentBlockHeight)
+//	stateMachine.Register("MBC_Block_GetTransactionByHash", this.blockGetTransactionByHash)
+//	stateMachine.Register("MBC_Block_GetTransactionCount", this.blockGetTransactionCount)
+//	stateMachine.Register("MBC_Block_GetTransactions", this.blockGetTransactions)
 //
 //	//blockchain
-//	stateMachine.Register("ONT_BlockChain_GetHeight", this.blockChainGetHeight)
-//	stateMachine.Register("ONT_BlockChain_GetHeaderByHeight", this.blockChainGetHeaderByHeight)
-//	stateMachine.Register("ONT_BlockChain_GetHeaderByHash", this.blockChainGetHeaderByHash)
-//	stateMachine.Register("ONT_BlockChain_GetBlockByHeight", this.blockChainGetBlockByHeight)
-//	stateMachine.Register("ONT_BlockChain_GetBlockByHash", this.blockChainGetBlockByHash)
-//	stateMachine.Register("ONT_BlockChain_GetContract", this.blockChainGetContract)
+//	stateMachine.Register("MBC_BlockChain_GetHeight", this.blockChainGetHeight)
+//	stateMachine.Register("MBC_BlockChain_GetHeaderByHeight", this.blockChainGetHeaderByHeight)
+//	stateMachine.Register("MBC_BlockChain_GetHeaderByHash", this.blockChainGetHeaderByHash)
+//	stateMachine.Register("MBC_BlockChain_GetBlockByHeight", this.blockChainGetBlockByHeight)
+//	stateMachine.Register("MBC_BlockChain_GetBlockByHash", this.blockChainGetBlockByHash)
+//	stateMachine.Register("MBC_BlockChain_GetContract", this.blockChainGetContract)
 //
 //	//header
-//	stateMachine.Register("ONT_Header_GetHash", this.headerGetHash)
-//	stateMachine.Register("ONT_Header_GetVersion", this.headerGetVersion)
-//	stateMachine.Register("ONT_Header_GetPrevHash", this.headerGetPrevHash)
-//	stateMachine.Register("ONT_Header_GetMerkleRoot", this.headerGetMerkleRoot)
-//	stateMachine.Register("ONT_Header_GetIndex", this.headerGetIndex)
-//	stateMachine.Register("ONT_Header_GetTimestamp", this.headerGetTimestamp)
-//	stateMachine.Register("ONT_Header_GetConsensusData", this.headerGetConsensusData)
-//	stateMachine.Register("ONT_Header_GetNextConsensus", this.headerGetNextConsensus)
+//	stateMachine.Register("MBC_Header_GetHash", this.headerGetHash)
+//	stateMachine.Register("MBC_Header_GetVersion", this.headerGetVersion)
+//	stateMachine.Register("MBC_Header_GetPrevHash", this.headerGetPrevHash)
+//	stateMachine.Register("MBC_Header_GetMerkleRoot", this.headerGetMerkleRoot)
+//	stateMachine.Register("MBC_Header_GetIndex", this.headerGetIndex)
+//	stateMachine.Register("MBC_Header_GetTimestamp", this.headerGetTimestamp)
+//	stateMachine.Register("MBC_Header_GetConsensusData", this.headerGetConsensusData)
+//	stateMachine.Register("MBC_Header_GetNextConsensus", this.headerGetNextConsensus)
 //
 //	//storage
-//	stateMachine.Register("ONT_Storage_Put", this.putstore)
-//	stateMachine.Register("ONT_Storage_Get", this.getstore)
-//	stateMachine.Register("ONT_Storage_Delete", this.deletestore)
+//	stateMachine.Register("MBC_Storage_Put", this.putstore)
+//	stateMachine.Register("MBC_Storage_Get", this.getstore)
+//	stateMachine.Register("MBC_Storage_Delete", this.deletestore)
 //
 //	//transaction
-//	stateMachine.Register("ONT_Transaction_GetHash", this.transactionGetHash)
-//	stateMachine.Register("ONT_Transaction_GetType", this.transactionGetType)
-//	stateMachine.Register("ONT_Transaction_GetAttributes", this.transactionGetAttributes)
+//	stateMachine.Register("MBC_Transaction_GetHash", this.transactionGetHash)
+//	stateMachine.Register("MBC_Transaction_GetType", this.transactionGetType)
+//	stateMachine.Register("MBC_Transaction_GetAttributes", this.transactionGetAttributes)
 //
 //	engine := exec.NewExecutionEngine(
 //		this.Tx,

@@ -16,7 +16,7 @@ import (
 	"github.com/mixbee/mixbee/errors"
 	"github.com/mixbee/mixbee/smartcontract/service/native"
 	"github.com/mixbee/mixbee/smartcontract/service/native/auth"
-	"github.com/mixbee/mixbee/smartcontract/service/native/ont"
+	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/vm/neovm/types"
 )
@@ -96,31 +96,31 @@ func GetView(native *native.NativeService, contract common.Address) (uint32, err
 	return governanceView.View, nil
 }
 
-func appCallTransferOnt(native *native.NativeService, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransfer(native, utils.OntContractAddress, from, to, amount)
+func appCallTransferMbc(native *native.NativeService, from common.Address, to common.Address, amount uint64) error {
+	err := appCallTransfer(native, utils.MbcContractAddress, from, to, amount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOnt, appCallTransfer error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbc, appCallTransfer error!")
 	}
 	return nil
 }
 
-func appCallTransferOng(native *native.NativeService, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransfer(native, utils.OngContractAddress, from, to, amount)
+func appCallTransferMbg(native *native.NativeService, from common.Address, to common.Address, amount uint64) error {
+	err := appCallTransfer(native, utils.MbgContractAddress, from, to, amount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferOng, appCallTransfer error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferMbg, appCallTransfer error!")
 	}
 	return nil
 }
 
 func appCallTransfer(native *native.NativeService, contract common.Address, from common.Address, to common.Address, amount uint64) error {
 	bf := new(bytes.Buffer)
-	var sts []*ont.State
-	sts = append(sts, &ont.State{
+	var sts []*mbc.State
+	sts = append(sts, &mbc.State{
 		From:  from,
 		To:    to,
 		Value: amount,
 	})
-	transfers := &ont.Transfers{
+	transfers := &mbc.Transfers{
 		States: sts,
 	}
 	err := transfers.Serialize(bf)
@@ -134,25 +134,25 @@ func appCallTransfer(native *native.NativeService, contract common.Address, from
 	return nil
 }
 
-func appCallTransferFromOnt(native *native.NativeService, sender common.Address, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransferFrom(native, utils.OntContractAddress, sender, from, to, amount)
+func appCallTransferFromMbc(native *native.NativeService, sender common.Address, from common.Address, to common.Address, amount uint64) error {
+	err := appCallTransferFrom(native, utils.MbcContractAddress, sender, from, to, amount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOnt, appCallTransferFrom error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbc, appCallTransferFrom error!")
 	}
 	return nil
 }
 
-func appCallTransferFromOng(native *native.NativeService, sender common.Address, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransferFrom(native, utils.OngContractAddress, sender, from, to, amount)
+func appCallTransferFromMbg(native *native.NativeService, sender common.Address, from common.Address, to common.Address, amount uint64) error {
+	err := appCallTransferFrom(native, utils.MbgContractAddress, sender, from, to, amount)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromOng, appCallTransferFrom error!")
+		return errors.NewDetailErr(err, errors.ErrNoCode, "appCallTransferFromMbg, appCallTransferFrom error!")
 	}
 	return nil
 }
 
 func appCallTransferFrom(native *native.NativeService, contract common.Address, sender common.Address, from common.Address, to common.Address, amount uint64) error {
 	bf := new(bytes.Buffer)
-	params := &ont.TransferFrom{
+	params := &mbc.TransferFrom{
 		Sender: sender,
 		From:   from,
 		To:     to,
@@ -169,16 +169,16 @@ func appCallTransferFrom(native *native.NativeService, contract common.Address, 
 	return nil
 }
 
-func getOngBalance(native *native.NativeService, address common.Address) (uint64, error) {
+func getMbgBalance(native *native.NativeService, address common.Address) (uint64, error) {
 	bf := new(bytes.Buffer)
 	err := utils.WriteAddress(bf, address)
 	if err != nil {
-		return 0, errors.NewDetailErr(err, errors.ErrNoCode, "getOngBalance, utils.WriteAddress error!")
+		return 0, errors.NewDetailErr(err, errors.ErrNoCode, "getMbgBalance, utils.WriteAddress error!")
 	}
 
-	value, err := native.NativeCall(utils.OngContractAddress, "balanceOf", bf.Bytes())
+	value, err := native.NativeCall(utils.MbgContractAddress, "balanceOf", bf.Bytes())
 	if err != nil {
-		return 0, errors.NewDetailErr(err, errors.ErrNoCode, "getOngBalance, appCall error!")
+		return 0, errors.NewDetailErr(err, errors.ErrNoCode, "getMbgBalance, appCall error!")
 	}
 	balance := types.BigIntFromBytes(value.([]byte)).Uint64()
 	return balance, nil

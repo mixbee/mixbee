@@ -11,7 +11,7 @@ var (
 
 // startOffset : start timestamp offset from genesis block
 // endOffset :  end timestamp offset from genesis block
-func CalcUnbindOng(balance uint64, startOffset, endOffset uint32) uint64 {
+func CalcUnbindMbg(balance uint64, startOffset, endOffset uint32) uint64 {
 	var amount uint64 = 0
 	if startOffset >= endOffset {
 		return 0
