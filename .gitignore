@@ -29,3 +29,4 @@ node/
 docker/payload/*
 Chain/*
 wallet.dat
+hellopy.avm
