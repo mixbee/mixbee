@@ -583,7 +583,7 @@ func NewMixbeeConfig() *MixbeeConfig {
 		},
 		CrossChain: &CrossChainVerifyConfig{
 			EnableCrossChainVerify:      false,
-			EnableCrossChainInteractive: true,
+			EnableCrossChainInteractive: false,
 			SubChainNode:                make(map[uint32][]string),
 			MainVerifyNode:              []string{},
 		},
