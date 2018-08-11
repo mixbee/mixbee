@@ -1,5 +1,3 @@
-
-
 package utils
 
 import (
@@ -177,6 +175,22 @@ func TransactionHandle(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID
 	actor.AddTransaction(trn.Txn)
 	log.Debug("receive Transaction message hash", trn.Txn.Hash())
 
+}
+
+func CrossChainNodeHandle(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID, args ...interface{}) {
+	log.Debug("receive cross chain node  message", data.Addr, data.Id)
+	var nodes = data.Payload.(*msgTypes.CrossVerifyNodePayload)
+	if actor.CrossChainPid != nil {
+		actor.CrossChainPid.Tell(nodes)
+	}
+}
+
+func CrossChainTxHandle(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID, args ...interface{}) {
+	log.Debug("receive cross chain node  message", data.Addr, data.Id)
+	var tx = data.Payload.(*msgTypes.CrossChainTxInfoPayload)
+	if actor.CrossChainPid != nil {
+		actor.CrossChainPid.Tell(tx)
+	}
 }
 
 // VersionHandle handles version handshake protocol from peer

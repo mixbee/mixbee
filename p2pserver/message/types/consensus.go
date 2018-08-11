@@ -35,7 +35,7 @@ func (this *Consensus) Deserialization(p []byte) error {
 	buf := bytes.NewBuffer(p)
 	err := this.Cons.Deserialize(buf)
 	if err != nil {
-		return errors.NewDetailErr(err, errors.ErrNetUnPackFail, fmt.Sprintf("deserialize Cons error. buf:%v", buf))
+		return errors.NewDetailErr(err, errors.ErrNetUnPackFail, fmt.Sprintf("deserialize Node error. buf:%v", buf))
 	}
 	return nil
 }

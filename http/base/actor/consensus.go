@@ -19,6 +19,7 @@ func ConsensusSrvStart() error {
 	}
 	return nil
 }
+
 func ConsensusSrvHalt() error {
 	if consensusSrvPid != nil {
 		consensusSrvPid.Tell(&cactor.StopConsensus{})

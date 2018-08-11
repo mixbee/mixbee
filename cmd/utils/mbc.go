@@ -135,22 +135,6 @@ func CrossUnlockOrRelease(gasPrice, gasLimit uint64, signer *account.Account, se
 	return txHash, nil
 }
 
-func CrossChainReleaseAssetByMainChain(signer *account.Account, addr, seqId string, sign []byte) (string, error) {
-	transferTx, err := BuildCrossReleaseTx(seqId, sign)
-	if err != nil {
-		return "", err
-	}
-	err = SignTransaction(signer, transferTx)
-	if err != nil {
-		return "", fmt.Errorf("SignTransaction error:%s", err)
-	}
-	txHash, err := SendRawTransactionWithAddr(transferTx, addr)
-	if err != nil {
-		return "", fmt.Errorf("SendTransaction error:%s", err)
-	}
-	return txHash, nil
-}
-
 func GetAllowance(asset, from, to string) (string, error) {
 	result, err := sendRpcRequest("getallowance", []interface{}{asset, from, to})
 	if err != nil {
@@ -320,30 +304,6 @@ func CrossUnlockTx(gasPrice, gasLimit uint64, seqId string, method string) (*typ
 	tx := &types.Transaction{
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
-		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
-		Payload:  invokePayload,
-		Sigs:     make([]*types.Sig, 0, 0),
-	}
-	return tx, nil
-}
-
-func BuildCrossReleaseTx(seqId string, sig []byte) (*types.Transaction, error) {
-	sigHex := hex.EncodeToString(sig)
-	fmt.Println("BuildCrossReleaseTx sig=", sigHex)
-	param := seqId + ":" + sigHex
-	contractAddr := utils.CrossChainContractAddress
-	version := VERSION_CONTRACT_CROSS_CHAIN
-	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crosschain.CROSS_RELEASE, []interface{}{param})
-	if err != nil {
-		return nil, fmt.Errorf("build invoke code error:%s", err)
-	}
-	invokePayload := &payload.InvokeCode{
-		Code: invokeCode,
-	}
-	tx := &types.Transaction{
-		GasPrice: 0,
-		GasLimit: 20000,
 		TxType:   types.Invoke,
 		Nonce:    uint32(time.Now().Unix()),
 		Payload:  invokePayload,
@@ -526,25 +486,6 @@ func SendRawTransaction(tx *types.Transaction) (string, error) {
 	}
 	txData := hex.EncodeToString(buffer.Bytes())
 	data, err := sendRpcRequest("sendrawtransaction", []interface{}{txData})
-	if err != nil {
-		return "", err
-	}
-	hexHash := ""
-	err = json.Unmarshal(data, &hexHash)
-	if err != nil {
-		return "", fmt.Errorf("json.Unmarshal hash:%s error:%s", data, err)
-	}
-	return hexHash, nil
-}
-
-func SendRawTransactionWithAddr(tx *types.Transaction, addr string) (string, error) {
-	var buffer bytes.Buffer
-	err := tx.Serialize(&buffer)
-	if err != nil {
-		return "", fmt.Errorf("Serialize error:%s", err)
-	}
-	txData := hex.EncodeToString(buffer.Bytes())
-	data, err := SendRpcRequestWithAddr(addr, "sendrawtransaction", []interface{}{txData})
 	if err != nil {
 		return "", err
 	}

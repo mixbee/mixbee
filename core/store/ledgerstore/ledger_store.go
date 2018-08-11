@@ -507,6 +507,7 @@ func (this *LedgerStoreImp) saveBlockToStateStore(block *types.Block) error {
 	if err != nil {
 		return fmt.Errorf("SaveCurrentBlock error %s", err)
 	}
+
 	err = stateBatch.CommitTo()
 	if err != nil {
 		return fmt.Errorf("stateBatch.CommitTo error %s", err)

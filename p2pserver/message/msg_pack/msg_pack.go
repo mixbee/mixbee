@@ -12,6 +12,7 @@ import (
 	msgCommon "github.com/mixbee/mixbee/p2pserver/common"
 	mt "github.com/mixbee/mixbee/p2pserver/message/types"
 	p2pnet "github.com/mixbee/mixbee/p2pserver/net/protocol"
+	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 )
 
 //Peer address package
@@ -62,6 +63,12 @@ func NewConsensus(cp *mt.ConsensusPayload) mt.Message {
 	cons.Cons = *cp
 
 	return &cons
+}
+
+func NewVerifyNode(node *p2ptypes.CrossChainVerifyNode) mt.Message {
+	return &mt.CrossVerifyNodePayload{
+			Node:*node,
+	}
 }
 
 //InvPayload

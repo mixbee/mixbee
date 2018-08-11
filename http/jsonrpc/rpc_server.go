@@ -5,7 +5,6 @@ package jsonrpc
 import (
 	"net/http"
 	"strconv"
-
 	"fmt"
 	cfg "github.com/mixbee/mixbee/common/config"
 	"github.com/mixbee/mixbee/common/log"
@@ -22,7 +21,6 @@ func StartRPCServer() error {
 	rpc.HandleFunc("getblockcount", rpc.GetBlockCount)
 	rpc.HandleFunc("getblockhash", rpc.GetBlockHash)
 	rpc.HandleFunc("getconnectioncount", rpc.GetConnectionCount)
-	//HandleFunc("getrawmempool", GetRawMemPool)
 
 	rpc.HandleFunc("getrawtransaction", rpc.GetRawTransaction)
 	rpc.HandleFunc("sendrawtransaction", rpc.SendRawTransaction)
@@ -45,6 +43,7 @@ func StartRPCServer() error {
 	//cross chain
 	rpc.HandleFunc("registerSubChainNode", rpc.RegisterSubChainNode)
 	rpc.HandleFunc("pushCrossChainTxInfo", rpc.PushCrossChainTxInfo)
+	rpc.HandleFunc("getAllVerifyNodeInfo",rpc.GetAllCrossChainVerifyNodes)
 
 	// 查询mix test key
 	rpc.HandleFunc("getkey", rpc.GetKey)

@@ -14,14 +14,16 @@ import (
 var Version = "" //Set value when build project
 
 const (
-	DEFAULT_CONFIG_FILE_NAME        = "./config.json"
-	DEFAULT_WALLET_FILE_NAME        = "./wallet.dat"
-	MIN_GEN_BLOCK_TIME              = 2
-	DEFAULT_GEN_BLOCK_TIME          = 6
-	DEFAULT_CROSS_CHAIN_VERIFY_TIME = 10
-	DBFT_MIN_NODE_NUM               = 4 //min node number of dbft consensus
-	SOLO_MIN_NODE_NUM               = 1 //min node number of solo consensus
-	VBFT_MIN_NODE_NUM               = 4 //min node number of vbft consensus
+	DEFAULT_CONFIG_FILE_NAME                = "./config.json"
+	DEFAULT_WALLET_FILE_NAME                = "./wallet.dat"
+	MIN_GEN_BLOCK_TIME                      = 2
+	DEFAULT_GEN_BLOCK_TIME                  = 6
+	DEFAULT_CROSS_CHAIN_VERIFY_TIME         = 10
+	DEFAULT_CROSS_CHAIN_VERIFY_PING_TIME    = 20
+	DEFAULT_CROSS_CHAIN_VERIFY_PING_TIMEOUT = 41
+	DBFT_MIN_NODE_NUM                       = 4 //min node number of dbft consensus
+	SOLO_MIN_NODE_NUM                       = 1 //min node number of solo consensus
+	VBFT_MIN_NODE_NUM                       = 4 //min node number of vbft consensus
 
 	CONSENSUS_TYPE_DBFT = "dbft"
 	CONSENSUS_TYPE_SOLO = "solo"

@@ -126,15 +126,15 @@ func startMixbee(ctx *cli.Context) {
 	//TODO golang IDE 本地调试设置默认参数
 	//test 模式
 	//ctx.Set(utils.EnableTestModeFlag.Name, "true")
-	////wallet 密码
+	//////wallet 密码
 	//ctx.GlobalSet(utils.GetFlagName(utils.AccountPassFlag), "123456")
-	////启动清除原来数据
+	//////启动清除原来数据
 	//ctx.GlobalSet(utils.GetFlagName(utils.ClearTestModeDataFlag), "true")
-	////开启跨链验证模块
+	//////开启跨链验证模块
 	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainVerifyFlag), "true")
-	////子链跨链协议开启
+	//////子链跨链协议开启
 	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainInteractiveFlag), "true")
-	////主链的node信息
+	//////主链的node信息
 	//ctx.GlobalSet(utils.GetFlagName(utils.CrossChainVerifyNode), "http://localhost:20336")
 	//开启debug日志级别
 	ctx.GlobalSet(utils.GetFlagName(utils.LogLevelFlag), "0")
@@ -206,19 +206,29 @@ func startMixbee(ctx *cli.Context) {
 	initNodeInfo(ctx, p2pSvr)
 
 	//跨链协议初始化
-	initCrossChain(ctx, acc)
+	err = initCrossChain(ctx, acc, p2pPid)
+	if err != nil {
+		log.Errorf("initCrossChain error:%s", err)
+		return
+	}
 
 	// 一直打印当前区块高度
 	go logCurrBlockHeight()
 	waitToExit()
 }
 
-func initCrossChain(context *cli.Context, acc *account.Account) {
+func initCrossChain(context *cli.Context, acc *account.Account, p2pPid *actor.PID) error {
 
 	//初始化主链验证节点
 	if config.DefConfig.CrossChain.EnableCrossChainVerify {
-		crosschain.NewCTxPoolServer(2, acc)
+		pid, err := crosschain.NewCTxPoolServer(1, acc, p2pPid)
+		if err != nil {
+			return err
+		}
+		netreqactor.SetCrossChainPid(pid)
+		hserver.SetCrossChainPid(pid)
 		go crosschain.CtxServer.Start()
+		crosschain.CtxServer.VerifyNodes.Init(acc, p2pPid)
 	}
 
 	if config.DefConfig.CrossChain.EnableCrossChainInteractive {
@@ -236,9 +246,12 @@ func initCrossChain(context *cli.Context, acc *account.Account) {
 		subNetId := strconv.FormatUint(uint64(config.DefConfig.P2PNode.NetworkId), 10)
 
 		mainHost := config.DefConfig.CrossChain.MainVerifyNode[0]
-		result,err := cmdutils.SendRpcRequestWithAddr(mainHost, "registerSubChainNode", []interface{}{subNetId, subhost})
-		log.Infof("initCrossChain||registerSubChainNode result = %s",result)
+		result, err := cmdutils.SendRpcRequestWithAddr(mainHost, "registerSubChainNode", []interface{}{subNetId, subhost})
+		log.Infof("initCrossChain||registerSubChainNode result = %s", result)
+
+		//子链维护
 	}
+	return nil
 }
 
 func initLog(ctx *cli.Context) {

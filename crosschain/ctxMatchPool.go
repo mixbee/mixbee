@@ -6,28 +6,28 @@ import (
 )
 
 type CTXEntry struct {
-	From       string
-	To         string
-	FromValue  uint64
-	ToValue    uint64
-	TxHash     string
-	ANetWorkId uint32
-	BNetWorkId uint32
-	State      uint32 //0 待确认  1 打包成功
-	SeqId      string
-	Type       uint              //跨链资产类型
-	Sig        []byte            //验证节点对结果的签名
-	Pubk       string //验证节点公钥
-	TimeStamp  uint32            //过期时间
-	Nonce      uint32            //交易双方的nonce值,必须一样
+	From          string
+	To            string
+	FromValue     uint64
+	ToValue       uint64
+	TxHash        string
+	ANetWorkId    uint32
+	BNetWorkId    uint32
+	State         uint32 //0 待确认  1 打包成功
+	SeqId         string
+	Type          uint32 //跨链资产类型
+	Sig           []byte //验证节点对结果的签名
+	Pubk          string //验证节点公钥
+	TimeStamp     uint32 //过期时间
+	Nonce         uint32 //交易双方的nonce值,必须一样
+	CheckCount    uint32
+	ReleaseTxHash string
 }
 
 type CTXMatchPool struct {
 	sync.RWMutex
-	TxList map[string][]*CTXEntry // Transactions which have been verified
+	TxList map[string]*CTXPairEntry // Transactions which have been verified
 }
-
-type CTXPairEntrys []*CTXPairEntry
 
 type CTXPairEntry struct {
 	First  *CTXEntry
@@ -38,7 +38,7 @@ type CTXPairEntry struct {
 func (tp *CTXMatchPool) Init() {
 	tp.Lock()
 	defer tp.Unlock()
-	tp.TxList = make(map[string][]*CTXEntry)
+	tp.TxList = make(map[string]*CTXPairEntry)
 }
 
 func (tp *CTXMatchPool) push(entry *CTXEntry) {
@@ -46,17 +46,25 @@ func (tp *CTXMatchPool) push(entry *CTXEntry) {
 	defer tp.Unlock()
 
 	if _, ok := tp.TxList[entry.SeqId]; !ok {
-		tp.TxList[entry.SeqId] = []*CTXEntry{}
+		tp.TxList[entry.SeqId] = &CTXPairEntry{}
 	}
 
-	list := tp.TxList[entry.SeqId]
-	for _,value := range list {
-		if value.From == entry.From {
-			//已经保存过了，不需要再次保存了
-			return
-		}
+	pair := tp.TxList[entry.SeqId]
+
+	//check repeat tx
+	if pair.First != nil && pair.First.From == entry.From {
+		return
 	}
-	list = append(list, entry)
-	tp.TxList[entry.SeqId] = list
-	log.Infof("CTXMatchPool push success. len = %v", len(tp.TxList[entry.SeqId]))
+	if pair.Second != nil && pair.Second.From == entry.From {
+		return
+	}
+
+	if pair.First == nil {
+		pair.First = entry
+	} else if pair.Second == nil {
+		pair.Second = entry
+	} else {
+		log.Errorf("CTXMatchPool push error")
+	}
+	tp.TxList[entry.SeqId] = pair
 }

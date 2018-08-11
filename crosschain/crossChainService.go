@@ -5,53 +5,73 @@ import (
 	"time"
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/common/config"
-	"github.com/mixbee/mixbee/cmd/utils"
-	"encoding/json"
 	"fmt"
 	"github.com/mixbee/mixbee/account"
 	"github.com/mixbee/mixbee/core/signature"
+	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
+	httpactor "github.com/mixbee/mixbee/http/base/actor"
+	"github.com/mixbee/mixbee-crypto/keypair"
+	"encoding/hex"
 )
 
 var CtxServer *CTXPoolServer
 
 // TXPoolServer contains all api to external modules
 type CTXPoolServer struct {
-	mu              sync.RWMutex // Sync mutex
-	muPool          sync.RWMutex
-	muPending       sync.RWMutex
-	muVerifyed      sync.RWMutex
-	wg              sync.WaitGroup  // Worker sync
-	workers         []ctxPoolWorker // Worker pool
-	txPool          *CTXMatchPool   // The tx pool that holds the valid transaction
-	pairTxPending   CTXPairEntrys
-	slots           chan struct{} // The limited slots for the new transaction
-	txToPending     chan *CTXPairEntry
-	pairTxVerifyed  CTXPairEntrys
-	txToverify      chan *CTXPairEntry
-	VerifyerAccount *account.Account
+	mu sync.RWMutex   // Sync mutex
+	wg sync.WaitGroup // Worker sync
+	//workers          []ctxPoolWorker // Worker pool
+	txPool        *CTXMatchPool // The tx pool that holds the valid transaction
+	pairTxPending *CTXMatchPool
+	txToMatchPair chan *CTXPairEntry
+	//slots            chan struct{} // The limited slots for the new transaction
+	pairTxRelease    *CTXMatchPool
+	txToRelease      chan *CTXPairEntry
+	pairTxEndConfirm *CTXMatchPool
+	txToEndConfirm   chan *CTXPairEntry
+	VerifyerAccount  *account.Account
+
+	VerifyNodes *VerifyNodes
+
+	P2pPid *actor.PID
+	Pid    *actor.PID
 }
 
-func NewCTxPoolServer(num uint8, acc *account.Account) *CTXPoolServer {
+func NewCTxPoolServer(num uint8, acc *account.Account, p2pPid *actor.PID) (*actor.PID, error) {
 	s := &CTXPoolServer{}
-	s.init(num)
+	s.init(num, p2pPid)
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	CtxServer = s
 	s.VerifyerAccount = acc
-	return s
+	s.VerifyNodes = NewVerifyNodes()
+
+	pidActor := NewCrossChainActor(s)
+	pid, err := pidActor.Start()
+	if err != nil {
+		return nil, fmt.Errorf("crosschain actor init error %s", err)
+	}
+	s.Pid = pid
+
+	CtxServer = s
+	return pid, nil
 }
 
 // init initializes the server with the configured settings
-func (s *CTXPoolServer) init(num uint8) {
+func (s *CTXPoolServer) init(num uint8, p2pPid *actor.PID) {
 	// Initial txnPool
 	s.txPool = &CTXMatchPool{}
 	s.txPool.Init()
+	s.P2pPid = p2pPid
+	s.pairTxPending = &CTXMatchPool{}
+	s.pairTxPending.Init()
+	s.pairTxRelease = &CTXMatchPool{}
+	s.pairTxRelease.Init()
+	s.pairTxEndConfirm = &CTXMatchPool{}
+	s.pairTxEndConfirm.Init()
 
-	s.pairTxPending = CTXPairEntrys{}
-	s.pairTxVerifyed = CTXPairEntrys{}
-
-	s.txToPending = make(chan *CTXPairEntry, 10000)
-	s.txToverify = make(chan *CTXPairEntry, 10000)
+	s.txToMatchPair = make(chan *CTXPairEntry, 5000)
+	s.txToRelease = make(chan *CTXPairEntry, 5000)
+	s.txToEndConfirm = make(chan *CTXPairEntry, 5000)
 }
 
 func (s *CTXPoolServer) Start() {
@@ -60,32 +80,94 @@ func (s *CTXPoolServer) Start() {
 	for {
 		select {
 		case <-ticker.C:
-			go txToMatchPair(s)
-			go verifyBlock(s)
+			go txVerify(s)
+			go txMatchPair(s)
 			go releaseLockToken(s)
-		case pair, ok := <-s.txToPending:
+			go txEndConfirmHandler(s)
+		case pair, ok := <-s.txToMatchPair:
 			if ok {
-				s.pairTxPending = append(s.pairTxPending, pair)
+				if pair.First != nil && pair.Second != nil {
+					s.pairTxPending.push(pair.First)
+					s.pairTxPending.push(pair.Second)
+				} else {
+					pushSigedCrossTx2OtherNode(pair, s)
+				}
 			}
-		case pair, ok := <-s.txToverify:
+		case pair, ok := <-s.txToRelease:
 			if ok {
-				s.pairTxVerifyed = append(s.pairTxVerifyed, pair)
+				s.pairTxRelease.push(pair.First)
+				s.pairTxRelease.push(pair.Second)
+			}
+		case pair, ok := <-s.txToEndConfirm:
+			if ok {
+				s.pairTxEndConfirm.push(pair.First)
+				s.pairTxEndConfirm.push(pair.Second)
 			}
 		}
 	}
 }
+func txEndConfirmHandler(server *CTXPoolServer) {
 
-func releaseLockToken(s *CTXPoolServer) {
-	pool := s.pairTxVerifyed
-	if pool == nil || len(pool) == 0 {
+	pool := server.pairTxEndConfirm
+	if pool == nil || len(pool.TxList) == 0 {
 		return
 	}
-	s.muVerifyed.Lock()
-	defer s.muVerifyed.Unlock()
-	log.Infof("cross chain releaseLockToken len=%v", len(pool))
-	var indexs []int
+
+	pool.Lock()
+	defer pool.Unlock()
+
+	log.Infof("cross chain txEndConfirmHandler len=%v", len(pool.TxList))
+
 	subChainNode := config.DefConfig.CrossChain.SubChainNode
-	for index, value := range pool {
+
+	for k, value := range pool.TxList {
+		firstPath := subChainNode[value.First.ANetWorkId]
+		firstHash := value.First.ReleaseTxHash
+		firstState, err := GetTxStateByHash(firstPath[0], firstHash)
+		if err != nil {
+			log.Errorf("GetTxStateByHash addr=%v,hash=%v err=%v", firstPath[0], firstHash, err)
+			continue
+		}
+
+		secondPath := subChainNode[value.First.ANetWorkId]
+		secondHash := value.Second.ReleaseTxHash
+		secondState, err := GetTxStateByHash(secondPath[0], secondHash)
+		if err != nil {
+			log.Errorf("GetTxStateByHash addr=%v,hash=%v err=%v", secondPath[0], secondHash, err)
+			continue
+		}
+
+		if firstState == 1 && secondState == 1 {
+			delete(pool.TxList, k)
+			continue
+		}
+
+		if firstState != 1 {
+			value.First.ReleaseTxHash = ""
+		}
+
+		if secondState != 1 {
+			value.Second.ReleaseTxHash = ""
+		}
+
+		server.txToRelease <- value
+		delete(pool.TxList, k)
+	}
+}
+
+func releaseLockToken(s *CTXPoolServer) {
+	pool := s.pairTxRelease
+	if pool == nil || len(pool.TxList) == 0 {
+		return
+	}
+	pool.Lock()
+	defer pool.Unlock()
+
+	log.Infof("cross chain releaseLockToken len=%v", len(pool.TxList))
+
+	subChainNode := config.DefConfig.CrossChain.SubChainNode
+
+	for k, value := range pool.TxList {
 		firstSeqId := value.First.SeqId
 		secondSeqId := value.Second.SeqId
 
@@ -95,259 +177,154 @@ func releaseLockToken(s *CTXPoolServer) {
 		secondNetId := value.Second.ANetWorkId
 		secondPath := subChainNode[secondNetId][0]
 
-		firstTxHash, err := pushCrossChainResult(s.VerifyerAccount, firstPath, firstSeqId, value.First.Sig)
-		if err != nil {
-			log.Errorf("pushCrossChainResult first err %v", err)
-			continue
+		if value.First.ReleaseTxHash == "" {
+			firstTxHash, err := pushCrossChainResult(s.VerifyerAccount, firstPath, firstSeqId, value.First.Sig)
+			if err != nil {
+				log.Errorf("pushCrossChainResult first err %v", err)
+				continue
+			}
+			value.First.ReleaseTxHash = firstTxHash
+
+			log.Debugf("pushCrossChainResult first success addr=%v,seqId=%v,txHash=%v", firstPath, firstSeqId, firstTxHash)
 		}
 
-		log.Infof("pushCrossChainResult first success addr=%v,seqId=%v,txHash=%v", firstPath, firstSeqId, firstTxHash)
-
-		secondTxHash, err := pushCrossChainResult(s.VerifyerAccount, secondPath, secondSeqId, value.Second.Sig)
-		if err != nil {
-			log.Errorf("pushCrossChainResult second err %v", err)
-			continue
+		if value.Second.ReleaseTxHash == "" {
+			secondTxHash, err := pushCrossChainResult(s.VerifyerAccount, secondPath, secondSeqId, value.Second.Sig)
+			if err != nil {
+				log.Errorf("pushCrossChainResult second err %v", err)
+				continue
+			}
+			value.Second.ReleaseTxHash = secondTxHash
+			log.Debugf("pushCrossChainResult second success addr=%v,seqId=%v,txHash=%v", secondPath, secondSeqId, secondTxHash)
 		}
 
-		log.Infof("pushCrossChainResult second success addr=%v,seqId=%v,txHash=%v", secondPath, secondSeqId, secondTxHash)
-
-		indexs = append(indexs, index)
-	}
-
-	//delete
-	log.Infof("releaseLockToken delete release tx.. len=%v", len(indexs))
-	for e := range indexs {
-		pool = append(pool[:e], pool[e+1:]...)
-		s.pairTxVerifyed = pool
+		delete(pool.TxList, k)
+		s.txToEndConfirm <- value
 	}
 }
 
 //校验交易双方是否打包
-func verifyBlock(s *CTXPoolServer) {
+func txMatchPair(s *CTXPoolServer) {
 
 	pool := s.pairTxPending
-	if pool == nil || len(pool) == 0 {
+	if pool == nil || len(pool.TxList) == 0 {
 		return
 	}
-	s.muPending.Lock()
-	defer s.muPending.Unlock()
-	log.Infof("verifyBlock check len=%v", len(pool))
-	var indexs []int
-	subChainNode := config.DefConfig.CrossChain.SubChainNode
-	for index, v := range pool {
-		first := v.First
-		second := v.Second
+	pool.Lock()
+	defer pool.Unlock()
+	log.Infof("txMatchPair check len=%v", len(pool.TxList))
 
-		firstState := v.First.State
-		if firstState == 0 {
-			firstHash := first.TxHash
-			firstPath := subChainNode[first.ANetWorkId]
-			firstState, err := GetTxStateByHash(firstPath[0], firstHash)
-			if err != nil {
-				log.Errorf("GetTxStateByHash addr=%v,hash=%v err=%v", firstPath[0], firstHash, err)
-			}
-			if firstState == 1 {
-				v.First.State = firstState
-				sigDate := v.First.SeqId
-				sig, err := signature.Sign(s.VerifyerAccount, []byte(sigDate))
-				if err != nil {
-					log.Errorf("verifyBlock signature err %v", err.Error())
-				}
-				v.First.Sig = sig
-			}
-		}
-
-		secondState := v.Second.State
-		if secondState == 0 {
-			secondHash := second.TxHash
-			secondPath := subChainNode[second.ANetWorkId]
-			secondState, err := GetTxStateByHash(secondPath[0], secondHash)
-			if err != nil {
-				log.Errorf("GetTxStateByHash addr=%v,hash=%v err=%v", secondPath[0], secondHash, err)
-			}
-
-			if secondState == 1 {
-				v.Second.State = secondState
-				sigDate := v.Second.SeqId
-				sig, err := signature.Sign(s.VerifyerAccount, []byte(sigDate))
-				if err != nil {
-					log.Errorf("verifyBlock signature err %v", err.Error())
-				}
-				v.Second.Sig = sig
-			}
-		}
-
-		if firstState == 1 && secondState == 1 {
-			s.txToverify <- v
-			indexs = append(indexs, index)
+	for k, v := range pool.TxList {
+		if v.First != nil && v.Second != nil {
+			s.txToRelease <- v
+			delete(pool.TxList, k)
 		}
 	}
-
-	//delete
-	log.Infof("verifyBlock delete match tx.. len=%v", len(indexs))
-	for e := range indexs {
-		pool = append(pool[:e], pool[e+1:]...)
-		s.pairTxPending = pool
-	}
-}
-
-func pushCrossChainResult(signer *account.Account, addr, seqId string, sig []byte) (string, error) {
-	log.Infof("releaseLockToken||pushCrossChainResult addr=%v,seqid=%v", addr, seqId)
-	result, err := utils.CrossChainReleaseAssetByMainChain(signer, addr, seqId, sig)
-	if err != nil {
-		return "", err
-	}
-	log.Infof("pushCrossChainResult %s", result)
-	return result, nil
-}
-
-func GetTxStateByHash(addr, hash string) (uint32, error) {
-	//log.Infof("verifyBlock||GetTxStateByHash addr=%v,hash=%v",addr,hash)
-	result, err := utils.SendRpcRequestWithAddr(addr, "getsmartcodeevent", []interface{}{hash})
-	if err != nil {
-		return 0, err
-	}
-
-	re, err := Json2map(result)
-	if err != nil {
-		return 0, err
-	}
-	if re["State"] == nil {
-		return 0, nil
-	}
-
-	bb, ok := re["State"].(float64)
-	if !ok {
-		log.Errorf("crossChainService||GetTxStateByHash err %s", result)
-		return 0, nil
-	}
-	return uint32(bb), nil
-}
-
-func Json2map(param []byte) (s map[string]interface{}, err error) {
-	var result map[string]interface{}
-	if err := json.Unmarshal(param, &result); err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 //把交易匹配打包
-func txToMatchPair(s *CTXPoolServer) {
+func txVerify(s *CTXPoolServer) {
 
 	pool := s.txPool
 	if pool == nil || len(pool.TxList) == 0 {
-		log.Infof("txToMatchPair empty..")
+		log.Debugf("txVerify empty..")
 		return
 	}
 
-	s.muPool.Lock()
-	defer s.muPool.Unlock()
+	pool.Lock()
+	defer pool.Unlock()
 
-	log.Infof("txToMatchPair || check pair cross chain tx poolLen=%v", len(pool.TxList))
+	log.Infof("txVerify || check pair cross chain tx poolLen=%v", len(pool.TxList))
 	txMap := pool.TxList
 
 	for k, v := range txMap {
-		if len(v) < 2 {
-			continue
+
+		log.Infof("txVerify k = %s", k)
+
+		first := v.First
+		if first != nil {
+			ok, expire := checkCrossChainTxBySeqId(first)
+			if expire {
+				delete(txMap, k)
+				pool.TxList = txMap
+				continue
+			}
+
+			if !ok {
+				continue
+			}
+			//sign cross chain tx
+			sigDate := first.SeqId
+			sig, err := signature.Sign(s.VerifyerAccount, []byte(sigDate))
+			if err != nil {
+				log.Errorf("txMatchPair signature err %v", err.Error())
+				continue
+			}
+			first.Sig = sig
 		}
 
-		log.Infof("txToMatchPair k = %s", k)
+		second := v.Second
+		if second != nil {
+			ok, expire := checkCrossChainTxBySeqId(second)
+			if expire {
+				delete(txMap, k)
+				pool.TxList = txMap
+				return
+			}
 
-		first := v[0]
-		second := v[1]
+			if !ok {
+				return
+			}
+			//sign cross chain tx
 
-		if first.From != second.To {
-			v = append(v[1:])
-			v = append(v, first)
-			continue
+			sigDate := second.SeqId
+			sig, err := signature.Sign(s.VerifyerAccount, []byte(sigDate))
+			if err != nil {
+				log.Errorf("txMatchPair signature err %v", err.Error())
+				continue
+			}
+			second.Sig = sig
 		}
 
-		//v = append(v[1:])
-		v = append(v[2:])
-		pair := CTXPairEntry{First: first, Second: second}
-		s.txToPending <- &pair
-
-		if len(v) == 0 {
-			delete(txMap, k)
-			pool.TxList = txMap
-		}
+		s.txToMatchPair <- v
+		delete(txMap, k)
+		pool.TxList = txMap
 	}
 }
 
 // init initializes the server with the configured settings
-func (s *CTXPoolServer) PushCtxToPool(params []interface{}) error {
-	log.Infof("cross chain PushCtxToPool params=%#v", params)
-	from, ok := params[0].(string)
-	if !ok {
-		return fmt.Errorf("param-0 invalid %v", params[0])
-	}
-	to, ok := params[1].(string)
-	if !ok {
-		return fmt.Errorf("param-1 invalid %v", params[1])
-	}
-	fromV, ok := params[2].(float64)
-	if !ok {
-		return fmt.Errorf("param-2 invalid %v", params[2])
-	}
-	toV, ok := params[3].(float64)
-	if !ok {
-		return fmt.Errorf("param-3 invalid %v", params[3])
-	}
-	aNId, ok := params[4].(float64)
-	if !ok {
-		return fmt.Errorf("param-4 invalid %v", params[4])
-	}
-	bNId, ok := params[5].(float64)
-	if !ok {
-		return fmt.Errorf("param-5 invalid %v", params[5])
-	}
-	txHash, ok := params[6].(string)
-	if !ok {
-		return fmt.Errorf("param-6 invalid %v", params[6])
-	}
-	seqId, ok := params[7].(string)
-	if !ok {
-		return fmt.Errorf("param-7 invalid %v", params[7])
-	}
-	timestamp, ok := params[8].(float64)
-	if !ok {
-		return fmt.Errorf("param-8 invalid %v", params[8])
-	}
-	nonce, ok := params[9].(float64)
-	if !ok {
-		return fmt.Errorf("param-9 invalid %v", params[9])
-	}
-	publickKey, ok := params[10].(string)
-	if !ok {
-		return fmt.Errorf("param-7 invalid %v", params[10])
-	}
-
-	nodeinfo, ok := config.DefConfig.CrossChain.SubChainNode[uint32(aNId)]
-	if !ok || len(nodeinfo) == 0 {
-		return fmt.Errorf("invalid networkId %v,subchain not register in mainchain", aNId)
-	}
-
-	nodeinfo, ok = config.DefConfig.CrossChain.SubChainNode[uint32(bNId)]
-	if !ok || len(nodeinfo) == 0 {
-		return fmt.Errorf("invalid networkId %v,subchain not register in mainchain", bNId)
-	}
+func (s *CTXPoolServer) PushCtxToPool(rsq *httpactor.PushCrossChainTxRsq) error {
+	log.Infof("cross chain PushCtxToPool params=%#v", rsq)
 
 	entry := &CTXEntry{
-		From:       from,
-		To:         to,
-		FromValue:  uint64(fromV),
-		ToValue:    uint64(toV),
-		ANetWorkId: uint32(aNId),
-		BNetWorkId: uint32(bNId),
-		TxHash:     txHash,
-		SeqId:      seqId,
-		TimeStamp:  uint32(timestamp),
-		Nonce:      uint32(nonce),
-		Pubk:       publickKey,
+		From:       rsq.From,
+		To:         rsq.To,
+		FromValue:  rsq.FromValue,
+		ToValue:    rsq.ToValue,
+		ANetWorkId: rsq.ANetWorkId,
+		BNetWorkId: rsq.BNetWorkId,
+		TxHash:     rsq.TxHash,
+		SeqId:      rsq.SeqId,
+		TimeStamp:  rsq.TimeStamp,
+		Nonce:      rsq.Nonce,
+		Pubk:       rsq.Pubk,
 	}
 
-	s.txPool.push(entry)
+	if s.IsVerifyNode(rsq.Pubk) {
+		s.txPool.push(entry)
+	} else {
+		log.Warnf("cross chain tx push err node. nodePublicKey=%s tx=%#v", s.VerifyerAccount.PublicKey, rsq)
+	}
 
 	return nil
+}
+
+func (s *CTXPoolServer) IsVerifyNode(pbk string) bool {
+	if s.VerifyerAccount == nil {
+		return false
+	}
+
+	bb := keypair.SerializePublicKey(s.VerifyerAccount.PublicKey)
+	publicKey := hex.EncodeToString(bb)
+	return pbk == publicKey
 }

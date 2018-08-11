@@ -1,5 +1,3 @@
-
-
 package p2pserver
 
 import (
@@ -28,15 +26,17 @@ import (
 	"github.com/mixbee/mixbee/p2pserver/net/netserver"
 	p2pnet "github.com/mixbee/mixbee/p2pserver/net/protocol"
 	"github.com/mixbee/mixbee/p2pserver/peer"
+
+	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 )
 
 //P2PServer control all network activities
 type P2PServer struct {
-	network   p2pnet.P2P
-	msgRouter *utils.MessageRouter
-	pid       *evtActor.PID
-	blockSync *BlockSyncMgr
-	ledger    *ledger.Ledger
+	network        p2pnet.P2P
+	msgRouter      *utils.MessageRouter
+	pid            *evtActor.PID
+	blockSync      *BlockSyncMgr
+	ledger         *ledger.Ledger
 	ReconnectAddrs
 	recentPeers    []string
 	quitSyncRecent chan bool
@@ -149,6 +149,14 @@ func (this *P2PServer) Xmit(message interface{}) error {
 		// construct inv message
 		invPayload := msgpack.NewInvPayload(comm.BLOCK, []comm.Uint256{hash})
 		msg = msgpack.NewInv(invPayload)
+	case *p2ptypes.CrossChainVerifyNode:
+		log.Debug("cross chain verify node message")
+		nodeInfo := message.(*p2ptypes.CrossChainVerifyNode)
+		msg = msgpack.NewVerifyNode(nodeInfo)
+	case *p2ptypes.CrossChainTxInfoPayload:
+		log.Debug("cross chain tx message")
+		nodeInfo := message.(*p2ptypes.CrossChainTxInfoPayload)
+		msg = nodeInfo
 	default:
 		log.Warnf("Unknown Xmit message %v , type %v", message,
 			reflect.TypeOf(message))

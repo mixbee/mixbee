@@ -1,5 +1,3 @@
-
-
 package rpc
 
 import (
@@ -17,7 +15,7 @@ import (
 	berr "github.com/mixbee/mixbee/http/base/error"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"strconv"
-	"github.com/mixbee/mixbee/crosschain"
+	"github.com/mixbee/mixbee/http/base/actor"
 )
 
 func GetGenerateBlockTime(params []interface{}) map[string]interface{} {
@@ -522,6 +520,14 @@ func GetGasPrice(params []interface{}) map[string]interface{} {
 	return responseSuccess(result)
 }
 
+func GetAllCrossChainVerifyNodes(params []interface{}) map[string]interface{} {
+	result, err := actor.GetAllCrossChainVerifyNodeInfo()
+	if err != nil {
+		return responsePack(berr.INTERNAL_ERROR, err.Error())
+	}
+	return responseSuccess(result)
+}
+
 func GetUnboundMbg(params []interface{}) map[string]interface{} {
 	if len(params) < 1 {
 		return responsePack(berr.INVALID_PARAMS, "")
@@ -556,9 +562,9 @@ func RegisterSubChainNode(params []interface{}) map[string]interface{} {
 	if !ok {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
-	id,err := strconv.Atoi(netWorkId)
+	id, err := strconv.Atoi(netWorkId)
 	if err != nil {
-		responsePack(berr.INVALID_PARAMS,"networkId is a uint32")
+		responsePack(berr.INVALID_PARAMS, "networkId is a uint32")
 	}
 	nid := uint32(id)
 
@@ -566,13 +572,13 @@ func RegisterSubChainNode(params []interface{}) map[string]interface{} {
 	if !ok {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
-	log.Infof("RegisterSubChainNode nid=%d,path=%s",nid,host)
-	info,ok := config.DefConfig.CrossChain.SubChainNode[nid]
+	log.Infof("RegisterSubChainNode nid=%d,path=%s", nid, host)
+	info, ok := config.DefConfig.CrossChain.SubChainNode[nid]
 	if !ok {
-			info = []string{}
-			config.DefConfig.CrossChain.SubChainNode[nid] = info
+		info = []string{}
+		config.DefConfig.CrossChain.SubChainNode[nid] = info
 	}
-	info = append(info,host)
+	info = append(info, host)
 	config.DefConfig.CrossChain.SubChainNode[nid] = info
 
 	return responseSuccess("success")
@@ -589,8 +595,8 @@ func PushCrossChainTxInfo(params []interface{}) map[string]interface{} {
 	if len(params) < 11 {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
-	log.Infof("PushCrossChainTxInfo %#v\n",params)
-	err := crosschain.CtxServer.PushCtxToPool(params)
+	log.Infof("PushCrossChainTxInfo %#v\n", params)
+	err := actor.PushCrossChainTx(params)
 	if err != nil {
 		return responsePack(berr.INVALID_PARAMS, err.Error())
 	}

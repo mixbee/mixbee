@@ -1,0 +1,53 @@
+
+version: '2'
+
+
+services:
+  node1.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test --enablecrosschainverify
+    container_name: node1.example.com
+    volumes:
+      - ./node1/:/var/mixbee
+
+
+  node2.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee  --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test --enablecrosschainverify
+    container_name: node2.example.com
+    volumes:
+      - ./node2/:/var/mixbee
+
+  node3.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command:  mixbee --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test --enablecrosschainverify
+    container_name: node3.example.com
+    volumes:
+      - ./node3/:/var/mixbee
+
+
+  node4.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --enableconsensus --disablerpc --disableeventlog --networkid 1 --config ./config.json --password test
+    container_name: node4.example.com
+    volumes:
+      - ./node4/:/var/mixbee
+
+  node5.example.com:
+    image: mixbee/mixbee:latest
+    ports:
+      - "20338"
+    command: mixbee --networkid 1 --config ./config.json --password test
+    container_name: node5.example.com
+    volumes:
+      - ./node5/:/var/mixbee
+
+
