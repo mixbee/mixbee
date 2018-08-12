@@ -1,10 +1,9 @@
 {
   "SeedList": [
-    "node1.example.com:20338",
-    "node2.example.com:20338",
-    "node3.example.com:20338",
-    "node4.example.com:20338"
-
+    "net1node1.example.com:20338",
+    "net1node2.example.com:20338",
+    "net1node3.example.com:20338",
+    "net1node4.example.com:20338"
   ],
   "ConsensusType":"dbft",
   "DBFT":{

@@ -1,5 +1,3 @@
-
-
 package types
 
 import (
@@ -144,6 +142,10 @@ func MakeEmptyMessage(cmdType string) (Message, error) {
 		return &CrossVerifyNodePayload{}, nil
 	case common.CROSSCHAIN_TX_TYPE:
 		return &CrossChainTxInfoPayload{}, nil
+	case common.CROSSCHAIN_TX_COMPLETED_TYPE:
+		return &CrossChainTxCompletedPayload{}, nil
+	case common.CROSSCHAIN_SUBNET_TYPE:
+		return &CrossSubNetNodePayload{}, nil
 	case common.NOT_FOUND_TYPE:
 		return &NotFound{}, nil
 	case common.DISCONNECT_TYPE:

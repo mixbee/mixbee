@@ -185,9 +185,26 @@ func CrossChainNodeHandle(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.
 	}
 }
 
-func CrossChainTxHandle(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID, args ...interface{}) {
+func CrossChainSubNetNodeHander(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID, args ...interface{}) {
 	log.Debug("receive cross chain node  message", data.Addr, data.Id)
+	var nodes = data.Payload.(*msgTypes.CrossSubNetNodePayload)
+	if actor.CrossChainPid != nil {
+		actor.CrossChainPid.Tell(nodes)
+	}
+}
+
+func CrossChainTxHandle(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID, args ...interface{}) {
+	log.Infof("receive cross chain tx  message", data.Addr, data.Id)
 	var tx = data.Payload.(*msgTypes.CrossChainTxInfoPayload)
+	if actor.CrossChainPid != nil {
+		log.Infof("push cross chain tx info to crossPid")
+		actor.CrossChainPid.Tell(tx)
+	}
+}
+
+func CrossChainCompletedTxHander(data *msgTypes.MsgPayload, p2p p2p.P2P, pid *evtActor.PID, args ...interface{}) {
+	log.Debug("receive cross chain completed  message", data.Addr, data.Id)
+	var tx = data.Payload.(*msgTypes.CrossChainTxCompletedPayload)
 	if actor.CrossChainPid != nil {
 		actor.CrossChainPid.Tell(tx)
 	}

@@ -1,0 +1,18 @@
+{
+  "SeedList": [
+    "net2node1.example.com:20338",
+    "net2node2.example.com:20338",
+    "net2node3.example.com:20338",
+    "net2node4.example.com:20338"
+  ],
+  "ConsensusType":"dbft",
+  "DBFT":{
+    "Bookkeepers": [
+      "02bb8c2025709577ad0b3c67d5962eb329c74257143c827e4330412bc26892b392",
+      "022d11de63eece8e59c8dabce89594edf476fb3eb6694222027bc3ad41d4193eb6",
+      "03ac3214285525434c1db575646b4465417a22d69a7457cdebf92523a1afd03cb8",
+      "02f73e1f27437a249d904874b42a5a67d82b3c6d40ac9564b08105cb3fd7ac50c7"
+    ],
+    "GenBlockTime":6
+  }
+}

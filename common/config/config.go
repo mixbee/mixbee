@@ -18,7 +18,7 @@ const (
 	DEFAULT_WALLET_FILE_NAME                = "./wallet.dat"
 	MIN_GEN_BLOCK_TIME                      = 2
 	DEFAULT_GEN_BLOCK_TIME                  = 6
-	DEFAULT_CROSS_CHAIN_VERIFY_TIME         = 10
+	DEFAULT_CROSS_CHAIN_VERIFY_TIME         = 5
 	DEFAULT_CROSS_CHAIN_VERIFY_PING_TIME    = 20
 	DEFAULT_CROSS_CHAIN_VERIFY_PING_TIMEOUT = 41
 	DBFT_MIN_NODE_NUM                       = 4 //min node number of dbft consensus
@@ -474,7 +474,6 @@ type ConsensusConfig struct {
 type CrossChainVerifyConfig struct {
 	//主链配置
 	EnableCrossChainVerify bool                //用于主链是否开启跨链验证
-	SubChainNode           map[uint32][]string //主链连接上的子链节点，用于验证交易完成度
 
 	//子链配置
 	EnableCrossChainInteractive bool     //用于子链是否开启跨链协议
@@ -586,7 +585,6 @@ func NewMixbeeConfig() *MixbeeConfig {
 		CrossChain: &CrossChainVerifyConfig{
 			EnableCrossChainVerify:      false,
 			EnableCrossChainInteractive: false,
-			SubChainNode:                make(map[uint32][]string),
 			MainVerifyNode:              []string{},
 		},
 	}

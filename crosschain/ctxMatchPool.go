@@ -41,21 +41,28 @@ func (tp *CTXMatchPool) Init() {
 	tp.TxList = make(map[string]*CTXPairEntry)
 }
 
+func (tp *CTXMatchPool) delete (seqId string) {
+	tp.Lock()
+	defer tp.Unlock()
+	delete(tp.TxList,seqId)
+}
+
 func (tp *CTXMatchPool) push(entry *CTXEntry) {
 	tp.Lock()
 	defer tp.Unlock()
-
+	log.Infof("cross chain CTXMatchPool push seqId=%s from=%s",entry.SeqId,entry.From)
 	if _, ok := tp.TxList[entry.SeqId]; !ok {
 		tp.TxList[entry.SeqId] = &CTXPairEntry{}
 	}
 
 	pair := tp.TxList[entry.SeqId]
-
 	//check repeat tx
 	if pair.First != nil && pair.First.From == entry.From {
+		log.Infof("repeat cross tx seqId=%s,from=%s",entry.SeqId,entry.From)
 		return
 	}
 	if pair.Second != nil && pair.Second.From == entry.From {
+		log.Infof("repeat cross tx seqId=%s,from=%s",entry.SeqId,entry.From)
 		return
 	}
 

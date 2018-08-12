@@ -15,7 +15,6 @@ import (
 	httpcom "github.com/mixbee/mixbee/http/base/common"
 	sig "github.com/mixbee/mixbee-crypto/signature"
 	"github.com/mixbee/mixbee/common/log"
-	"github.com/mixbee/mixbee/common/config"
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 )
 
@@ -40,12 +39,12 @@ type CrossChainStateResult struct {
 }
 
 func pushCrossChainResult(signer *account.Account, addr, seqId string, sig []byte) (string, error) {
-	log.Infof("releaseLockToken||pushCrossChainResult addr=%v,seqid=%v", addr, seqId)
+	log.Infof("cross chain || releaseLockToken||pushCrossChainResult addr=%v,seqid=%v", addr, seqId)
 	result, err := CrossChainReleaseAssetByMainChain(signer, addr, seqId, sig)
 	if err != nil {
 		return "", err
 	}
-	log.Infof("pushCrossChainResult %s", result)
+	log.Infof("cross chain || pushCrossChainReleaseResult %s", result)
 	return result, nil
 }
 
@@ -139,16 +138,15 @@ func SendRawTransactionWithAddr(tx *types.Transaction, addr string) (string, err
 
 func checkCrossChainTxBySeqId(tx *CTXEntry) (bool, bool) {
 
-	subChainNode := config.DefConfig.CrossChain.SubChainNode
-	firstPath := subChainNode[tx.ANetWorkId]
+	firstPath := CtxServer.SubNetNodesMgr.GetSubNetNode(tx.ANetWorkId)
 	tx.CheckCount = tx.CheckCount + 1
-	firstInfo, err := GetCrossChainTxInfoBySeqId(firstPath[0], tx.SeqId)
+	firstInfo, err := GetCrossChainTxInfoBySeqId(firstPath, tx.SeqId)
 	if err != nil {
 		return false, false
 	}
 
-	secondPath := subChainNode[tx.BNetWorkId]
-	secondInfo, err := GetCrossChainTxInfoBySeqId(secondPath[0], tx.SeqId)
+	secondPath := CtxServer.SubNetNodesMgr.GetSubNetNode(tx.BNetWorkId)
+	secondInfo, err := GetCrossChainTxInfoBySeqId(secondPath, tx.SeqId)
 	if err != nil {
 		return false, false
 	}
@@ -182,14 +180,14 @@ func GetCrossChainTxInfoBySeqId(addr, seqId string) (*CrossChainStateResult, err
 	}
 	log.Debugf("GetCrossChainTxInfoBySeqId result = %s", string(result))
 
-	rmap,err := Json2map(result)
+	rmap, err := Json2map(result)
 	if err != nil {
 		log.Errorf("GetCrossChainTxInfoBySeqId seqId=%s error %s", seqId, err)
 		return nil, err
 	}
 	infoStr := rmap["value"].(string)
 	info := &CrossChainStateResult{}
-	err = json.Unmarshal([]byte(infoStr),info)
+	err = json.Unmarshal([]byte(infoStr), info)
 	if err != nil {
 		log.Errorf("GetCrossChainTxInfoBySeqId seqId=%s error %s", seqId, err)
 		return nil, err

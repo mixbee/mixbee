@@ -137,7 +137,7 @@ func startMixbee(ctx *cli.Context) {
 	//////主链的node信息
 	//ctx.GlobalSet(utils.GetFlagName(utils.CrossChainVerifyNode), "http://localhost:20336")
 	//开启debug日志级别
-	ctx.GlobalSet(utils.GetFlagName(utils.LogLevelFlag), "0")
+	//ctx.GlobalSet(utils.GetFlagName(utils.LogLevelFlag), "0")
 	//networkId
 	//ctx.GlobalSet(utils.GetFlagName(utils.NetworkIdFlag), "3")
 
@@ -248,9 +248,8 @@ func initCrossChain(context *cli.Context, acc *account.Account, p2pPid *actor.PI
 		mainHost := config.DefConfig.CrossChain.MainVerifyNode[0]
 		result, err := cmdutils.SendRpcRequestWithAddr(mainHost, "registerSubChainNode", []interface{}{subNetId, subhost})
 		log.Infof("initCrossChain||registerSubChainNode result = %s", result)
-
-		//子链维护
 	}
+
 	return nil
 }
 

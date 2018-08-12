@@ -105,8 +105,10 @@ const (
 	BLOCK_TYPE       = "block"      //blk payload
 	TX_TYPE          = "tx"         //transaction
 	CONSENSUS_TYPE   = "consensus"  //consensus payload
-	CROSSCHAIN_TYPE   = "crosschainnode"  //consensus payload
-	CROSSCHAIN_TX_TYPE   = "cctx"  //consensus tx payload
+	CROSSCHAIN_TYPE   = "crossnode"  //cross chain verify node payload
+	CROSSCHAIN_SUBNET_TYPE   = "csnode"  //sub net node payload
+	CROSSCHAIN_TX_TYPE   = "cctx"  //cross chain  tx payload
+	CROSSCHAIN_TX_COMPLETED_TYPE   = "crossCpt"  //cross chain completed tx payload
 	GET_BLOCKS_TYPE  = "getblocks"  //req blks from peer
 	NOT_FOUND_TYPE   = "notfound"   //peer can`t find blk according to the hash
 	DISCONNECT_TYPE  = "disconnect" //peer disconnect info raise by link

@@ -61,7 +61,7 @@ func sendRpcRequest(method string, params []interface{}) ([]byte, error) {
 	return rpcRsp.Result, nil
 }
 
-func SendRpcRequestWithAddr(addr,method string, params []interface{}) ([]byte, error) {
+func SendRpcRequestWithAddr(addr, method string, params []interface{}) ([]byte, error) {
 	rpcReq := &JsonRpcRequest{
 		Version: JSON_RPC_VERSION,
 		Id:      "cli",

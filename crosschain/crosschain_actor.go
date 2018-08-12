@@ -38,15 +38,29 @@ func (this *CrossChainActor) Receive(ctx actor.Context) {
 	case *p2ptypes.CrossVerifyNodePayload:
 		log.Info("cross actor CrossVerifyNodePayload", msg)
 		this.server.VerifyNodes.RegisterNodes(msg.Node.PublicKey, msg.Node.Host)
+	case *p2ptypes.CrossSubNetNodePayload:
+		log.Info("cross actor CrossSubNetNodePayload", msg)
+		this.server.SubNetNodesMgr.RegisterNodes(msg.NetId, msg.Host)
+	case *httpactor.CrossSubNetNodeReq:
+		log.Info("cross actor CrossSubNetNodeReq", msg)
+		this.server.P2pPid.Tell(&p2ptypes.CrossSubNetNodePayload{
+			NetId: msg.NetId,
+			Host:  msg.Host,
+		})
+		this.server.SubNetNodesMgr.RegisterNodes(msg.NetId, msg.Host)
 	case *httpactor.GetAllVerifyNodeReq:
 		log.Info("cross actor GetAllVerifyNodeReq", msg)
 		nodes := this.server.VerifyNodes.GetNodes()
 		ctx.Sender().Request(nodes, ctx.Self())
+	case *httpactor.CheckSubNetId:
+		log.Info("cross actor CheckSubNetId", msg)
+		ok := this.server.SubNetNodesMgr.CheckNetId(msg.NetIds)
+		ctx.Sender().Request(ok, ctx.Self())
 	case *httpactor.PushCrossChainTxRsq:
 		log.Info("cross actor PushCrossChainTxRsq", msg)
 		this.server.PushCtxToPool(msg)
 	case *p2ptypes.CrossChainTxInfoPayload:
-		log.Info("cross actor CrossChainTxInfoPayload", msg)
+		log.Warnf("cross chain actor CrossChainTxInfoPayload %v", msg)
 		entry := &CTXEntry{
 			From:       msg.From,
 			To:         msg.To,
@@ -63,6 +77,8 @@ func (this *CrossChainActor) Receive(ctx actor.Context) {
 			Nonce:      msg.Nonce,
 		}
 		this.server.pairTxPending.push(entry)
+	case *p2ptypes.CrossChainTxCompletedPayload:
+		this.server.CrossTxCompletedHandler(msg)
 	default:
 		log.Warnf("cross actor now handle msg=%#v", msg)
 	}

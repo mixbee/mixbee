@@ -12,6 +12,7 @@ import (
 	httpactor "github.com/mixbee/mixbee/http/base/actor"
 	"github.com/mixbee/mixbee-crypto/keypair"
 	"encoding/hex"
+	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 )
 
 var CtxServer *CTXPoolServer
@@ -32,6 +33,7 @@ type CTXPoolServer struct {
 	VerifyerAccount  *account.Account
 
 	VerifyNodes *VerifyNodes
+	SubNetNodesMgr *SubChainNetNodes
 
 	P2pPid *actor.PID
 	Pid    *actor.PID
@@ -44,6 +46,8 @@ func NewCTxPoolServer(num uint8, acc *account.Account, p2pPid *actor.PID) (*acto
 	defer s.mu.Unlock()
 	s.VerifyerAccount = acc
 	s.VerifyNodes = NewVerifyNodes()
+	s.SubNetNodesMgr = NewSubChainNetNodes()
+
 
 	pidActor := NewCrossChainActor(s)
 	pid, err := pidActor.Start()
@@ -72,10 +76,13 @@ func (s *CTXPoolServer) init(num uint8, p2pPid *actor.PID) {
 	s.txToMatchPair = make(chan *CTXPairEntry, 5000)
 	s.txToRelease = make(chan *CTXPairEntry, 5000)
 	s.txToEndConfirm = make(chan *CTXPairEntry, 5000)
+
+	s.SubNetNodesMgr = NewSubChainNetNodes()
+	s.SubNetNodesMgr.Init()
 }
 
 func (s *CTXPoolServer) Start() {
-	log.Infof("CTXPoolServer start .....")
+	log.Infof("cross chain || CTXPoolServer start .....")
 	ticker := time.NewTicker(config.DEFAULT_CROSS_CHAIN_VERIFY_TIME * time.Second)
 	for {
 		select {
@@ -87,9 +94,11 @@ func (s *CTXPoolServer) Start() {
 		case pair, ok := <-s.txToMatchPair:
 			if ok {
 				if pair.First != nil && pair.Second != nil {
+					log.Infof("seqId= %s is finish push tx to txToMatchPair chan ", pair.First.SeqId)
 					s.pairTxPending.push(pair.First)
 					s.pairTxPending.push(pair.Second)
 				} else {
+					log.Infof("send cross tx to p2p server...")
 					pushSigedCrossTx2OtherNode(pair, s)
 				}
 			}
@@ -100,6 +109,15 @@ func (s *CTXPoolServer) Start() {
 			}
 		case pair, ok := <-s.txToEndConfirm:
 			if ok {
+				s.P2pPid.Tell(&p2ptypes.CrossChainTxCompletedPayload{
+					SeqId:             pair.First.SeqId,
+					FirstFrom:         pair.First.From,
+					FirstReleaseHash:  pair.First.ReleaseTxHash,
+					SecondFrom:        pair.Second.From,
+					SecondReleaseHash: pair.Second.ReleaseTxHash,
+					Type:              uint32(1),
+				})
+
 				s.pairTxEndConfirm.push(pair.First)
 				s.pairTxEndConfirm.push(pair.Second)
 			}
@@ -116,42 +134,51 @@ func txEndConfirmHandler(server *CTXPoolServer) {
 	pool.Lock()
 	defer pool.Unlock()
 
-	log.Infof("cross chain txEndConfirmHandler len=%v", len(pool.TxList))
-
-	subChainNode := config.DefConfig.CrossChain.SubChainNode
+	log.Infof("cross chain || txEndConfirmHandler len=%v", len(pool.TxList))
 
 	for k, value := range pool.TxList {
-		firstPath := subChainNode[value.First.ANetWorkId]
-		firstHash := value.First.ReleaseTxHash
-		firstState, err := GetTxStateByHash(firstPath[0], firstHash)
+
+		seqId := value.First.SeqId
+
+		firstPath := server.SubNetNodesMgr.GetSubNetNode(value.First.ANetWorkId)
+
+		firstResult, err := GetCrossChainTxInfoBySeqId(firstPath, seqId)
 		if err != nil {
-			log.Errorf("GetTxStateByHash addr=%v,hash=%v err=%v", firstPath[0], firstHash, err)
+			log.Errorf("cross chain||txEndConfirmHandler||GetCrossChainTxInfoBySeqId error %s ", err)
 			continue
 		}
 
-		secondPath := subChainNode[value.First.ANetWorkId]
-		secondHash := value.Second.ReleaseTxHash
-		secondState, err := GetTxStateByHash(secondPath[0], secondHash)
+		secondPath := server.SubNetNodesMgr.GetSubNetNode(value.Second.ANetWorkId)
+		secondResult, err := GetCrossChainTxInfoBySeqId(secondPath, seqId)
 		if err != nil {
-			log.Errorf("GetTxStateByHash addr=%v,hash=%v err=%v", secondPath[0], secondHash, err)
+			log.Errorf("cross chain||txEndConfirmHandler||GetCrossChainTxInfoBySeqId error %s ", err)
 			continue
 		}
 
-		if firstState == 1 && secondState == 1 {
+		if firstResult.Statue == 0 {
+			value.First.ReleaseTxHash = ""
+		}
+
+		if secondResult.Statue == 0 {
+			value.Second.ReleaseTxHash = ""
+		}
+		if firstResult.Statue == 0 || secondResult.Statue == 0 {
+			log.Warnf("cross chain || seqid=%s releaseHash invalid,reRelease ", value.First.SeqId)
+			server.txToRelease <- value
 			delete(pool.TxList, k)
 			continue
 		}
 
-		if firstState != 1 {
-			value.First.ReleaseTxHash = ""
-		}
-
-		if secondState != 1 {
-			value.Second.ReleaseTxHash = ""
-		}
-
-		server.txToRelease <- value
+		log.Warnf("cross chain || seqid=%s finished... ", value.First.SeqId)
 		delete(pool.TxList, k)
+		server.P2pPid.Tell(&p2ptypes.CrossChainTxCompletedPayload{
+			SeqId:             value.First.SeqId,
+			FirstFrom:         value.First.From,
+			FirstReleaseHash:  value.First.ReleaseTxHash,
+			SecondFrom:        value.Second.From,
+			SecondReleaseHash: value.Second.ReleaseTxHash,
+			Type:              uint32(2),
+		})
 	}
 }
 
@@ -163,39 +190,37 @@ func releaseLockToken(s *CTXPoolServer) {
 	pool.Lock()
 	defer pool.Unlock()
 
-	log.Infof("cross chain releaseLockToken len=%v", len(pool.TxList))
-
-	subChainNode := config.DefConfig.CrossChain.SubChainNode
+	log.Infof("cross chain || releaseLockToken len=%v", len(pool.TxList))
 
 	for k, value := range pool.TxList {
 		firstSeqId := value.First.SeqId
 		secondSeqId := value.Second.SeqId
 
 		firstNetId := value.First.ANetWorkId
-		firstPath := subChainNode[firstNetId][0]
+		firstPath := s.SubNetNodesMgr.GetSubNetNode(firstNetId)
 
 		secondNetId := value.Second.ANetWorkId
-		secondPath := subChainNode[secondNetId][0]
+		secondPath := s.SubNetNodesMgr.GetSubNetNode(secondNetId)
 
 		if value.First.ReleaseTxHash == "" {
 			firstTxHash, err := pushCrossChainResult(s.VerifyerAccount, firstPath, firstSeqId, value.First.Sig)
 			if err != nil {
-				log.Errorf("pushCrossChainResult first err %v", err)
+				log.Errorf("cross chain || pushCrossChainResult first err %v", err)
 				continue
 			}
 			value.First.ReleaseTxHash = firstTxHash
 
-			log.Debugf("pushCrossChainResult first success addr=%v,seqId=%v,txHash=%v", firstPath, firstSeqId, firstTxHash)
+			log.Debugf("cross chain || pushCrossChainResult first success addr=%v,seqId=%v,txHash=%v", firstPath, firstSeqId, firstTxHash)
 		}
 
 		if value.Second.ReleaseTxHash == "" {
 			secondTxHash, err := pushCrossChainResult(s.VerifyerAccount, secondPath, secondSeqId, value.Second.Sig)
 			if err != nil {
-				log.Errorf("pushCrossChainResult second err %v", err)
+				log.Errorf("cross chain || pushCrossChainResult second err %v", err)
 				continue
 			}
 			value.Second.ReleaseTxHash = secondTxHash
-			log.Debugf("pushCrossChainResult second success addr=%v,seqId=%v,txHash=%v", secondPath, secondSeqId, secondTxHash)
+			log.Debugf("cross chain || pushCrossChainResult second success addr=%v,seqId=%v,txHash=%v", secondPath, secondSeqId, secondTxHash)
 		}
 
 		delete(pool.TxList, k)
@@ -212,9 +237,10 @@ func txMatchPair(s *CTXPoolServer) {
 	}
 	pool.Lock()
 	defer pool.Unlock()
-	log.Infof("txMatchPair check len=%v", len(pool.TxList))
+	log.Infof("cross chain || txMatchPair check len=%v", len(pool.TxList))
 
 	for k, v := range pool.TxList {
+		log.Infof("cross chain || pair first = %#v  second = %#v", v.First,v.Second)
 		if v.First != nil && v.Second != nil {
 			s.txToRelease <- v
 			delete(pool.TxList, k)
@@ -227,19 +253,19 @@ func txVerify(s *CTXPoolServer) {
 
 	pool := s.txPool
 	if pool == nil || len(pool.TxList) == 0 {
-		log.Debugf("txVerify empty..")
+		log.Debugf("cross chain || txVerify empty..")
 		return
 	}
 
 	pool.Lock()
 	defer pool.Unlock()
 
-	log.Infof("txVerify || check pair cross chain tx poolLen=%v", len(pool.TxList))
+	log.Infof("cross chain || txVerify || check pair cross chain tx poolLen=%v", len(pool.TxList))
 	txMap := pool.TxList
 
 	for k, v := range txMap {
 
-		log.Infof("txVerify k = %s", k)
+		log.Infof("cross chain || txVerify k = %s", k)
 
 		first := v.First
 		if first != nil {
@@ -327,4 +353,21 @@ func (s *CTXPoolServer) IsVerifyNode(pbk string) bool {
 	bb := keypair.SerializePublicKey(s.VerifyerAccount.PublicKey)
 	publicKey := hex.EncodeToString(bb)
 	return pbk == publicKey
+}
+
+func (s *CTXPoolServer) CrossTxCompletedHandler(info *p2ptypes.CrossChainTxCompletedPayload) {
+
+	log.Infof("CrossTxCompletedHandler param %v", info)
+
+	seqId := info.SeqId
+	//delete txpool
+	s.txPool.delete(seqId)
+
+	s.pairTxPending.delete(seqId)
+
+	s.pairTxRelease.delete(seqId)
+
+	if info.Type == 2 {
+		s.pairTxEndConfirm.delete(seqId)
+	}
 }

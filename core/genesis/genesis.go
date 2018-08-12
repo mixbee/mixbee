@@ -1,5 +1,3 @@
-
-
 package genesis
 
 import (
@@ -165,12 +163,13 @@ func newGoverningInit() *types.Transaction {
 	if len(bookkeepers) == 1 {
 		addr = types.AddressFromPubKey(bookkeepers[0])
 	} else {
-		m := (5*len(bookkeepers) + 6) / 7
-		temp, err := types.AddressFromMultiPubKeys(bookkeepers, m)
-		if err != nil {
-			panic(fmt.Sprint("wrong bookkeeper config, caused by", err))
-		}
-		addr = temp
+		//m := (5*len(bookkeepers) + 6) / 7
+		//temp, err := types.AddressFromMultiPubKeys(bookkeepers, m)
+		//if err != nil {
+		//	panic(fmt.Sprint("wrong bookkeeper config, caused by", err))
+		//}
+		//addr = temp
+		addr = types.AddressFromPubKey(bookkeepers[0])
 	}
 
 	distribute := []struct {

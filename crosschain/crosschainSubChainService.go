@@ -13,6 +13,8 @@ import (
 	"github.com/mixbee/mixbee/smartcontract/service/native/crosschain"
 	"github.com/mixbee/mixbee/common/config"
 	"time"
+	"github.com/mixbee/mixbee/common"
+	"strconv"
 )
 
 var SubCrossChainServerInstant *SubCrossChainServer
@@ -26,6 +28,9 @@ type SubChainTimeOut struct {
 }
 
 func StartSubChainServer() {
+
+	log.Infof("cross chain || StartSubChainServer ")
+
 	subPID := actor.Spawn(actor.FromFunc(Receive))
 	sub1 := events.NewActorSubscriber(subPID)
 	sub1.Subscribe(message.TOPIC_SMART_CODE_EVENT)
@@ -57,6 +62,7 @@ func Receive(c actor.Context) {
 }
 
 func timeout() {
+	//定时更新主链跨链验证节点
 	addr := config.DefConfig.CrossChain.MainVerifyNode[0]
 	params := []interface{}{}
 	result, err := SendRpcRequestWithAddr(addr, "getAllVerifyNodeInfo", params)
@@ -64,8 +70,21 @@ func timeout() {
 		log.Errorf("SubCrossChainServerInstant getAllVerifyNodeInfo err %s", err.Error())
 		return
 	}
-	log.Debugf("getAllVerifyNodeInfo error %s",result)
+	log.Infof("getAllVerifyNodeInfo error %s", result)
 	SubCrossChainServerInstant.UpdateMainVerifyNodes(result)
+	//向主链发送存活消息
+	ip, err := common.GetLocalIp()
+	if err != nil {
+		log.Errorf("get local ip err:%s", err.Error())
+		return
+	}
+	port := config.DefConfig.Rpc.HttpJsonPort
+	portStr := strconv.FormatUint(uint64(port), 10)
+	subhost := "http://" + ip + ":" + portStr
+	subNetId := strconv.FormatUint(uint64(config.DefConfig.P2PNode.NetworkId), 10)
+
+	mainHost := config.DefConfig.CrossChain.MainVerifyNode[0]
+	SendRpcRequestWithAddr(mainHost, "registerSubChainNode", []interface{}{subNetId, subhost})
 }
 
 func (s *SubCrossChainServer) UpdateMainVerifyNodes(str []byte) {
@@ -95,7 +114,7 @@ func (s *SubCrossChainServer) GetVerifyNodeInfoByPublicKey(pbk string) *CrossCha
 }
 
 func (s *SubCrossChainServer) IsExsitNode(pbk string) bool {
-	_,ok := s.MainVerifyNodes.VerifyerNodes[pbk]
+	_, ok := s.MainVerifyNodes.VerifyerNodes[pbk]
 	return ok
 }
 
@@ -134,12 +153,12 @@ func pushCrossChainTxToMainChain(bools map[string]bool, notify bcomn.ExecuteNoti
 		info := crosschain.CrossChainStateResult{}
 		err := json.Unmarshal([]byte(infoStr), &info)
 		if err != nil {
-			log.Errorf("subchain pushCrossChainTxToMainChain json unmarshal err",err)
+			log.Errorf("subchain pushCrossChainTxToMainChain json unmarshal err", err)
 			return
 		}
 		nodeInfo := SubCrossChainServerInstant.GetVerifyNodeInfoByPublicKey(info.VerifyPublicKey)
 		if nodeInfo == nil {
-			log.Errorf("pushCrossChainTxToMainChain no verify public %s node info",info.VerifyPublicKey)
+			log.Errorf("pushCrossChainTxToMainChain no verify public %s node info", info.VerifyPublicKey)
 			return
 		}
 		params := []interface{}{info.From, info.To, info.AValue, info.BValue, info.AChainId, info.BChainId, notify.TxHash, info.SeqId, info.Timestamp, info.Nonce, info.VerifyPublicKey}

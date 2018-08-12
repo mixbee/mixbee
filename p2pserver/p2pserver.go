@@ -154,9 +154,17 @@ func (this *P2PServer) Xmit(message interface{}) error {
 		nodeInfo := message.(*p2ptypes.CrossChainVerifyNode)
 		msg = msgpack.NewVerifyNode(nodeInfo)
 	case *p2ptypes.CrossChainTxInfoPayload:
-		log.Debug("cross chain tx message")
-		nodeInfo := message.(*p2ptypes.CrossChainTxInfoPayload)
-		msg = nodeInfo
+		log.Infof("cross chain tx message")
+		txInfo := message.(*p2ptypes.CrossChainTxInfoPayload)
+		msg = txInfo
+	case *p2ptypes.CrossChainTxCompletedPayload:
+		log.Infof("cross chain tx completed message")
+		txCompletedInfo := message.(*p2ptypes.CrossChainTxCompletedPayload)
+		msg = txCompletedInfo
+	case *p2ptypes.CrossSubNetNodePayload:
+		log.Infof("cross chain sub net node message")
+		subNetNode := message.(*p2ptypes.CrossSubNetNodePayload)
+		msg = subNetNode
 	default:
 		log.Warnf("Unknown Xmit message %v , type %v", message,
 			reflect.TypeOf(message))

@@ -573,13 +573,7 @@ func RegisterSubChainNode(params []interface{}) map[string]interface{} {
 		return responsePack(berr.INVALID_PARAMS, "")
 	}
 	log.Infof("RegisterSubChainNode nid=%d,path=%s", nid, host)
-	info, ok := config.DefConfig.CrossChain.SubChainNode[nid]
-	if !ok {
-		info = []string{}
-		config.DefConfig.CrossChain.SubChainNode[nid] = info
-	}
-	info = append(info, host)
-	config.DefConfig.CrossChain.SubChainNode[nid] = info
+	bactor.RegisterSubNetNode(nid,host)
 
 	return responseSuccess("success")
 }

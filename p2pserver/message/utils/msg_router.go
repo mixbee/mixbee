@@ -1,5 +1,3 @@
-
-
 package utils
 
 import (
@@ -58,7 +56,9 @@ func (this *MessageRouter) init(p2p p2p.P2P) {
 	this.RegisterMsgHandler(msgCommon.TX_TYPE, TransactionHandle)
 	this.RegisterMsgHandler(msgCommon.DISCONNECT_TYPE, DisconnectHandle)
 	this.RegisterMsgHandler(msgCommon.CROSSCHAIN_TYPE, CrossChainNodeHandle)
+	this.RegisterMsgHandler(msgCommon.CROSSCHAIN_SUBNET_TYPE, CrossChainSubNetNodeHander)
 	this.RegisterMsgHandler(msgCommon.CROSSCHAIN_TX_TYPE, CrossChainTxHandle)
+	this.RegisterMsgHandler(msgCommon.CROSSCHAIN_TX_COMPLETED_TYPE, CrossChainCompletedTxHander)
 }
 
 // RegisterMsgHandler registers msg handler with the msg type

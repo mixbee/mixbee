@@ -7,11 +7,6 @@ import (
 	"github.com/mixbee/mixbee/common/log"
 )
 
-
-type NodeSelice struct {
-	Nodes []*CrossChainVerifyNode  `json:"nodes"`
-}
-
 func TestGetAllNodes(t *testing.T) {
 
 	log.InitLog(5, log.PATH, log.Stdout)
