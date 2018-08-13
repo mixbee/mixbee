@@ -141,7 +141,6 @@ var AssetCommand = cli.Command{
 			ArgsUsage: "<seqId>",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
-				utils.WalletFileFlag,
 			},
 		},
 		{
@@ -151,7 +150,6 @@ var AssetCommand = cli.Command{
 			ArgsUsage: "<adress>",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
-				utils.WalletFileFlag,
 			},
 		},
 		{
@@ -199,6 +197,15 @@ var AssetCommand = cli.Command{
 				utils.TransactionGasLimitFlag,
 				utils.TransactionFromFlag,
 				utils.CrossChainSeqIdFlag,
+			},
+		},
+		{
+			Action:    crossPairQuery,
+			Name:      "crossPairQuery",
+			Usage:     "cross chain pair evidence tx query by seqId",
+			ArgsUsage: "<seqId>",
+			Flags: []cli.Flag{
+				utils.RPCPortFlag,
 			},
 		},
 	},
@@ -474,6 +481,25 @@ func crossQuery(ctx *cli.Context) error {
 	}
 
 	fmt.Printf("crossQuery seqId:%s\n", seqArg)
+	fmt.Println("cross Info:", value.Value)
+	return nil
+}
+
+func crossPairQuery(ctx *cli.Context) error {
+	SetRpcPort(ctx)
+	if ctx.NArg() < 1 {
+		fmt.Println("Missing argument. cross chain seqId.\n")
+		cli.ShowSubcommandHelp(ctx)
+		return nil
+	}
+
+	seqArg := ctx.Args().First()
+	value, err := utils.CrossPairEvidenceQuery(seqArg)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("crossPairEvidenceQuery seqId:%s\n", seqArg)
 	fmt.Println("cross Info:", value.Value)
 	return nil
 }

@@ -32,6 +32,16 @@ func CrossChainQuery(seqId string) (*MixTestOfRsp, error) {
 	}, nil
 }
 
+func CrossChainPairEvidenceQuery(seqId string) (*MixTestOfRsp, error) {
+	value, err := GetContractKey(0, utils.CrossChainPairEvidenceContractAddress, "getCrossPairTx",seqId)
+	if err != nil {
+		return nil, fmt.Errorf("cross chain query error:%s", err)
+	}
+	return &MixTestOfRsp{
+		Value: fmt.Sprintf("%s", value),
+	}, nil
+}
+
 func CrossChainHistory(from string) (*MixTestOfRsp, error) {
 	value, err := GetContractKey(0, utils.CrossChainContractAddress, "crossHistory",from)
 	if err != nil {

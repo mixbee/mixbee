@@ -13,6 +13,7 @@ import (
 	params "github.com/mixbee/mixbee/smartcontract/service/native/global_params"
 	"github.com/mixbee/mixbee/smartcontract/service/native/governance"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mbg"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosspairevidence"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mixid"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
@@ -35,8 +36,9 @@ func init() {
 	governance.InitGovernance()
 
 	mixtest.InitMixTest()
-
 	crosschain.InitCrossChain()
+	crosspairevidence.InitCrossPairEvidence()
+
 }
 
 func InitBytes(addr common.Address, method string) []byte {

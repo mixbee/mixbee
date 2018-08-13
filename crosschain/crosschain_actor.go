@@ -5,6 +5,7 @@ import (
 	"github.com/mixbee/mixbee/common/log"
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 	httpactor "github.com/mixbee/mixbee/http/base/actor"
+	"github.com/mixbee/mixbee/common/config"
 )
 
 type CrossChainActor struct {
@@ -43,10 +44,12 @@ func (this *CrossChainActor) Receive(ctx actor.Context) {
 		this.server.SubNetNodesMgr.RegisterNodes(msg.NetId, msg.Host)
 	case *httpactor.CrossSubNetNodeReq:
 		log.Info("cross actor CrossSubNetNodeReq", msg)
-		this.server.P2pPid.Tell(&p2ptypes.CrossSubNetNodePayload{
-			NetId: msg.NetId,
-			Host:  msg.Host,
-		})
+		if config.DefConfig.Genesis.ConsensusType != config.CONSENSUS_TYPE_SOLO {
+			this.server.P2pPid.Tell(&p2ptypes.CrossSubNetNodePayload{
+				NetId: msg.NetId,
+				Host:  msg.Host,
+			})
+		}
 		this.server.SubNetNodesMgr.RegisterNodes(msg.NetId, msg.Host)
 	case *httpactor.GetAllVerifyNodeReq:
 		log.Info("cross actor GetAllVerifyNodeReq", msg)

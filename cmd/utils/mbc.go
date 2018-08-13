@@ -75,6 +75,20 @@ func CrossQuery(seqId string) (*httpcom.MixTestOfRsp, error) {
 	return rsp, nil
 }
 
+func CrossPairEvidenceQuery(seqId string) (*httpcom.MixTestOfRsp, error) {
+	result, err := sendRpcRequest("crossPairEvidenceQuery", []interface{}{seqId})
+	if err != nil {
+		return nil, fmt.Errorf("sendRpcRequest error:%s", err)
+	}
+
+	rsp := &httpcom.MixTestOfRsp{}
+	err = json.Unmarshal(result, rsp)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal error:%s", err)
+	}
+	return rsp, nil
+}
+
 func CrossHistory(from string) (*httpcom.MixTestOfRsp, error) {
 	result, err := sendRpcRequest("crossHistory", []interface{}{from})
 	if err != nil {

@@ -83,6 +83,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	configTx := newConfig()
 	mix := deployMixTestContract()
 	cross := deployCrossChainContract()
+	crossTxEvidence := 	deployCrossChainTxEvidenceContract()
 
 	genesisBlock := &types.Block{
 		Header: genesisHeader,
@@ -95,6 +96,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 			configTx,
 			mix,
 			cross,
+			crossTxEvidence,
 			newGoverningInit(),
 			newUtilityInit(),
 			newParamInit(),
@@ -152,6 +154,12 @@ func deployMixTestContract() *types.Transaction {
 
 func deployCrossChainContract() *types.Transaction {
 	tx := utils.NewDeployTransaction(nutils.CrossChainContractAddress[:], "MIXT", "1.0",
+		"Mixbee Team", "mixbee@gmail.com", "cross chain ledger", true)
+	return tx
+}
+
+func deployCrossChainTxEvidenceContract() *types.Transaction {
+	tx := utils.NewDeployTransaction(nutils.CrossChainPairEvidenceContractAddress[:], "crossEvidence", "1.0",
 		"Mixbee Team", "mixbee@gmail.com", "cross chain ledger", true)
 	return tx
 }

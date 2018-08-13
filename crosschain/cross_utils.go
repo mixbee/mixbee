@@ -16,6 +16,8 @@ import (
 	sig "github.com/mixbee/mixbee-crypto/signature"
 	"github.com/mixbee/mixbee/common/log"
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
+	"github.com/mixbee/mixbee/http/base/rpc"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosspairevidence"
 )
 
 const (
@@ -95,11 +97,31 @@ func Sign(data []byte, signer *account.Account) ([]byte, error) {
 
 func BuildCrossReleaseTx(seqId string, sig []byte) (*types.Transaction, error) {
 	sigHex := hex.EncodeToString(sig)
-	fmt.Println("BuildCrossReleaseTx sig=", sigHex)
 	param := seqId + ":" + sigHex
 	contractAddr := utils.CrossChainContractAddress
 	version := VERSION_CONTRACT_CROSS_CHAIN
 	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crosschain.CROSS_RELEASE, []interface{}{param})
+	if err != nil {
+		return nil, fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: 0,
+		GasLimit: 20000,
+		TxType:   types.Invoke,
+		Nonce:    uint32(time.Now().Unix()),
+		Payload:  invokePayload,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, nil
+}
+
+func BuildCrossPairEvidenceTx(param string) (*types.Transaction, error) {
+	contractAddr := utils.CrossChainPairEvidenceContractAddress
+	version := VERSION_CONTRACT_CROSS_CHAIN
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crosspairevidence.PUSH_EVIDENCE, []interface{}{param})
 	if err != nil {
 		return nil, fmt.Errorf("build invoke code error:%s", err)
 	}
@@ -139,12 +161,11 @@ func SendRawTransactionWithAddr(tx *types.Transaction, addr string) (string, err
 func checkCrossChainTxBySeqId(tx *CTXEntry) (bool, bool) {
 
 	firstPath := CtxServer.SubNetNodesMgr.GetSubNetNode(tx.ANetWorkId)
-	tx.CheckCount = tx.CheckCount + 1
+	tx.VerifyCheckCount = tx.VerifyCheckCount + 1
 	firstInfo, err := GetCrossChainTxInfoBySeqId(firstPath, tx.SeqId)
 	if err != nil {
 		return false, false
 	}
-
 	secondPath := CtxServer.SubNetNodesMgr.GetSubNetNode(tx.BNetWorkId)
 	secondInfo, err := GetCrossChainTxInfoBySeqId(secondPath, tx.SeqId)
 	if err != nil {
@@ -255,4 +276,33 @@ func pushSigedCrossTx2OtherNode(pair *CTXPairEntry, s *CTXPoolServer) {
 		TimeStamp:  info.TimeStamp,
 		Nonce:      info.Nonce,
 	})
+}
+
+func pushCrossTxEvidence2SmartContract(pair *CTXPairEntry, signer *account.Account) {
+
+	seqId := pair.First.SeqId
+	by, err := json.Marshal(pair)
+	if err != nil {
+		log.Errorf("cross chain || pushCrossTxEvidence2SmartContract ||json marshal err", err)
+		return
+	}
+	hexStr := hex.EncodeToString(by)
+	param := seqId + ":" + hexStr
+
+	transferTx, err := BuildCrossPairEvidenceTx(param)
+	if err != nil {
+		return
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return
+	}
+	var buffer bytes.Buffer
+	err = transferTx.Serialize(&buffer)
+	if err != nil {
+		return
+	}
+	txData := hex.EncodeToString(buffer.Bytes())
+	result := rpc.SendRawTransaction([]interface{}{txData})
+	log.Infof("cross chain || pushCrossTxEvidence2SmartContract || result %+v", result)
 }

@@ -50,6 +50,7 @@ func StartRPCServer() error {
 
 	//查询 cross chain 信息
 	rpc.HandleFunc("crossQuery", rpc.CrossChainQuery)
+	rpc.HandleFunc("crossPairEvidenceQuery", rpc.CrossChainPairEvidenceQuery)
 	rpc.HandleFunc("crossHistory", rpc.CrossChainHistory)
 
 	err := http.ListenAndServe(":"+strconv.Itoa(int(cfg.DefConfig.Rpc.HttpJsonPort)), nil)
