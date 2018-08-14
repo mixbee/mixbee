@@ -247,7 +247,7 @@ func transfer(ctx *cli.Context) error {
 		return err
 	}
 
-	gasPrice := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
+	gasPrice := ctx.Uint64(utils.TransactionGasPriceFlag.Name)
 	gasLimit := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
 
 	var signer *account.Account

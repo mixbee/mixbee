@@ -15,6 +15,7 @@ import (
 	"github.com/mixbee/mixbee/http/base/rest"
 	"github.com/mixbee/mixbee/http/websocket/websocket"
 	"github.com/mixbee/mixbee/smartcontract/event"
+	"github.com/mixbee/mixbee/common/utils"
 )
 
 var ws *websocket.WsServer
@@ -63,9 +64,11 @@ func pushSmartCodeEvent(v interface{}) {
 		switch object := rs.Result.(type) {
 		case *event.LogEventArgs:
 			contractAddrs, evts := bcomn.GetLogEvent(object)
+			log.Info("pushSmartCodeEvent | log=", utils.Object2Json(evts))
 			pushEvent(contractAddrs, rs.TxHash.ToHexString(), rs.Error, rs.Action, evts)
 		case *event.ExecuteNotify:
 			contractAddrs, notify := bcomn.GetExecuteNotify(object)
+			log.Debug("pushSmartCodeEvent | notify=",  utils.Object2Json(notify))
 			pushEvent(contractAddrs, rs.TxHash.ToHexString(), rs.Error, rs.Action, notify)
 		default:
 		}

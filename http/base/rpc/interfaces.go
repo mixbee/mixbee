@@ -271,7 +271,7 @@ func SendRawTransaction(params []interface{}) map[string]interface{} {
 				if ok && preExec == 1 {
 					result, err := bactor.PreExecuteContract(&txn)
 					if err != nil {
-						log.Infof("PreExec: ", err)
+						log.Error("SendRawTransaction | err=", err)
 						return responsePack(berr.SMARTCODE_ERROR, "")
 					}
 					return responseSuccess(result)

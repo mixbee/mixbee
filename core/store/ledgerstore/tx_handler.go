@@ -141,6 +141,7 @@ func (self *StateStore) HandleInvokeTransaction(store store.LedgerStore, stateBa
 			if err := costInvalidGas(tx.Payer, oldBalance, config, stateBatch, store, notify); err != nil {
 				return err
 			}
+			log.Errorf("HandleInvokeTransaction | balance gas: %d less than min gas: %d", oldBalance, minGas)
 			return fmt.Errorf("balance gas: %d less than min gas: %d", oldBalance, minGas)
 		}
 
@@ -150,6 +151,7 @@ func (self *StateStore) HandleInvokeTransaction(store store.LedgerStore, stateBa
 			if err := costInvalidGas(tx.Payer, oldBalance, config, stateBatch, store, notify); err != nil {
 				return err
 			}
+			log.Errorf("balance gas insufficient: balance:%d < code length need gas:%d", oldBalance, codeLenGasLimit*tx.GasPrice)
 			return fmt.Errorf("balance gas insufficient: balance:%d < code length need gas:%d", oldBalance, codeLenGasLimit*tx.GasPrice)
 		}
 
