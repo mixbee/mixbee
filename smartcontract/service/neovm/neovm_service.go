@@ -220,6 +220,7 @@ func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 	serviceName := engine.Context.OpReader.ReadVarString(vm.MAX_BYTEARRAY_SIZE)
 	service, ok := ServiceMap[serviceName]
 	if !ok {
+		log.Error("[SystemCall] service not support:", serviceName)
 		return errors.NewErr(fmt.Sprintf("[SystemCall] service not support: %s", serviceName))
 	}
 
@@ -245,6 +246,7 @@ func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 func (this *NeoVmService) getContract(address []byte) ([]byte, error) {
 	item, err := this.CloneCache.Store.TryGet(common.ST_CONTRACT, address)
 	if err != nil {
+		log.Error("getContract |  Get contract context error!, address=", string(address))
 		return nil, errors.NewErr("[getContract] Get contract context error!")
 	}
 	log.Infof("invoke contract address:%x", scommon.ToArrayReverse(address))
