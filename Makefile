@@ -16,6 +16,8 @@ TOOLS=./tools
 ABI=$(TOOLS)/abi
 NATIVE_ABI_SCRIPT=./cmd/abi/native_abi_script
 
+MixImageId = $(shell docker images mixbee/mixbee:latest -q)
+
 mixbee: $(SRC_FILES)
 	$(GC)  $(BUILD_NODE_PAR) -o mixbee main.go
  
@@ -104,5 +106,5 @@ docker: Makefile docker/payload docker/Dockerfile
 clean:
 	rm -rf *.8 *.o *.out *.6 *exe
 	rm -rf mixbee tools docker/payload docker/build Chain tools Log
-	docker rmi mixbee/mixbee
+	docker rmi -f $(MixImageId)
 
