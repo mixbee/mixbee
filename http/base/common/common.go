@@ -26,7 +26,7 @@ import (
 const MAX_SEARCH_HEIGHT uint32 = 100
 
 type BalanceOfRsp struct {
-	Mbc string `json:"mcb"`
+	Mbc string `json:"mbc"`
 	Mbg string `json:"mbg"`
 }
 
