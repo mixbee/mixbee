@@ -40,12 +40,15 @@ var (
 	BLOCK_GETTRANSACTIONCOUNT_NAME       = "Neo.Block.GetTransactionCount"
 	BLOCK_GETTRANSACTIONS_NAME           = "Neo.Block.GetTransactions"
 	BLOCK_GETTRANSACTION_NAME            = "Neo.Block.GetTransaction"
+
+
 	BLOCKCHAIN_GETHEIGHT_NAME            = "Neo.Blockchain.GetHeight"
 	BLOCKCHAIN_GETHEADER_NAME            = "Neo.Blockchain.GetHeader"
-	BLOCKCHAIN_GETBLOCK_NAME             = "System.Blockchain.GetBlock"
+	BLOCKCHAIN_GETBLOCK_NAME             = "Neo.Blockchain.GetBlock"
 	BLOCKCHAIN_GETTRANSACTION_NAME       = "Neo.Blockchain.GetTransaction"
 	BLOCKCHAIN_GETCONTRACT_NAME          = "Neo.Blockchain.GetContract"
 	BLOCKCHAIN_GETTRANSACTIONHEIGHT_NAME = "Neo.Blockchain.GetTransactionHeight"
+
 
 	HEADER_GETINDEX_NAME         = "Neo.Header.GetIndex"
 	HEADER_GETHASH_NAME          = "Neo.Header.GetHash"
@@ -56,15 +59,18 @@ var (
 	HEADER_GETNEXTCONSENSUS_NAME = "Neo.Header.GetNextConsensus"
 	HEADER_GETMERKLEROOT_NAME    = "Neo.Header.GetMerkleRoot"
 
+
 	TRANSACTION_GETHASH_NAME       = "Neo.Transaction.GetHash"
 	TRANSACTION_GETTYPE_NAME       = "Neo.Transaction.GetType"
 	TRANSACTION_GETATTRIBUTES_NAME = "Neo.Transaction.GetAttributes"
+
 
 	CONTRACT_CREATE_NAME            = "Neo.Contract.Create"
 	CONTRACT_MIGRATE_NAME           = "Neo.Contract.Migrate"
 	CONTRACT_GETSTORAGECONTEXT_NAME = "Neo.Contract.GetStorageContext"
 	CONTRACT_DESTROY_NAME           = "Neo.Contract.Destroy"
 	CONTRACT_GETSCRIPT_NAME         = "Neo.Contract.GetScript"
+
 
 	STORAGE_GET_NAME                = "Neo.Storage.Get"
 	STORAGE_PUT_NAME                = "Neo.Storage.Put"
@@ -82,7 +88,29 @@ var (
 	RUNTIME_SERIALIZE_NAME    = "Neo.Runtime.Serialize"
 	RUNTIME_DESERIALIZE_NAME  = "Neo.Runtime.Deserialize"
 
+
+	// asset
+	ASSET_GETASSETID_NAME   = "Neo.Asset.GetAssetId"
+	ASSET_GETASSETTYPE_NAME = "Neo.Asset.GetAssetType"
+	ASSET_GETAMOUNT_NAME    = "Neo.Asset.GetAmount"
+	ASSET_GETAVAILABLE_NAME = "Neo.Asset.GetAvailable"
+	ASSET_GETPRECISION_NAME = "Neo.Asset.GetPrecision"
+	ASSET_GETOWNER_NAME     = "Neo.Asset.GetOwner"
+	ASSET_GETADMIN_NAME     = "Neo.Asset.GetAdmin"
+	ASSET_GETISSUER_NAME    = "Neo.Asset.GetIssuer"
+	ASSET_CREATE_NAME       = "Neo.Asset.Create"
+	ASSET_RENEW_NAME        = "Neo.Asset.Renew"
+
+	//account api
+	ACCOUNT_GETSCRIPTHASH_NAME 	= "Neo.Account.GetScriptHash"
+	ACCOUNT_GETVOTES_NAME 		= "Neo.Account.GetVotes"
+	ACCOUNT_GETBALANCE_NAME 	= "Neo.Account.GetBalance"
+
+
+
+
 	NATIVE_INVOKE_NAME = "Mixbee.Native.Invoke"
+
 
 	GETSCRIPTCONTAINER_NAME     = "System.ExecutionEngine.GetScriptContainer"
 	GETEXECUTINGSCRIPTHASH_NAME = "System.ExecutionEngine.GetExecutingScriptHash"

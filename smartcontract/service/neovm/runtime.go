@@ -41,6 +41,7 @@ func RuntimeCheckWitness(service *NeoVmService, engine *vm.ExecutionEngine) erro
 		}
 		result = service.ContextRef.CheckWitness(address)
 	} else {
+		// parse the byte sequencce to a public key
 		pk, err := keypair.DeserializePublicKey(data)
 		if err != nil {
 			return errors.NewDetailErr(err, errors.ErrNoCode, "[RuntimeCheckWitness] data invalid.")

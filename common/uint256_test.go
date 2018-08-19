@@ -5,6 +5,9 @@ import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"encoding/binary"
+	"fmt"
+	"strconv"
 )
 
 func TestUint256_Serialize(t *testing.T) {
@@ -36,6 +39,14 @@ func TestUint256ParseFromBytes(t *testing.T) {
 	buf := []byte{1, 2, 3}
 
 	_, err := Uint256ParseFromBytes(buf)
+	t.Log("err",err)
+
+	bs1 := make([]byte,32)
+	binary.LittleEndian.PutUint32(bs1, 31415926)
+	fmt.Println(bs1)
+
+	bs2 := []byte(strconv.Itoa(31415926))
+	fmt.Println(bs2)
 
 	assert.NotNil(t, err)
 }

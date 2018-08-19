@@ -494,6 +494,7 @@ func (this *LedgerStoreImp) saveBlockToStateStore(block *types.Block) error {
 	for _, tx := range block.Transactions {
 		err := this.handleTransaction(stateBatch, block, tx)
 		if err != nil {
+			log.Errorf("saveBlockToStateStore | handleTransaction error %s", err)
 			return fmt.Errorf("handleTransaction error %s", err)
 		}
 	}
@@ -621,9 +622,11 @@ func (this *LedgerStoreImp) handleTransaction(stateBatch *statestore.StateBatch,
 	case types.Invoke:
 		err := this.stateStore.HandleInvokeTransaction(this, stateBatch, tx, block, notify)
 		if stateBatch.Error() != nil {
+			log.Errorf("handleTransaction tx %s error %s", txHash.ToHexString(), stateBatch.Error())
 			return fmt.Errorf("HandleInvokeTransaction tx %s error %s", txHash.ToHexString(), stateBatch.Error())
 		}
 		if err != nil {
+			log.Errorf("handleTransaction tx %s error %s", txHash.ToHexString(), err)
 			log.Debugf("HandleInvokeTransaction tx %s error %s", txHash.ToHexString(), err)
 		}
 		SaveNotify(this.eventStore, txHash, notify)

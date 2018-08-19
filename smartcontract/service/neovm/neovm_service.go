@@ -69,6 +69,17 @@ var (
 		GETEXECUTINGSCRIPTHASH_NAME:          {Execute: GetExecutingAddress},
 		GETCALLINGSCRIPTHASH_NAME:            {Execute: GetCallingAddress},
 		GETENTRYSCRIPTHASH_NAME:              {Execute: GetEntryAddress},
+
+		ASSET_GETASSETID_NAME:				  {Execute: AssetGetAssetId},
+		ASSET_GETASSETTYPE_NAME:			  {Execute: AssetGetAssetType},
+		ASSET_GETAMOUNT_NAME:				  {Execute: AssetGetAmount},
+		ASSET_GETAVAILABLE_NAME:			  {Execute: AssetGetAvailable},
+		ASSET_GETPRECISION_NAME:			  {Execute: AssetGetPrecision},
+		ASSET_GETOWNER_NAME:				  {Execute: AssetGetOwner},
+		ASSET_GETADMIN_NAME:				  {Execute: AssetGetAdmin},
+		ASSET_GETISSUER_NAME:				  {Execute: AssetGetIssuer},
+		ASSET_CREATE_NAME:					  {Execute: CreateAsset},
+		ASSET_RENEW_NAME:					  {Execute: AssetRenew},
 	}
 )
 
@@ -149,6 +160,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, err
 			}
 			if !this.ContextRef.CheckUseGas(price) {
+				log.Errorf("Invoke | CheckUseGas err: %s", ERR_GAS_INSUFFICIENT)
 				return nil, ERR_GAS_INSUFFICIENT
 			}
 		}
@@ -156,6 +168,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 		switch this.Engine.OpCode {
 		case vm.VERIFY:
 			if vm.EvaluationStackCount(this.Engine) < 3 {
+				log.Errorf("Invoke [VERIFY] Too few input parameters ")
 				return nil, errors.NewErr("[VERIFY] Too few input parameters ")
 			}
 			pubKey, err := vm.PopByteArray(this.Engine)
@@ -181,6 +194,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 			}
 		case vm.SYSCALL:
 			if err := this.SystemCall(this.Engine); err != nil {
+				log.Errorf("Invoke ")
 				return nil, errors.NewDetailErr(err, errors.ErrNoCode, "[NeoVmService] service system call error!")
 			}
 		case vm.APPCALL, vm.TAILCALL:
@@ -203,6 +217,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 			}
 		default:
 			if err := this.Engine.StepInto(); err != nil {
+				log.Errorf("Invoke | [NeoVmService] vm execute error!, err=%s", err)
 				return nil, errors.NewDetailErr(err, errors.ErrNoCode, "[NeoVmService] vm execute error!")
 			}
 		}

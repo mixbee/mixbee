@@ -27,4 +27,13 @@ const (
 	SYS_BLOCK_MERKLE_TREE  DataEntryPrefix = 0x13 // Block merkle tree root key prefix
 
 	EVENT_NOTIFY DataEntryPrefix = 0x14 //Event notify key prefix
+
+
+
+	// ASSET
+	ST_Info           DataEntryPrefix = 0xc0
+	ST_QuantityIssued DataEntryPrefix = 0xc1
+	ST_ACCOUNT        DataEntryPrefix = 0xc4
+	ST_AssetState     DataEntryPrefix = 0xc5
+	ST_Validator      DataEntryPrefix = 0xc6
 )

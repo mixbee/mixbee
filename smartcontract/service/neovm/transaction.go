@@ -9,6 +9,7 @@ import (
 )
 
 // GetExecutingAddress push transaction's hash to vm stack
+// 获得当前交易的 Hash
 func TransactionGetHash(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	txn, _ := vm.PopInteropInterface(engine)
 	tx := txn.(*types.Transaction)
@@ -18,6 +19,7 @@ func TransactionGetHash(service *NeoVmService, engine *vm.ExecutionEngine) error
 }
 
 // TransactionGetType push transaction's type to vm stack
+// 获得当前交易的类型
 func TransactionGetType(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	txn, _ := vm.PopInteropInterface(engine)
 	tx := txn.(*types.Transaction)
@@ -26,6 +28,7 @@ func TransactionGetType(service *NeoVmService, engine *vm.ExecutionEngine) error
 }
 
 // TransactionGetAttributes push transaction's attributes to vm stack
+// 查询当前交易的所有属性
 func TransactionGetAttributes(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	vm.PopInteropInterface(engine)
 	attributList := make([]vmtypes.StackItems, 0)

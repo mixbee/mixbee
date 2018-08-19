@@ -21,10 +21,12 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	if count < 4 {
 		return fmt.Errorf("invoke native contract invalid parameters %d < 4 ", count)
 	}
+	// parm1: version
 	version, err := vm.PopInt(engine)
 	if err != nil {
 		return err
 	}
+	// parm2: contract address
 	address, err := vm.PopByteArray(engine)
 	if err != nil {
 		return err
@@ -33,6 +35,7 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	if err != nil {
 		return fmt.Errorf("invoke native contract:%s, address invalid", address)
 	}
+	// parm3: method
 	method, err := vm.PopByteArray(engine)
 	if err != nil {
 		return err
@@ -40,6 +43,7 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	if len(method) > METHOD_LENGTH_LIMIT {
 		return fmt.Errorf("invoke native contract:%s method:%s too long, over max length 1024 limit", address, method)
 	}
+	// parm4: args
 	args := vm.PopStackItem(engine)
 
 	buf := new(bytes.Buffer)
@@ -47,6 +51,7 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 		return err
 	}
 
+	// build contract
 	contract := &states.Contract{
 		Version: byte(version),
 		Address: addr,
@@ -59,6 +64,7 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 		return err
 	}
 
+	// build nativeservice
 	native := &native.NativeService{
 		CloneCache: service.CloneCache,
 		Code:       bf.Bytes(),
@@ -69,6 +75,7 @@ func NativeInvoke(service *NeoVmService, engine *vm.ExecutionEngine) error {
 		ServiceMap: make(map[string]native.Handler),
 	}
 
+	// native invoke
 	result, err := native.Invoke()
 	if err != nil {
 		return err

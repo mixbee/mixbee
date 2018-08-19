@@ -30,22 +30,29 @@ func ContractCreate(service *NeoVmService, engine *vm.ExecutionEngine) error {
 
 // ContractMigrate migrate old smart contract to a new contract, and destroy old contract
 func ContractMigrate(service *NeoVmService, engine *vm.ExecutionEngine) error {
+	// get new contract
 	contract, err := isContractParamValid(engine)
 	if err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[ContractMigrate] contract parameters invalid!")
 	}
+	// calculate new contract address
 	contractAddress := types.AddressFromVmCode(contract.Code)
 
+	// Find out if the contract already exists based on the contract address, if not exists , then continue
 	if err := isContractExist(service, contractAddress); err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[ContractMigrate] contract invalid!")
 	}
+	// smart contract execute context struct , contains address and code
 	context := service.ContextRef.CurrentContext()
 
+	// new contract add to clonecache
 	service.CloneCache.Add(scommon.ST_CONTRACT, contractAddress[:], contract)
+	// Replace the old key with the new one, and return old key-value list.
 	items, err := storeMigration(service, context.ContractAddress, contractAddress)
 	if err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[ContractMigrate] contract store migration error!")
 	}
+	// delete from cache
 	service.CloneCache.Delete(scommon.ST_CONTRACT, context.ContractAddress[:])
 	for _, v := range items {
 		service.CloneCache.Delete(scommon.ST_STORAGE, []byte(v.Key))
@@ -78,6 +85,7 @@ func ContractDestory(service *NeoVmService, engine *vm.ExecutionEngine) error {
 }
 
 // ContractGetStorageContext put contract storage context to vm stack
+// 获得合约的存储上下文
 func ContractGetStorageContext(service *NeoVmService, engine *vm.ExecutionEngine) error {
 	if vm.EvaluationStackCount(engine) < 1 {
 		return errors.NewErr("[GetStorageContext] Too few input parameter!")
