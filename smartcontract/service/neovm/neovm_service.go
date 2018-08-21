@@ -121,12 +121,14 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 	if len(this.Code) == 0 {
 		return nil, ERR_EXECUTE_CODE
 	}
-	//if this.Tx.TxType == types.CrossChain && this.Engine.OpCode != vm.SYSCALL {
-	//	return nil, ERR_EXECUTE_ENGINE_OPCODE
-	//}
 
 	this.ContextRef.PushContext(&context.Context{ContractAddress: types.AddressFromVmCode(this.Code), Code: this.Code})
 	this.Engine.PushContext(vm.NewExecutionContext(this.Engine, this.Code))
+
+	//if this.Tx.SystemTx && this.Engine.OpCode != vm.SYSCALL {
+	//	return nil, ERR_EXECUTE_ENGINE_OPCODE
+	//}
+
 	for {
 		//check the execution step count
 		if !this.ContextRef.CheckExecStep() {
@@ -167,6 +169,10 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 
 		switch this.Engine.OpCode {
 		case vm.VERIFY:
+			if this.Tx.SystemTx {
+				return nil, errors.NewErr("[NeoVmService] service system call error not support systemTx!")
+			}
+
 			if vm.EvaluationStackCount(this.Engine) < 3 {
 				log.Errorf("Invoke [VERIFY] Too few input parameters ")
 				return nil, errors.NewErr("[VERIFY] Too few input parameters ")
@@ -198,6 +204,11 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 				return nil, errors.NewDetailErr(err, errors.ErrNoCode, "[NeoVmService] service system call error!")
 			}
 		case vm.APPCALL, vm.TAILCALL:
+
+			if this.Tx.SystemTx {
+				return nil, errors.NewErr("[NeoVmService] service system call error not support systemTx!")
+			}
+
 			address := this.Engine.Context.OpReader.ReadBytes(20)
 			code, err := this.getContract(address)
 			if err != nil {

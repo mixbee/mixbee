@@ -84,17 +84,19 @@ func (ta *TxActor) handleTransaction(sender tc.SenderType, self *actor.PID,
 			return
 		}
 
-		if txn.GasLimit < config.DefConfig.Common.GasLimit ||
-			txn.GasPrice < ta.server.getGasPrice() {
-			log.Debugf("handleTransaction: invalid gasLimit %v, gasPrice %v",
-				txn.GasLimit, txn.GasPrice)
-			return
-		}
+		if !txn.SystemTx {
+			if txn.GasLimit < config.DefConfig.Common.GasLimit ||
+				txn.GasPrice < ta.server.getGasPrice() {
+				log.Debugf("handleTransaction: invalid gasLimit %v, gasPrice %v",
+					txn.GasLimit, txn.GasPrice)
+				return
+			}
 
-		if txn.TxType == tx.Deploy && txn.GasLimit < neovm.CONTRACT_CREATE_GAS {
-			log.Debugf("handleTransaction: deploy tx invalid gasLimit %v, gasPrice %v",
-				txn.GasLimit, txn.GasPrice)
-			return
+			if txn.TxType == tx.Deploy && txn.GasLimit < neovm.CONTRACT_CREATE_GAS {
+				log.Debugf("handleTransaction: deploy tx invalid gasLimit %v, gasPrice %v",
+					txn.GasLimit, txn.GasPrice)
+				return
+			}
 		}
 
 		if ta.server.preExec && sender != tc.HttpSender {

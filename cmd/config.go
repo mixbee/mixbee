@@ -68,14 +68,8 @@ func setCrossChainConfig(ctx *cli.Context, verifyConfig *config.CrossChainVerify
 			return fmt.Errorf("if set enablecrosschaininter is true,crosschainnode must be set ")
 		}
 		verifyConfig.MainVerifyNode = node
-
-		if ctx.GlobalUint64(utils.GetFlagName(utils.GasPriceFlag)) > 0 {
-			return fmt.Errorf("if set enablecrosschaininter is true,min gasprice must be 0 ")
-		}
 	}
 
-	//verifyConfig.SubChainNode[3] = []string{"http://localhost:20336"}
-	//verifyConfig.SubChainNode[5] = []string{"http://localhost:20336"}
 	return nil
 }
 

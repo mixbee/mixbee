@@ -321,6 +321,7 @@ func CrossUnlockTx(gasPrice, gasLimit uint64, seqId string, method string) (*typ
 		TxType:   types.Invoke,
 		Nonce:    uint32(time.Now().Unix()),
 		Payload:  invokePayload,
+		SystemTx:true,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil

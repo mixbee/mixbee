@@ -28,6 +28,7 @@ type Transaction struct {
 	//Attributes []*TxAttribute
 	attributes byte //this must be 0 now, Attribute Array length use VarUint encoding, so byte is enough for extension
 	Sigs       []*Sig
+	SystemTx   bool
 
 	hash *common.Uint256
 }
@@ -179,6 +180,12 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[SerializeUnsigned], Transaction item txAttribute length serialization failed.")
 	}
 
+	err = serialization.WriteBool(w,tx.SystemTx)
+	if err != nil {
+		return errors.NewDetailErr(err, errors.ErrNoCode, "[SerializeUnsigned], Transaction item SystemTx serialization failed.")
+	}
+
+
 	return nil
 }
 
@@ -262,6 +269,12 @@ func (tx *Transaction) DeserializeUnsigned(r io.Reader) error {
 		return fmt.Errorf("transaction attribute must be 0, got %d", length)
 	}
 	tx.attributes = 0
+
+	systemTx, err := serialization.ReadBool(r)
+	if err != nil {
+		return err
+	}
+	tx.SystemTx = systemTx
 
 	return nil
 }

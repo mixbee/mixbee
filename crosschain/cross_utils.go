@@ -113,6 +113,7 @@ func BuildCrossReleaseTx(seqId string, sig []byte) (*types.Transaction, error) {
 		TxType:   types.Invoke,
 		Nonce:    uint32(time.Now().Unix()),
 		Payload:  invokePayload,
+		SystemTx: true,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil
@@ -134,6 +135,7 @@ func BuildCrossPairEvidenceTx(param string) (*types.Transaction, error) {
 		TxType:   types.Invoke,
 		Nonce:    uint32(time.Now().Unix()),
 		Payload:  invokePayload,
+		SystemTx: true,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil

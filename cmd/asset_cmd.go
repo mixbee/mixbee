@@ -186,19 +186,19 @@ var AssetCommand = cli.Command{
 				utils.CrossChainSeqIdFlag,
 			},
 		},
-		{
-			Action: crossRelease,
-			Name:   "crelease",
-			Usage:  "cross chain release tx asset 2 toAddress",
-			Flags: []cli.Flag{
-				utils.RPCPortFlag,
-				utils.WalletFileFlag,
-				utils.TransactionGasPriceFlag,
-				utils.TransactionGasLimitFlag,
-				utils.TransactionFromFlag,
-				utils.CrossChainSeqIdFlag,
-			},
-		},
+		//{
+		//	Action: crossRelease,
+		//	Name:   "crelease",
+		//	Usage:  "cross chain release tx asset 2 toAddress",
+		//	Flags: []cli.Flag{
+		//		utils.RPCPortFlag,
+		//		utils.WalletFileFlag,
+		//		utils.TransactionGasPriceFlag,
+		//		utils.TransactionGasLimitFlag,
+		//		utils.TransactionFromFlag,
+		//		utils.CrossChainSeqIdFlag,
+		//	},
+		//},
 		{
 			Action:    crossPairQuery,
 			Name:      "crossPairQuery",

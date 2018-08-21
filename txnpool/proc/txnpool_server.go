@@ -641,7 +641,7 @@ func (s *TXPoolServer) verifyBlock(req *tc.VerifyBlockReq, sender *actor.PID) {
 	// Check whether a tx's gas price is lower than the required, if yes,
 	// just return error
 	for _, t := range req.Txs {
-		if t.GasPrice < s.gasPrice {
+		if !t.SystemTx && t.GasPrice < s.gasPrice {
 			entry := &tc.VerifyTxResult{
 				Height:  s.pendingBlock.height,
 				Tx:      t,

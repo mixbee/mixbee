@@ -300,7 +300,7 @@ func (self *Syncer) onNewBlockSyncReq(req *BlockSyncReq) error {
 
 func (self *PeerSyncer) run() {
 	// send blockinfo fetch req to peer
-	// wait blockinfo fetch rep
+	// wait blockinfo fetch rsp
 	// if have the proposal in msgpool, get proposal from msg pool, notify syncer
 	// if not have the proposal in msgpool,
 	// 				send block fetch req to peer
