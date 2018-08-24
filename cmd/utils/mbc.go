@@ -265,7 +265,7 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -297,7 +297,7 @@ func SetKeyTx(gasPrice, gasLimit uint64, from, key, value string) (*types.Transa
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -319,7 +319,7 @@ func CrossUnlockTx(gasPrice, gasLimit uint64, seqId string, method string) (*typ
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		SystemTx:true,
 		Sigs:     make([]*types.Sig, 0, 0),
@@ -362,7 +362,7 @@ func CrossChainTransferTx(gasPrice, gasLimit uint64, asset, from, to string, aAm
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -407,7 +407,7 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -456,7 +456,7 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -788,7 +788,7 @@ func NewDeployCodeTransaction(gasPrice, gasLimit uint64, code []byte, needStorag
 	tx := &types.Transaction{
 		Version:  VERSION_TRANSACTION,
 		TxType:   types.Deploy,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  deployPayload,
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,

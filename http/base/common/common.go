@@ -79,7 +79,7 @@ type Sig struct {
 }
 type Transactions struct {
 	Version    byte
-	Nonce      uint32
+	Nonce      uint64
 	GasPrice   uint64
 	GasLimit   uint64
 	Payer      string
@@ -393,7 +393,7 @@ func NewSmartContractTransaction(gasPrice, gasLimit uint64, invokeCode []byte) (
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint32(time.Now().Unix()),
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}

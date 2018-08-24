@@ -839,10 +839,6 @@ func Withdraw(native *native.NativeService) ([]byte, error) {
 	for i := 0; i < len(params.PeerPubkeyList); i++ {
 		peerPubkey := params.PeerPubkeyList[i]
 		pos := params.WithdrawList[i]
-		peerPubkeyPrefix, err := hex.DecodeString(peerPubkey)
-		if err != nil {
-			return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "hex.DecodeString, peerPubkey format error!")
-		}
 
 		voteInfo, err := getVoteInfo(native, contract, peerPubkey, address)
 		if err != nil {
@@ -860,6 +856,10 @@ func Withdraw(native *native.NativeService) ([]byte, error) {
 		}
 		if voteInfo.ConsensusPos == 0 && voteInfo.FreezePos == 0 && voteInfo.NewPos == 0 &&
 			voteInfo.WithdrawPos == 0 && voteInfo.WithdrawFreezePos == 0 && voteInfo.WithdrawUnfreezePos == 0 {
+			peerPubkeyPrefix, err := hex.DecodeString(peerPubkey)
+			if err != nil {
+				return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "hex.DecodeString, peerPubkey format error!")
+			}
 			native.CloneCache.Delete(scommon.ST_STORAGE, utils.ConcatKey(contract, []byte(VOTE_INFO_POOL), peerPubkeyPrefix, address[:]))
 		}
 	}

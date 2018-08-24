@@ -20,7 +20,7 @@ import (
 type Transaction struct {
 	Version  byte
 	TxType   TransactionType
-	Nonce    uint32
+	Nonce    uint64
 	GasPrice uint64
 	GasLimit uint64
 	Payer    common.Address
@@ -155,7 +155,7 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 	if _, err := w.Write([]byte{byte(tx.Version), byte(tx.TxType)}); err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[SerializeUnsigned], Transaction version failed.")
 	}
-	if err := serialization.WriteUint32(w, tx.Nonce); err != nil {
+	if err := serialization.WriteUint64(w, tx.Nonce); err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[SerializeUnsigned], Transaction nonce failed.")
 	}
 	if err := serialization.WriteUint64(w, tx.GasPrice); err != nil {
@@ -225,7 +225,7 @@ func (tx *Transaction) DeserializeUnsigned(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	nonce, err := serialization.ReadUint32(r)
+	nonce, err := serialization.ReadUint64(r)
 	if err != nil {
 		return err
 	}

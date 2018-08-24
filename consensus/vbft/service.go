@@ -1687,7 +1687,7 @@ func (self *Server) msgSendLoop() {
 //creategovernaceTransaction invoke governance native contract commit_pos
 func (self *Server) creategovernaceTransaction(blkNum uint32) *types.Transaction {
 	tx := utils.BuildNativeTransaction(nutils.GovernanceContractAddress, gover.COMMIT_DPOS, []byte{})
-	tx.Nonce = blkNum
+	tx.Nonce = uint64(blkNum)
 	return tx
 }
 
