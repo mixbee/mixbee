@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"github.com/mixbee/mixbee/core/types"
-	"github.com/mixbee/mixbee/smartcontract/service/native/crosschain"
 	"time"
 	"github.com/mixbee/mixbee/core/payload"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
@@ -18,6 +17,8 @@ import (
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 	"github.com/mixbee/mixbee/http/base/rpc"
 	"github.com/mixbee/mixbee/smartcontract/service/native/crosspairevidence"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosschaintx"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crossverifynode"
 )
 
 const (
@@ -66,6 +67,22 @@ func CrossChainReleaseAssetByMainChain(signer *account.Account, addr, seqId stri
 	return txHash, nil
 }
 
+func CrossChainVerifyNodeRegister(signer *account.Account,info *CrossChainVerifyNode,addr string) (string, error) {
+	transferTx, err := BuildCrossVerifyRegisterTx(info)
+	if err != nil {
+		return "", err
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SignTransaction error:%s", err)
+	}
+	txHash, err := SendRawTransactionWithAddr(transferTx,addr)
+	if err != nil {
+		return "", fmt.Errorf("SendTransaction error:%s", err)
+	}
+	return txHash, nil
+}
+
 func SignTransaction(signer *account.Account, tx *types.Transaction) error {
 	tx.Payer = signer.Address
 	txHash := tx.Hash()
@@ -95,12 +112,37 @@ func Sign(data []byte, signer *account.Account) ([]byte, error) {
 	return sigData, nil
 }
 
+func BuildCrossVerifyRegisterTx(info *CrossChainVerifyNode) (*types.Transaction, error) {
+	contractAddr := utils.CrossChainVerifynodeContractAddress
+	version := VERSION_CONTRACT_CROSS_CHAIN
+	nodeInfo := &crossverifynode.CrossVerifyNodeInfo{
+		Pbk:info.PublicKey,
+	}
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crossverifynode.REGISTER_VERIFY_NODE, []interface{}{nodeInfo})
+	if err != nil {
+		return nil, fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: 0,
+		GasLimit: 20000,
+		TxType:   types.Invoke,
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Payload:  invokePayload,
+		SystemTx: true,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, nil
+}
+
 func BuildCrossReleaseTx(seqId string, sig []byte) (*types.Transaction, error) {
 	sigHex := hex.EncodeToString(sig)
 	param := seqId + ":" + sigHex
 	contractAddr := utils.CrossChainContractAddress
 	version := VERSION_CONTRACT_CROSS_CHAIN
-	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crosschain.CROSS_RELEASE, []interface{}{param})
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crosschaintx.CROSS_RELEASE, []interface{}{param})
 	if err != nil {
 		return nil, fmt.Errorf("build invoke code error:%s", err)
 	}

@@ -1,4 +1,4 @@
-package crosschain
+package crosschaintx
 
 import (
 	"github.com/mixbee/mixbee/common"

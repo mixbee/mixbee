@@ -10,21 +10,30 @@ import (
 	"github.com/mixbee/mixbee/events"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"encoding/json"
-	"github.com/mixbee/mixbee/smartcontract/service/native/crosschain"
 	"github.com/mixbee/mixbee/common/config"
 	"time"
 	"github.com/mixbee/mixbee/common"
 	"strconv"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosschaintx"
+	"sync"
 )
 
 var SubCrossChainServerInstant *SubCrossChainServer
 
 type SubCrossChainServer struct {
-	MainVerifyNodes *VerifyNodes
-	SubCrossPid     *actor.PID
+	MainVerifyNodes                 *VerifyNodes
+	SubCrossPid                     *actor.PID
+	CrossChainTxToMainChainPendings map[string]*CrossChainTxToMainChainInfo
+	sync.RWMutex
 }
 
 type SubChainTimeOut struct {
+}
+
+type CrossChainTxToMainChainInfo struct {
+	Info     *crosschaintx.CrossChainStateResult
+	TxHash   string
+	TryCount uint32
 }
 
 func StartSubChainServer() {
@@ -38,6 +47,7 @@ func StartSubChainServer() {
 	server := &SubCrossChainServer{}
 	server.SubCrossPid = subPID
 	server.MainVerifyNodes = NewVerifyNodes()
+	server.CrossChainTxToMainChainPendings = make(map[string]*CrossChainTxToMainChainInfo)
 	SubCrossChainServerInstant = server
 
 	go func() {
@@ -46,6 +56,7 @@ func StartSubChainServer() {
 			select {
 			case <-ticker.C:
 				subPID.Tell(&SubChainTimeOut{})
+				go handleCrossChainTxToMainChainPendings()
 			}
 		}
 	}()
@@ -61,6 +72,23 @@ func Receive(c actor.Context) {
 	}
 }
 
+func handleCrossChainTxToMainChainPendings() {
+	if len(SubCrossChainServerInstant.CrossChainTxToMainChainPendings) == 0 {
+		return
+	}
+	SubCrossChainServerInstant.Lock()
+	defer SubCrossChainServerInstant.Unlock()
+	for _, value := range SubCrossChainServerInstant.CrossChainTxToMainChainPendings {
+		if value.TryCount == 10 {
+			delete(SubCrossChainServerInstant.CrossChainTxToMainChainPendings, value.TxHash)
+			log.Errorf("cross chain tx hash=%s try 10 count push to main chain failed. info=%+v", value.TxHash, value)
+			continue
+		}
+		delete(SubCrossChainServerInstant.CrossChainTxToMainChainPendings, value.TxHash)
+		doPushCrossChainTxToMainChain(value.Info, value.TxHash, value.TryCount+1)
+	}
+}
+
 func timeout() {
 	//定时更新主链跨链验证节点
 	addr := config.DefConfig.CrossChain.MainVerifyNode[0]
@@ -70,7 +98,7 @@ func timeout() {
 		log.Errorf("SubCrossChainServerInstant getAllVerifyNodeInfo err %s", err.Error())
 		return
 	}
-	log.Infof("getAllVerifyNodeInfo error %s", result)
+	log.Infof("getAllVerifyNodeInfo %s", result)
 	SubCrossChainServerInstant.UpdateMainVerifyNodes(result)
 	//向主链发送存活消息
 	ip, err := common.GetLocalIp()
@@ -82,7 +110,6 @@ func timeout() {
 	portStr := strconv.FormatUint(uint64(port), 10)
 	subhost := "http://" + ip + ":" + portStr
 	subNetId := strconv.FormatUint(uint64(config.DefConfig.P2PNode.NetworkId), 10)
-
 	mainHost := config.DefConfig.CrossChain.MainVerifyNode[0]
 	SendRpcRequestWithAddr(mainHost, "registerSubChainNode", []interface{}{subNetId, subhost})
 }
@@ -149,23 +176,32 @@ func pushCrossChainTxToMainChain(bools map[string]bool, notify bcomn.ExecuteNoti
 	method := stateInfos[0].(string)
 	infoStr := stateInfos[1].(string)
 	log.Infof("subchain pushCrossChainTxToMainChain method=%s,info=%s", method, infoStr)
-	if method == crosschain.CROSS_TRANSFER {
-		info := crosschain.CrossChainStateResult{}
-		err := json.Unmarshal([]byte(infoStr), &info)
+	if method == crosschaintx.CROSS_TRANSFER {
+		info := &crosschaintx.CrossChainStateResult{}
+		err := json.Unmarshal([]byte(infoStr), info)
 		if err != nil {
 			log.Errorf("subchain pushCrossChainTxToMainChain json unmarshal err", err)
 			return
 		}
-		nodeInfo := SubCrossChainServerInstant.GetVerifyNodeInfoByPublicKey(info.VerifyPublicKey)
-		if nodeInfo == nil {
-			log.Errorf("pushCrossChainTxToMainChain no verify public %s node info", info.VerifyPublicKey)
-			return
-		}
-		params := []interface{}{info.From, info.To, info.AValue, info.BValue, info.AChainId, info.BChainId, notify.TxHash, info.SeqId, info.Timestamp, info.Nonce, info.VerifyPublicKey}
-		result, err := SendRpcRequestWithAddr(nodeInfo.Host, "pushCrossChainTxInfo", params)
-		if err != nil {
-			log.Errorf("pushCrossChainTxToMainChain error %s", err.Error())
-		}
-		log.Infof("pushCrossChainTxToMainChain result %s", result)
+		doPushCrossChainTxToMainChain(info, notify.TxHash, 1)
 	}
+}
+
+func doPushCrossChainTxToMainChain(info *crosschaintx.CrossChainStateResult, txHash string, count uint32) {
+	nodeInfo := SubCrossChainServerInstant.GetVerifyNodeInfoByPublicKey(info.VerifyPublicKey)
+	if nodeInfo == nil {
+		log.Warnf("pushCrossChainTxToMainChain no verify public %s node info", info.VerifyPublicKey)
+		SubCrossChainServerInstant.CrossChainTxToMainChainPendings[txHash] = &CrossChainTxToMainChainInfo{
+			Info:     info,
+			TxHash:   txHash,
+			TryCount: count,
+		}
+		return
+	}
+	params := []interface{}{info.From, info.To, info.AValue, info.BValue, info.AChainId, info.BChainId, txHash, info.SeqId, info.Timestamp, info.Nonce, info.VerifyPublicKey}
+	result, err := SendRpcRequestWithAddr(nodeInfo.Host, "pushCrossChainTxInfo", params)
+	if err != nil {
+		log.Errorf("pushCrossChainTxToMainChain error %s", err.Error())
+	}
+	log.Infof("pushCrossChainTxToMainChain result %s", result)
 }

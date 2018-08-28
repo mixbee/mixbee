@@ -125,10 +125,6 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 	this.ContextRef.PushContext(&context.Context{ContractAddress: types.AddressFromVmCode(this.Code), Code: this.Code})
 	this.Engine.PushContext(vm.NewExecutionContext(this.Engine, this.Code))
 
-	//if this.Tx.SystemTx && this.Engine.OpCode != vm.SYSCALL {
-	//	return nil, ERR_EXECUTE_ENGINE_OPCODE
-	//}
-
 	for {
 		//check the execution step count
 		if !this.ContextRef.CheckExecStep() {

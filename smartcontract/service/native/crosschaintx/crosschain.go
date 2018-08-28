@@ -1,4 +1,4 @@
-package crosschain
+package crosschaintx
 
 import (
 	"github.com/mixbee/mixbee/common/constants"
@@ -22,7 +22,7 @@ import (
 	"github.com/mixbee/mixbee/core/signature"
 )
 
-func InitCrossChain() {
+func InitCrossChainTx() {
 	native.Contracts[utils.CrossChainContractAddress] = RegisterCrossChainContract
 }
 
@@ -153,8 +153,8 @@ func CrossRelease(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	toAddress := info.To
 	fromAddress, err := BuildDepositAddress(contract, info.From)
-	ontState := &mbc.State{From: fromAddress, To: toAddress, Value: info.AValue}
-	_, _, err = mbc.TransferForCrossChainContract(native, utils.MbcContractAddress, ontState)
+	mbcState := &mbc.State{From: fromAddress, To: toAddress, Value: info.AValue}
+	_, _, err = mbc.TransferForCrossChainContract(native, utils.MbcContractAddress, mbcState)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[CrossChain] CrossRelease asset error!")
 	}

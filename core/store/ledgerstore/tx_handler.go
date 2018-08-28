@@ -1,5 +1,3 @@
-
-
 package ledgerstore
 
 import (
@@ -229,7 +227,7 @@ func (self *StateStore) HandleCrossChainTransaction(store store.LedgerStore, sta
 	//code := invoke.Code
 
 	// init smart contract configuration info
-	sconfig := &smartcontract.Config {
+	sconfig := &smartcontract.Config{
 		Time:   block.Header.Timestamp,
 		Height: block.Header.Height,
 		Tx:     tx,

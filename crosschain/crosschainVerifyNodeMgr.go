@@ -12,16 +12,20 @@ import (
 	"github.com/mixbee/mixbee/common/config"
 	"strconv"
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crossverifynode"
 )
 
 type CrossChainVerifyNode struct {
 	PublicKey string `json:"publicKey"`
 	Host      string `json:"host"`
 	TimeStamp uint32 `json:"timestamp"`
+	Status    uint64 `json:"status"`
+	Deposit   uint64 `json:"deposit"`
 }
 
 type VerifyNodes struct {
 	VerifyerNodes map[string]*CrossChainVerifyNode
+	acc           *account.Account
 	sync.RWMutex
 }
 
@@ -33,6 +37,7 @@ func NewVerifyNodes() *VerifyNodes {
 
 func (this *VerifyNodes) Init(acc *account.Account, p2pPid *actor.PID) {
 	go func() {
+		this.acc = acc
 		bb, host := getVerifyNodeMetaInfo(acc)
 		this.RegisterNodes(hex.EncodeToString(bb), host)
 		ticker := time.NewTicker(config.DEFAULT_CROSS_CHAIN_VERIFY_PING_TIME * time.Second)
@@ -97,14 +102,31 @@ func (this *VerifyNodes) RegisterNodes(pbk, host string) {
 		TimeStamp: uint32(time.Now().Unix()),
 	}
 
+	//check verifyNode from native smartContract crossVerifyNode
+	nodeInfo, err := getVerifyNodeInfoFromNative(pbk)
+	if err != nil {
+		log.Errorf("crossVerifyNode||RegisterNodes||error %s", err)
+		return
+	}
+	if nodeInfo == nil {
+		//register verifyNode
+		txhash, err := CrossChainVerifyNodeRegister(this.acc, info, host)
+		if err != nil {
+			log.Errorf("crossVerifyNode||RegisterNodes||error %s", err)
+			return
+		}
+		log.Infof("crossVerifyNode||RegisterNodes||txHash %s", txhash)
+	} else {
+		info.Deposit = nodeInfo.Deposit
+		info.Status = nodeInfo.CurrentStatus
+	}
+
 	this.VerifyerNodes[pbk] = info
-	log.Debugf("cross chain verify nodes %d", len(this.VerifyerNodes))
 }
 
 func (this *VerifyNodes) DeleteNodes(pbk string) {
 	this.Lock()
 	defer this.Unlock()
-
 	delete(this.VerifyerNodes, pbk)
 }
 
@@ -118,7 +140,9 @@ func (this *VerifyNodes) GetNodes() []*CrossChainVerifyNode {
 	}
 
 	for _, v := range this.VerifyerNodes {
-		nodes = append(nodes, v)
+		if v.Status == crossverifynode.CanVerifyStatus {
+			nodes = append(nodes, v)
+		}
 	}
 	return nodes
 }

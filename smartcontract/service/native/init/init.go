@@ -20,7 +20,8 @@ import (
 	"github.com/mixbee/mixbee/smartcontract/service/neovm"
 	vm "github.com/mixbee/mixbee/vm/neovm"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mixtest"
-	"github.com/mixbee/mixbee/smartcontract/service/native/crosschain"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosschaintx"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crossverifynode"
 )
 
 var (
@@ -36,9 +37,9 @@ func init() {
 	governance.InitGovernance()
 
 	mixtest.InitMixTest()
-	crosschain.InitCrossChain()
+	crosschaintx.InitCrossChainTx()
 	crosspairevidence.InitCrossPairEvidence()
-
+	crossverifynode.InitCrossChainVerifyNode()
 }
 
 func InitBytes(addr common.Address, method string) []byte {

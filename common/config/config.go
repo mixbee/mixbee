@@ -262,7 +262,7 @@ type VBFTConfig struct {
 	PeerHandshakeTimeout uint32               `json:"peer_handshake_timeout"`
 	MaxBlockChangeView   uint32               `json:"max_block_change_view"`
 	MinInitStake         uint32               `json:"min_init_stake"`
-	AdminMixID           string               `json:"admin_ont_id"`
+	AdminMixID           string               `json:"admin_mix_id"`
 	VrfValue             string               `json:"vrf_value"`
 	VrfProof             string               `json:"vrf_proof"`
 	Peers                []*VBFTPeerStakeInfo `json:"peers"`

@@ -41,17 +41,17 @@ const (
 	BLACK_NODE                       = "blackNode"
 	WHITE_NODE                       = "whiteNode"
 	QUIT_NODE                        = "quitNode"
-	VOTE_FOR_PEER                    = "voteForPeer"
-	VOTE_FOR_PEER_TRANSFER_FROM      = "voteForPeerTransferFrom"
-	UNVOTE_FOR_PEER                  = "unVoteForPeer"
-	WITHDRAW                         = "withdraw"
-	COMMIT_DPOS                      = "commitDpos"
-	UPDATE_CONFIG                    = "updateConfig"
-	UPDATE_GLOBAL_PARAM              = "updateGlobalParam"
-	UPDATE_SPLIT_CURVE               = "updateSplitCurve"
-	CALL_SPLIT                       = "callSplit"
-	TRANSFER_PENALTY                 = "transferPenalty"
-	WITHDRAW_ONG                     = "withdrawMbg"
+	VOTE_FOR_PEER               = "voteForPeer"
+	VOTE_FOR_PEER_TRANSFER_FROM = "voteForPeerTransferFrom"
+	UNVOTE_FOR_PEER             = "unVoteForPeer"
+	WITHDRAW                    = "withdraw"
+	COMMIT_DPOS                 = "commitDpos"
+	UPDATE_CONFIG               = "updateConfig"
+	UPDATE_GLOBAL_PARAM         = "updateGlobalParam"
+	UPDATE_SPLIT_CURVE          = "updateSplitCurve"
+	CALL_SPLIT                  = "callSplit"
+	TRANSFER_PENALTY            = "transferPenalty"
+	WITHDRAW_MBG                = "withdrawMbg"
 
 	//key prefix
 	GLOBAL_PARAM    = "globalParam"
@@ -97,7 +97,7 @@ func RegisterGovernanceContract(native *native.NativeService) {
 	native.Register(UNVOTE_FOR_PEER, UnVoteForPeer)
 	native.Register(WITHDRAW, Withdraw)
 	native.Register(QUIT_NODE, QuitNode)
-	native.Register(WITHDRAW_ONG, WithdrawMbg)
+	native.Register(WITHDRAW_MBG, WithdrawMbg)
 
 	native.Register(INIT_CONFIG, InitConfig)
 	native.Register(APPROVE_CANDIDATE, ApproveCandidate)

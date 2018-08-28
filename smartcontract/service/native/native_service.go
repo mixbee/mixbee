@@ -1,5 +1,3 @@
-
-
 package native
 
 import (
@@ -16,7 +14,7 @@ import (
 )
 
 type (
-	Handler         func(native *NativeService) ([]byte, error)
+	Handler func(native *NativeService) ([]byte, error)
 	RegisterService func(native *NativeService)
 )
 
@@ -53,8 +51,8 @@ func (this *NativeService) Invoke() (interface{}, error) {
 		return false, fmt.Errorf("Native contract address %x haven't been registered.", contract.Address)
 	}
 
-	if this.Tx.SystemTx && !IsSystemTx(contract.Address,contract.Method){
-		return false, fmt.Errorf("Native contract address %x method %x not support systemTx.", contract.Address,contract.Method)
+	if this.Tx.SystemTx && !IsSystemTx(contract.Address, contract.Method) {
+		return false, fmt.Errorf("Native contract address %x method %x not support systemTx.", contract.Address, contract.Method)
 	}
 
 	services(this)
@@ -93,16 +91,20 @@ func (this *NativeService) NativeCall(address common.Address, method string, arg
 	return this.Invoke()
 }
 
-
-func IsSystemTx(address common.Address,method string) bool {
+func IsSystemTx(address common.Address, method string) bool {
 
 	CrossChainContractAddress, _ := common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09})
 
 	if address == CrossChainContractAddress && (method == "crossRelease" || method == "crossUnlock") {
 		return true
 	}
-	CrossChainPairEvidenceContractAddress, _  := common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10})
+	CrossChainPairEvidenceContractAddress, _ := common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10})
 	if address == CrossChainPairEvidenceContractAddress && method == "pushEvidence" {
+		return true
+	}
+
+	CrossChainVerifynodeContractAddress, _ := common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11})
+	if address == CrossChainVerifynodeContractAddress && method == "registerVerifyNode" {
 		return true
 	}
 

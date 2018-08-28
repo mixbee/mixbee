@@ -51,7 +51,7 @@ func NewCTxPoolServer(num uint8, acc *account.Account, p2pPid *actor.PID) (*acto
 	pidActor := NewCrossChainActor(s)
 	pid, err := pidActor.Start()
 	if err != nil {
-		return nil, fmt.Errorf("crosschain actor init error %s", err)
+		return nil, fmt.Errorf("crosschaintx actor init error %s", err)
 	}
 	s.Pid = pid
 
@@ -174,7 +174,7 @@ func txEndConfirmHandler(server *CTXPoolServer) {
 		}
 
 		if firstResult.Statue != 0 && secondResult.Statue != 0 {
-			log.Warnf("cross chain || seqid=%s finished... ", value.First.SeqId)
+			log.Infof("cross chain || seqid=%s finished... ", value.First.SeqId)
 			delete(pool.TxList, k)
 			if config.DefConfig.Genesis.ConsensusType != config.CONSENSUS_TYPE_SOLO {
 				server.P2pPid.Tell(&p2ptypes.CrossChainTxCompletedPayload{

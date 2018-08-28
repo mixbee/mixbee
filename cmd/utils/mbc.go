@@ -24,7 +24,8 @@ import (
 	"strings"
 	"time"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mixtest"
-	"github.com/mixbee/mixbee/smartcontract/service/native/crosschain"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crosschaintx"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crossverifynode"
 )
 
 const (
@@ -135,6 +136,22 @@ func SetKey(gasPrice, gasLimit uint64, signer *account.Account, key, value strin
 
 func CrossUnlockOrRelease(gasPrice, gasLimit uint64, signer *account.Account, seqId string, method string) (string, error) {
 	transferTx, err := CrossUnlockTx(gasPrice, gasLimit, seqId, method)
+	if err != nil {
+		return "", err
+	}
+	err = SignTransaction(signer, transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SignTransaction error:%s", err)
+	}
+	txHash, err := SendRawTransaction(transferTx)
+	if err != nil {
+		return "", fmt.Errorf("SendTransaction error:%s", err)
+	}
+	return txHash, nil
+}
+
+func CrossVerifyNodePaidDeposit(gasPrice, gasLimit uint64, signer *account.Account,pbk string,amount uint64) (string, error) {
+	transferTx, err := CrossVerifyNodePaidDepositTx(gasPrice, gasLimit,pbk,amount)
 	if err != nil {
 		return "", err
 	}
@@ -327,6 +344,29 @@ func CrossUnlockTx(gasPrice, gasLimit uint64, seqId string, method string) (*typ
 	return tx, nil
 }
 
+func CrossVerifyNodePaidDepositTx(gasPrice, gasLimit uint64,pbk string,amount uint64) (*types.Transaction, error) {
+
+	contractAddr := utils.CrossChainVerifynodeContractAddress
+	version := VERSION_CONTRACT_CROSS_CHAIN
+	param := fmt.Sprintf("%s:%d",pbk,amount)
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version,crossverifynode.PAID_DEPOSIT, []interface{}{param})
+	if err != nil {
+		return nil, fmt.Errorf("build invoke code error:%s", err)
+	}
+	invokePayload := &payload.InvokeCode{
+		Code: invokeCode,
+	}
+	tx := &types.Transaction{
+		GasPrice: gasPrice,
+		GasLimit: gasLimit,
+		TxType:   types.Invoke,
+		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Payload:  invokePayload,
+		Sigs:     make([]*types.Sig, 0, 0),
+	}
+	return tx, nil
+}
+
 func CrossChainTransferTx(gasPrice, gasLimit uint64, asset, from, to string, aAmount, bAmount, aChainId, bChainId, delayTime, nonce uint64, verifyPublicKey string) (*types.Transaction, string, error) {
 	fromAddr, err := common.AddressFromBase58(from)
 	if err != nil {
@@ -337,7 +377,7 @@ func CrossChainTransferTx(gasPrice, gasLimit uint64, asset, from, to string, aAm
 		return nil, "", fmt.Errorf("To address:%s invalid:%s", to, err)
 	}
 
-	crossState := &crosschain.CrossChainState{
+	crossState := &crosschaintx.CrossChainState{
 		From:            fromAddr,
 		To:              toAddr,
 		AValue:          aAmount,
@@ -349,7 +389,7 @@ func CrossChainTransferTx(gasPrice, gasLimit uint64, asset, from, to string, aAm
 		Nonce:           uint32(nonce),
 		VerifyPublicKey: verifyPublicKey,
 	}
-	crossState.SeqId = crosschain.GetSeqId(crossState)
+	crossState.SeqId = crosschaintx.GetSeqId(crossState)
 
 	invokeCode, err := httpcom.BuildNativeInvokeCode(utils.CrossChainContractAddress, VERSION_CONTRACT_CROSS_CHAIN, CONTRACT_CROSS_TRANSFER, []interface{}{crossState})
 	if err != nil {

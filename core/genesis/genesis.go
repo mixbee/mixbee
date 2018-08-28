@@ -20,6 +20,7 @@ import (
 	nutils "github.com/mixbee/mixbee/smartcontract/service/native/utils"
 	"github.com/mixbee/mixbee/smartcontract/service/neovm"
 	"log"
+	"github.com/mixbee/mixbee/smartcontract/service/native/crossverifynode"
 )
 
 const (
@@ -84,6 +85,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	mix := deployMixTestContract()
 	cross := deployCrossChainContract()
 	crossTxEvidence := 	deployCrossChainTxEvidenceContract()
+	crossVerifyNode := 	deployCrossChainVerifyNodeContract()
 
 	genesisBlock := &types.Block{
 		Header: genesisHeader,
@@ -97,12 +99,14 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 			mix,
 			cross,
 			crossTxEvidence,
+			crossVerifyNode,
 			newGoverningInit(),
 			newUtilityInit(),
 			newParamInit(),
 			govConfig,
 			newMixTest(),
 			newCrossChain(),
+			newCrossChainVerifyNode(),
 		},
 	}
 	genesisBlock.RebuildMerkleRoot()
@@ -164,6 +168,12 @@ func deployCrossChainTxEvidenceContract() *types.Transaction {
 	return tx
 }
 
+func deployCrossChainVerifyNodeContract() *types.Transaction {
+	tx := utils.NewDeployTransaction(nutils.CrossChainVerifynodeContractAddress[:], "crossVerifyNode", "1.0",
+		"Mixbee Team", "mixbee@gmail.com", "cross chain ledger", true)
+	return tx
+}
+
 func newGoverningInit() *types.Transaction {
 	bookkeepers, _ := config.DefConfig.GetBookkeepers()
 
@@ -206,6 +216,10 @@ func newMixTest() *types.Transaction {
 
 func newCrossChain() *types.Transaction {
 	return utils.BuildNativeTransaction(nutils.CrossChainContractAddress, mbc.INIT_NAME, []byte{})
+}
+
+func newCrossChainVerifyNode() *types.Transaction {
+	return utils.BuildNativeTransaction(nutils.CrossChainVerifynodeContractAddress, crossverifynode.INIT_NAME, []byte{})
 }
 
 func newParamInit() *types.Transaction {
