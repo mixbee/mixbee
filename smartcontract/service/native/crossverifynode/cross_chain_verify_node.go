@@ -18,7 +18,6 @@ import (
 	scommon "github.com/mixbee/mixbee/core/store/common"
 	"math/big"
 	ntypes "github.com/mixbee/mixbee/vm/neovm/types"
-
 )
 
 func InitCrossChainVerifyNode() {
@@ -100,7 +99,6 @@ func QueryVerifyNodeInfo(native *native.NativeService) ([]byte, error) {
 }
 
 func RegisterVerifyNode(native *native.NativeService) ([]byte, error) {
-
 	//参数反序列化
 	info := &CrossVerifyNodeInfo{}
 	if err := info.Deserialize(bytes.NewBuffer(native.Input)); err != nil {
@@ -143,12 +141,11 @@ func RegisterVerifyNode(native *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putCrossChainVerifyNodeInfo error!")
 	}
-
+	AddNotifications(native, REGISTER_VERIFY_NODE, info)
 	return utils.BYTE_TRUE, nil
 }
 
 func PaidDeposit(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
@@ -177,13 +174,12 @@ func PaidDeposit(native *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("pbk=%s verifyNode is in blackNode list", arg0)
 	}
 
-	err = appCallTransferMbc(native, native.Tx.Payer, utils.CrossChainVerifynodeContractAddress,deposit)
+	err = appCallTransferMbc(native, native.Tx.Payer, utils.CrossChainVerifynodeContractAddress, deposit)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "deposit transfer error!")
 	}
 
 	info.Deposit = info.Deposit + deposit
-
 	if info.Deposit >= MIN_DEPOSIT_MBC {
 		info.CurrentStatus = CanVerifyStatus
 	} else {
@@ -194,12 +190,11 @@ func PaidDeposit(native *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putCrossChainVerifyNodeInfo error!")
 	}
-
+	AddNotifications(native, PAID_DEPOSIT, info)
 	return utils.BYTE_TRUE, nil
 }
 
 func ApplyWithdrawDeposit(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
@@ -221,17 +216,15 @@ func ApplyWithdrawDeposit(native *native.NativeService) ([]byte, error) {
 	info.Deposit = 0
 	info.WithDrawStartTime = uint64(native.Time)
 	info.CurrentStatus = WaitReadyStatus
-
 	err = putCrossChainVerifyNodeInfo(native, info)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putCrossChainVerifyNodeInfo error!")
 	}
-
+	AddNotifications(native, APPLY_WITHDRAW_DEPOSIT, info)
 	return utils.BYTE_TRUE, nil
 }
 
 func WithdrawDeposit(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
@@ -271,12 +264,12 @@ func WithdrawDeposit(native *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putCrossChainVerifyNodeInfo error!")
 	}
+	AddNotifications(native, WITHDRAW_DEPOSIT, info)
 
 	return utils.BYTE_TRUE, nil
 }
 
 func FrozeDeposit(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
@@ -316,12 +309,11 @@ func FrozeDeposit(native *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putCrossChainVerifyNodeInfo error!")
 	}
-
+	AddNotifications(native, FROZE_DEPOSIT, info)
 	return utils.BYTE_TRUE, nil
 }
 
 func PunishingDeposit(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
@@ -357,18 +349,16 @@ func PunishingDeposit(native *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "putCrossChainVerifyNodeInfo error!")
 	}
-
+	AddNotifications(native, PUNISHING_DEPOSIT, info)
 	return utils.BYTE_TRUE, nil
 }
 
 func BlackNode(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewErr("BlackNode failed: argument 0 error, " + err.Error())
 	}
-
 	info, err := getCrossChainVerifyNodeInfoByPublicKey(native, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "getCrossChainVerifyNodeInfoByPublicKey error!")
@@ -387,18 +377,16 @@ func BlackNode(native *native.NativeService) ([]byte, error) {
 	}
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	utils.PutBytes(native, utils.ConcatKey(contract, []byte(BLACK_VERIFY_NODES)), []byte(info.Pbk))
-
+	AddNotifications(native, BLACK_VERIFY_NODE, info)
 	return utils.BYTE_TRUE, nil
 }
 
 func WhiteNode(native *native.NativeService) ([]byte, error) {
-
 	args := bytes.NewBuffer(native.Input)
 	arg0, err := serialization.ReadString(args)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewErr("WhiteNode failed: argument 0 error, " + err.Error())
 	}
-
 	info, err := getCrossChainVerifyNodeInfoByPublicKey(native, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "getCrossChainVerifyNodeInfoByPublicKey error!")
@@ -406,7 +394,6 @@ func WhiteNode(native *native.NativeService) ([]byte, error) {
 	if info == nil {
 		return utils.BYTE_FALSE, errors.NewErr("not found verifyNode pbk=" + arg0)
 	}
-
 	info.Deposit = info.FrozeDeposit
 	if info.Deposit >= MIN_DEPOSIT_MBC {
 		info.CurrentStatus = CanVerifyStatus
@@ -419,5 +406,6 @@ func WhiteNode(native *native.NativeService) ([]byte, error) {
 	}
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	native.CloneCache.Delete(scommon.ST_STORAGE, utils.ConcatKey(contract, []byte(BLACK_VERIFY_NODES), []byte(info.Pbk)))
+	AddNotifications(native, WITHDRAW_DEPOSIT, info)
 	return utils.BYTE_TRUE, nil
 }

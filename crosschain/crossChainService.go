@@ -13,6 +13,12 @@ import (
 	"github.com/mixbee/mixbee-crypto/keypair"
 	"encoding/hex"
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
+	"github.com/mixbee/mixbee/events"
+	"github.com/mixbee/mixbee/events/message"
+	"github.com/mixbee/mixbee/core/types"
+	"github.com/mixbee/mixbee/smartcontract/event"
+	bcomn "github.com/mixbee/mixbee/http/base/common"
+	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
 )
 
 var CtxServer *CTXPoolServer
@@ -54,7 +60,8 @@ func NewCTxPoolServer(num uint8, acc *account.Account, p2pPid *actor.PID) (*acto
 		return nil, fmt.Errorf("crosschaintx actor init error %s", err)
 	}
 	s.Pid = pid
-
+	sub1 := events.NewActorSubscriber(pid)
+	sub1.Subscribe(message.TOPIC_SMART_CODE_EVENT)
 	CtxServer = s
 	return pid, nil
 }
@@ -126,19 +133,16 @@ func (s *CTXPoolServer) Start() {
 	}
 }
 func txEndConfirmHandler(server *CTXPoolServer) {
-
 	pool := server.pairTxEndConfirm
 	if pool == nil || len(pool.TxList) == 0 {
 		return
 	}
-
 	pool.Lock()
 	defer pool.Unlock()
 
 	log.Infof("cross chain || txEndConfirmHandler len=%v", len(pool.TxList))
 
 	for k, value := range pool.TxList {
-
 		seqId := value.First.SeqId
 		value.First.ConfrimCheckCount += 1
 		firstPath := server.SubNetNodesMgr.GetSubNetNode(value.First.ANetWorkId)
@@ -148,7 +152,6 @@ func txEndConfirmHandler(server *CTXPoolServer) {
 			continue
 		}
 		value.First.State = firstResult.Statue
-
 		secondPath := server.SubNetNodesMgr.GetSubNetNode(value.Second.ANetWorkId)
 		secondResult, err := GetCrossChainTxInfoBySeqId(secondPath, seqId)
 		if err != nil {
@@ -156,15 +159,12 @@ func txEndConfirmHandler(server *CTXPoolServer) {
 			continue
 		}
 		value.Second.State = secondResult.Statue
-
 		if firstResult.Statue == 0 && firstResult.Timestamp < uint32(time.Now().Unix()) && value.First.ConfrimCheckCount > 3 {
 			value.First.ReleaseTxHash = ""
 		}
-
 		if secondResult.Statue == 0 && secondResult.Timestamp < uint32(time.Now().Unix()) && value.First.ConfrimCheckCount > 3 {
 			value.Second.ReleaseTxHash = ""
 		}
-
 		if value.First.ReleaseTxHash == "" || value.Second.ReleaseTxHash == "" {
 			log.Warnf("cross chain || seqid=%s releaseHash invalid,reRelease ", value.First.SeqId)
 			value.First.ConfrimCheckCount = 0
@@ -186,9 +186,8 @@ func txEndConfirmHandler(server *CTXPoolServer) {
 					Type:              uint32(2),
 				})
 			}
-
 			//写入智能合约存证
-			pushCrossTxEvidence2SmartContract(value,server.VerifyerAccount)
+			pushCrossTxEvidence2SmartContract(value, server.VerifyerAccount)
 		}
 	}
 }
@@ -202,7 +201,6 @@ func releaseLockToken(s *CTXPoolServer) {
 	defer pool.Unlock()
 
 	log.Infof("cross chain || releaseLockToken len=%v", len(pool.TxList))
-
 	for k, value := range pool.TxList {
 		firstSeqId := value.First.SeqId
 		secondSeqId := value.Second.SeqId
@@ -241,7 +239,6 @@ func releaseLockToken(s *CTXPoolServer) {
 
 //校验交易双方是否打包
 func txMatchPair(s *CTXPoolServer) {
-
 	pool := s.pairTxPending
 	if pool == nil || len(pool.TxList) == 0 {
 		return
@@ -275,9 +272,7 @@ func txVerify(s *CTXPoolServer) {
 	txMap := pool.TxList
 
 	for k, v := range txMap {
-
 		log.Infof("cross chain || txVerify k = %s", k)
-
 		first := v.First
 		if first != nil {
 			ok, expire := checkCrossChainTxBySeqId(first)
@@ -286,7 +281,6 @@ func txVerify(s *CTXPoolServer) {
 				pool.TxList = txMap
 				continue
 			}
-
 			if !ok {
 				continue
 			}
@@ -308,12 +302,10 @@ func txVerify(s *CTXPoolServer) {
 				pool.TxList = txMap
 				return
 			}
-
 			if !ok {
 				return
 			}
 			//sign cross chain tx
-
 			sigDate := second.SeqId
 			sig, err := signature.Sign(s.VerifyerAccount, []byte(sigDate))
 			if err != nil {
@@ -322,7 +314,6 @@ func txVerify(s *CTXPoolServer) {
 			}
 			second.Sig = sig
 		}
-
 		s.txToMatchPair <- v
 		delete(txMap, k)
 		pool.TxList = txMap
@@ -332,7 +323,6 @@ func txVerify(s *CTXPoolServer) {
 // init initializes the server with the configured settings
 func (s *CTXPoolServer) PushCtxToPool(rsq *httpactor.PushCrossChainTxRsq) error {
 	log.Infof("cross chain PushCtxToPool params=%#v", rsq)
-
 	entry := &CTXEntry{
 		From:       rsq.From,
 		To:         rsq.To,
@@ -346,7 +336,6 @@ func (s *CTXPoolServer) PushCtxToPool(rsq *httpactor.PushCrossChainTxRsq) error 
 		Nonce:      rsq.Nonce,
 		Pubk:       rsq.Pubk,
 	}
-
 	if s.IsVerifyNode(rsq.Pubk) {
 		s.txPool.push(entry)
 	} else {
@@ -360,25 +349,47 @@ func (s *CTXPoolServer) IsVerifyNode(pbk string) bool {
 	if s.VerifyerAccount == nil {
 		return false
 	}
-
 	bb := keypair.SerializePublicKey(s.VerifyerAccount.PublicKey)
 	publicKey := hex.EncodeToString(bb)
 	return pbk == publicKey
 }
 
 func (s *CTXPoolServer) CrossTxCompletedHandler(info *p2ptypes.CrossChainTxCompletedPayload) {
-
 	log.Infof("CrossTxCompletedHandler param %v", info)
-
 	seqId := info.SeqId
 	//delete txpool
 	s.txPool.delete(seqId)
-
 	s.pairTxPending.delete(seqId)
-
 	s.pairTxRelease.delete(seqId)
-
 	if info.Type == 2 {
 		s.pairTxEndConfirm.delete(seqId)
 	}
+}
+
+func handlerSmartCodeEvent(v interface{}) {
+	rs, ok := v.(types.SmartCodeEvent)
+	if !ok {
+		log.Errorf("[handlerSmartCodeEvent]", "SmartCodeEvent err")
+		return
+	}
+	switch object := rs.Result.(type) {
+	case *event.ExecuteNotify:
+		contractAddrs, notify := bcomn.GetExecuteNotify(object)
+		if _, ok := contractAddrs[utils.CrossChainVerifynodeContractAddress.ToHexString()]; !ok {
+			return
+		}
+		if len(notify.Notify) < 1 {
+			return
+		}
+		doHandlerSmartCodeEvent(notify)
+	default:
+	}
+}
+
+func doHandlerSmartCodeEvent(notify bcomn.ExecuteNotify) {
+	stateInfos := notify.Notify[0].States.([]interface{})
+	method := stateInfos[0].(string)
+	infoStr := stateInfos[1].(string)
+	log.Infof("mainchain doHandlerSmartCodeEvent method=%s,info=%s", method, infoStr)
+	CtxServer.VerifyNodes.UpdateVerifyNodeInfo(infoStr)
 }

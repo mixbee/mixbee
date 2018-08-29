@@ -3,6 +3,7 @@ package crosschain
 import (
 	"sync"
 	"github.com/mixbee/mixbee/common/log"
+	"time"
 )
 
 type CTXEntry struct {
@@ -52,10 +53,16 @@ func (tp *CTXMatchPool) push(entry *CTXEntry) {
 	tp.Lock()
 	defer tp.Unlock()
 	log.Debugf("cross chain CTXMatchPool push seqId=%s from=%s", entry.SeqId, entry.From)
+
+	timestamp := entry.TimeStamp
+	if timestamp < uint32(time.Now().Unix()) + 60*60 {
+		log.Infof("cross tx seqId=%s expireTime=%d nowTime=%d",entry.SeqId,entry.TimeStamp,time.Now().Unix()+ 60*60)
+		return
+	}
+
 	if _, ok := tp.TxList[entry.SeqId]; !ok {
 		tp.TxList[entry.SeqId] = &CTXPairEntry{}
 	}
-
 	pair := tp.TxList[entry.SeqId]
 	//check repeat tx
 	if pair.First != nil && pair.First.From == entry.From {

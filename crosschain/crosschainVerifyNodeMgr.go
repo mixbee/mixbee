@@ -13,6 +13,7 @@ import (
 	"strconv"
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 	"github.com/mixbee/mixbee/smartcontract/service/native/crossverifynode"
+	"encoding/json"
 )
 
 type CrossChainVerifyNode struct {
@@ -26,6 +27,7 @@ type CrossChainVerifyNode struct {
 type VerifyNodes struct {
 	VerifyerNodes map[string]*CrossChainVerifyNode
 	acc           *account.Account
+	p2pPid        *actor.PID
 	sync.RWMutex
 }
 
@@ -38,44 +40,62 @@ func NewVerifyNodes() *VerifyNodes {
 func (this *VerifyNodes) Init(acc *account.Account, p2pPid *actor.PID) {
 	go func() {
 		this.acc = acc
+		this.p2pPid = p2pPid
 		bb, host := getVerifyNodeMetaInfo(acc)
 		this.RegisterNodes(hex.EncodeToString(bb), host)
 		ticker := time.NewTicker(config.DEFAULT_CROSS_CHAIN_VERIFY_PING_TIME * time.Second)
 		for {
 			select {
 			case <-ticker.C:
-				deleteTimeOutVerifyNode(this)
-				pushNodeToOtherVerifyNode(acc, this, p2pPid)
+				this.deleteTimeOutVerifyNode()
+				this.pushSelfNodeToOtherVerifyNode()
 			}
 		}
 	}()
 }
 
-func deleteTimeOutVerifyNode(nodes *VerifyNodes) {
-	if len(nodes.VerifyerNodes) == 0 {
+func (this *VerifyNodes) deleteTimeOutVerifyNode() {
+	if len(this.VerifyerNodes) == 0 {
 		return
 	}
-	nodes.Lock()
-	defer nodes.Unlock()
-	for k, v := range nodes.VerifyerNodes {
+	this.Lock()
+	defer this.Unlock()
+	for k, v := range this.VerifyerNodes {
 		if uint32(time.Now().Unix())-v.TimeStamp > config.DEFAULT_CROSS_CHAIN_VERIFY_PING_TIMEOUT {
 			log.Infof("cross chain verify node timeout %s delete", v.PublicKey)
-			delete(nodes.VerifyerNodes, k)
+			delete(this.VerifyerNodes, k)
 		}
 	}
 }
 
-func pushNodeToOtherVerifyNode(acc *account.Account, verifyNodes *VerifyNodes, p2pPid *actor.PID) {
-	bb, host := getVerifyNodeMetaInfo(acc)
-	verifyNodes.RegisterNodes(hex.EncodeToString(bb), host)
+func (this *VerifyNodes) UpdateVerifyNodeInfo(infoStr string) {
+	info := &crossverifynode.CrossVerifyNodeInfo{}
+	err := json.Unmarshal([]byte(infoStr),info)
+	if err != nil {
+		log.Errorf("UpdateVerifyNodeInfo json unmarshal err. %s",err.Error())
+		return
+	}
+	node,ok := this.VerifyerNodes[info.Pbk]
+	if !ok {
+		return
+	}
+	this.Lock()
+	defer this.Unlock()
+	node.Deposit = info.Deposit
+	node.Status = info.CurrentStatus
+	this.VerifyerNodes[info.Pbk] = node
+}
 
+func (this *VerifyNodes) pushSelfNodeToOtherVerifyNode() {
+	bb, host := getVerifyNodeMetaInfo(this.acc)
+	this.RegisterNodes(hex.EncodeToString(bb), host)
 	if config.DefConfig.Genesis.ConsensusType != config.CONSENSUS_TYPE_SOLO {
 		info := &p2ptypes.CrossChainVerifyNode{
 			PublicKey: hex.EncodeToString(bb),
 			Host:      host,
 			Type:      1,
 		}
-		p2pPid.Tell(info)
+		this.p2pPid.Tell(info)
 	}
 }
 
@@ -92,7 +112,6 @@ func getVerifyNodeMetaInfo(acc *account.Account) ([]byte, string) {
 }
 
 func (this *VerifyNodes) RegisterNodes(pbk, host string) {
-
 	this.Lock()
 	defer this.Unlock()
 	log.Debugf("cross chain verify node register pbk=%s,host=%s time=%v", pbk, host, time.Now().Unix())
@@ -101,7 +120,6 @@ func (this *VerifyNodes) RegisterNodes(pbk, host string) {
 		Host:      host,
 		TimeStamp: uint32(time.Now().Unix()),
 	}
-
 	//check verifyNode from native smartContract crossVerifyNode
 	nodeInfo, err := getVerifyNodeInfoFromNative(pbk)
 	if err != nil {
@@ -120,7 +138,6 @@ func (this *VerifyNodes) RegisterNodes(pbk, host string) {
 		info.Deposit = nodeInfo.Deposit
 		info.Status = nodeInfo.CurrentStatus
 	}
-
 	this.VerifyerNodes[pbk] = info
 }
 

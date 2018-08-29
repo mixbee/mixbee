@@ -6,6 +6,7 @@ import (
 	p2ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 	httpactor "github.com/mixbee/mixbee/http/base/actor"
 	"github.com/mixbee/mixbee/common/config"
+	"github.com/mixbee/mixbee/events/message"
 )
 
 type CrossChainActor struct {
@@ -82,6 +83,8 @@ func (this *CrossChainActor) Receive(ctx actor.Context) {
 		this.server.pairTxPending.push(entry)
 	case *p2ptypes.CrossChainTxCompletedPayload:
 		this.server.CrossTxCompletedHandler(msg)
+	case *message.SmartCodeEventMsg:
+		handlerSmartCodeEvent(*msg.Event)
 	default:
 		log.Warnf("cross actor now handle msg=%#v", msg)
 	}

@@ -323,7 +323,6 @@ func pushSigedCrossTx2OtherNode(pair *CTXPairEntry, s *CTXPoolServer) {
 }
 
 func pushCrossTxEvidence2SmartContract(pair *CTXPairEntry, signer *account.Account) {
-
 	seqId := pair.First.SeqId
 	by, err := json.Marshal(pair)
 	if err != nil {

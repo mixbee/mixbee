@@ -10,18 +10,21 @@ import (
 	"fmt"
 	"github.com/mixbee/mixbee/smartcontract/service/native/mbc"
 	"encoding/binary"
+	"github.com/mixbee/mixbee/smartcontract/event"
+	"github.com/mixbee/mixbee/common/config"
+	"encoding/json"
 )
 
 const (
 	//constants config
-	MIN_DEPOSIT_MBC  = 10000
-	WITHDRAW_RELEASE_TIME = 60*60*48
+	MIN_DEPOSIT_MBC       = 10000
+	WITHDRAW_RELEASE_TIME = 60 * 60 * 48
 
 	// function name
 	INIT_NAME                = "init"
 	MIN_DEPOSIT_MBC_FUNCTION = "minDepostMbc"
 	QUERY_VERIFY_NODE_INFO   = "queryVerifyNodeInfo"
-	IS_EXSIT_VERIFY_NODE   = "isExsitVerifyNode"
+	IS_EXSIT_VERIFY_NODE     = "isExsitVerifyNode"
 	REGISTER_VERIFY_NODE     = "registerVerifyNode"
 	PAID_DEPOSIT             = "paidDeposit"
 	APPLY_WITHDRAW_DEPOSIT   = "applyWithdrawDeposit"
@@ -32,8 +35,8 @@ const (
 	WHITE_VERIFY_NODE        = "whiteNode"
 
 	//key prefix
-	VERIFY_NODE_INFO = "verifyNodeInfo"
-	BLACK_VERIFY_NODES = "blackVerifyNodes"
+	VERIFY_NODE_INFO      = "verifyNodeInfo"
+	BLACK_VERIFY_NODES    = "blackVerifyNodes"
 	PULISHING_DEPOSIT_SUM = "pulishingDepositSum"
 )
 
@@ -68,13 +71,13 @@ func (this *CrossVerifyNodeInfo) Serialize(w io.Writer) error {
 	if err := utils.WriteVarUint(w, this.WithdrawDeposit); err != nil {
 		return fmt.Errorf("[State] serialize WithdrawDeposit error:%v", err)
 	}
-	if err := utils.WriteVarUint(w,this.WithDrawStartTime); err != nil {
+	if err := utils.WriteVarUint(w, this.WithDrawStartTime); err != nil {
 		return fmt.Errorf("[State] serialize WithDrawStartTime error:%v", err)
 	}
-	if err := utils.WriteVarUint(w,this.FrozeDeposit); err != nil {
+	if err := utils.WriteVarUint(w, this.FrozeDeposit); err != nil {
 		return fmt.Errorf("[State] serialize FrozeDeposit error:%v", err)
 	}
-	if err := utils.WriteVarUint(w,this.CurrentStatus); err != nil {
+	if err := utils.WriteVarUint(w, this.CurrentStatus); err != nil {
 		return fmt.Errorf("[State] serialize CurrentStatus error:%v", err)
 	}
 	return nil
@@ -132,7 +135,7 @@ func getCrossChainVerifyNodeInfoByPublicKey(native *native.NativeService, pbk st
 	return &info, nil
 }
 
-func putCrossChainVerifyNodeInfo(native *native.NativeService,info *CrossVerifyNodeInfo) error {
+func putCrossChainVerifyNodeInfo(native *native.NativeService, info *CrossVerifyNodeInfo) error {
 
 	buf := new(bytes.Buffer)
 	err := info.Serialize(buf)
@@ -180,10 +183,22 @@ func appCallTransfer(native *native.NativeService, contract common.Address, from
 
 func Uint64ToBytes(i uint64) []byte {
 	var buf = make([]byte, 8)
-	binary.BigEndian.PutUint64(buf,i)
+	binary.BigEndian.PutUint64(buf, i)
 	return buf
 }
 
 func BytesToUint64(buf []byte) uint64 {
 	return uint64(binary.BigEndian.Uint64(buf))
+}
+
+func AddNotifications(native *native.NativeService, method string, info *CrossVerifyNodeInfo) {
+	if !config.DefConfig.Common.EnableEventLog {
+		return
+	}
+	infoB, _ := json.Marshal(info)
+	native.Notifications = append(native.Notifications,
+		&event.NotifyEventInfo{
+			ContractAddress: native.ContextRef.CurrentContext().ContractAddress,
+			States:          []interface{}{method, string(infoB)},
+		})
 }

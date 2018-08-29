@@ -39,7 +39,6 @@ type CrossChainTxToMainChainInfo struct {
 func StartSubChainServer() {
 
 	log.Infof("cross chain || StartSubChainServer ")
-
 	subPID := actor.Spawn(actor.FromFunc(Receive))
 	sub1 := events.NewActorSubscriber(subPID)
 	sub1.Subscribe(message.TOPIC_SMART_CODE_EVENT)
@@ -121,11 +120,9 @@ func (s *SubCrossChainServer) UpdateMainVerifyNodes(str []byte) {
 		log.Errorf("cross chain SubCrossChainServerInstant json unmarshal err %s\n", err)
 		return
 	}
-
 	if len(list) == 0 {
 		return
 	}
-
 	s.MainVerifyNodes.Lock()
 	defer s.MainVerifyNodes.Unlock()
 
@@ -146,13 +143,11 @@ func (s *SubCrossChainServer) IsExsitNode(pbk string) bool {
 }
 
 func pushSmartCodeEvent(v interface{}) {
-
 	rs, ok := v.(types.SmartCodeEvent)
 	if !ok {
 		log.Errorf("[PushSmartCodeEvent]", "SmartCodeEvent err")
 		return
 	}
-
 	go func() {
 		switch object := rs.Result.(type) {
 		case *event.ExecuteNotify:
@@ -167,11 +162,9 @@ func pushCrossChainTxToMainChain(bools map[string]bool, notify bcomn.ExecuteNoti
 	if _, ok := bools[utils.CrossChainContractAddress.ToHexString()]; !ok {
 		return
 	}
-
 	if len(notify.Notify) < 1 {
 		return
 	}
-
 	stateInfos := notify.Notify[0].States.([]interface{})
 	method := stateInfos[0].(string)
 	infoStr := stateInfos[1].(string)
