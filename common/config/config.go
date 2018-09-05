@@ -16,7 +16,7 @@ var Version = "" //Set value when build project
 const (
 	DEFAULT_CONFIG_FILE_NAME                = "./config.json"
 	DEFAULT_WALLET_FILE_NAME                = "./wallet.dat"
-	MIN_GEN_BLOCK_TIME                      = 2
+	MIN_GEN_BLOCK_TIME                      = 1
 	DEFAULT_GEN_BLOCK_TIME                  = 6
 	DEFAULT_CROSS_CHAIN_VERIFY_TIME         = 5
 	DEFAULT_CROSS_CHAIN_VERIFY_PING_TIME    = 20
