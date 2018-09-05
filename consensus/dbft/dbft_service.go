@@ -690,6 +690,7 @@ func (ds *DbftService) Timeout() {
 
 		ds.timer.Stop()
 		ds.timer.Reset(genesis.GenBlockTime << (ds.timeView + 1))
+		log.Warnf("dbft genBlockTime %v",genesis.GenBlockTime << (ds.timeView + 1))
 	} else if (ds.context.State.HasFlag(Primary) && ds.context.State.HasFlag(RequestSent)) || ds.context.State.HasFlag(Backup) {
 		ds.RequestChangeView()
 	}
