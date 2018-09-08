@@ -232,7 +232,7 @@ func (tpa *TxPoolActor) Receive(context actor.Context) {
 		sender := context.Sender()
 		log.Debugf("txpool actor receives getting tx pool req from %v", sender)
 		res := tpa.server.getTxPool(msg.ByCount, msg.Height)
-		log.Debugf("txpool actor get txs len = %v  txpool len= %v ", len(res),tpa.server.txPool.GetTransactionCount())
+		log.Warnf("txpool actor get txs len = %v  txpool len= %v ", len(res),tpa.server.txPool.GetTransactionCount())
 		if sender != nil {
 			sender.Request(&tc.GetTxnPoolRsp{TxnPool: res}, context.Self())
 		}
@@ -241,7 +241,6 @@ func (tpa *TxPoolActor) Receive(context actor.Context) {
 		sender := context.Sender()
 
 		log.Debugf("txpool actor receives getting pedning tx req from %v", sender)
-
 		res := tpa.server.getPendingTxs(msg.ByCount)
 		if sender != nil {
 			sender.Request(&tc.GetPendingTxnRsp{Txs: res}, context.Self())
