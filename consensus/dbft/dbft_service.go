@@ -616,7 +616,6 @@ func (ds *DbftService) Timeout() {
 	}
 
 	log.Info("Timeout: height: ", ds.timerHeight, " View: ", ds.timeView, " State: ", ds.context.GetStateDetail())
-
 	if ds.context.State.HasFlag(Primary) && !ds.context.State.HasFlag(RequestSent) {
 		//primary node send the prepare request
 		log.Info("Send prepare request: height: ", ds.timerHeight, " View: ", ds.timeView, " State: ", ds.context.GetStateDetail())
@@ -666,7 +665,6 @@ func (ds *DbftService) Timeout() {
 			}
 
 			ds.context.Transactions = transactions
-
 			ds.context.NextBookkeepers, err = vote.GetValidators(ds.context.Transactions)
 			if err != nil {
 				log.Error("[Timeout] GetValidators failed", err.Error())
@@ -690,7 +688,7 @@ func (ds *DbftService) Timeout() {
 
 		ds.timer.Stop()
 		ds.timer.Reset(genesis.GenBlockTime << (ds.timeView + 1))
-		log.Warnf("dbft genBlockTime %v",genesis.GenBlockTime << (ds.timeView + 1))
+		log.Warnf("dbft genBlockTime %v %v",genesis.GenBlockTime,genesis.GenBlockTime << (ds.timeView + 1))
 	} else if (ds.context.State.HasFlag(Primary) && ds.context.State.HasFlag(RequestSent)) || ds.context.State.HasFlag(Backup) {
 		ds.RequestChangeView()
 	}

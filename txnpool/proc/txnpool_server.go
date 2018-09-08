@@ -193,8 +193,7 @@ func (s *TXPoolServer) checkPendingBlockOk(hash common.Uint256,
 	delete(s.pendingBlock.unProcessedTxs, hash)
 
 	// if the tx is invalid, send the response at once
-	if err != errors.ErrNoError ||
-		len(s.pendingBlock.unProcessedTxs) == 0 {
+	if err != errors.ErrNoError || len(s.pendingBlock.unProcessedTxs) == 0 {
 		s.sendBlkResult2Consensus()
 	}
 }
@@ -274,11 +273,10 @@ func (s *TXPoolServer) setPendingTx(tx *tx.Transaction,
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if ok := s.allPendingTxs[tx.Hash()]; ok != nil {
-		log.Infof("setPendingTx: transaction %x already in the verifying process",
-			tx.Hash())
+		log.Infof("setPendingTx: transaction %x already in the verifying process",tx.Hash())
 		return false
 	}
-
+	log.Infof("setPendingTx: allpendingTxs len = %v",len(s.allPendingTxs))
 	pt := &serverPendingTx{
 		tx:     tx,
 		sender: sender,

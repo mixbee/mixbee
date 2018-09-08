@@ -513,6 +513,7 @@ func GetMemPoolTxCount(cmd map[string]interface{}) map[string]interface{} {
 	resp["Result"] = count
 	return resp
 }
+
 func GetMemPoolTxState(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(berr.SUCCESS)
 	str, ok := cmd["Hash"].(string)

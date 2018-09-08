@@ -1,5 +1,3 @@
-
-
 package proc
 
 import (
@@ -198,13 +196,10 @@ func (ta *TxActor) Receive(context actor.Context) {
 
 	case *tc.GetTxnCountReq:
 		sender := context.Sender()
-
 		log.Debugf("txpool-tx actor receives getting tx count req from %v", sender)
-
 		res := ta.server.getTxCount()
 		if sender != nil {
-			sender.Request(&tc.GetTxnCountRsp{Count: res},
-				context.Self())
+			sender.Request(&tc.GetTxnCountRsp{Count: res}, context.Self())
 		}
 
 	default:
@@ -235,10 +230,9 @@ func (tpa *TxPoolActor) Receive(context actor.Context) {
 
 	case *tc.GetTxnPoolReq:
 		sender := context.Sender()
-
 		log.Debugf("txpool actor receives getting tx pool req from %v", sender)
-
 		res := tpa.server.getTxPool(msg.ByCount, msg.Height)
+		log.Debugf("txpool actor get txs len = %v  txpool len= %v ", len(res),tpa.server.txPool.GetTransactionCount())
 		if sender != nil {
 			sender.Request(&tc.GetTxnPoolRsp{TxnPool: res}, context.Self())
 		}
