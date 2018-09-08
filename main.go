@@ -128,11 +128,11 @@ func main() {
 func startMixbee(ctx *cli.Context) {
 	//TODO golang IDE 本地调试设置默认参数
 	//test 模式
-	ctx.Set(utils.EnableTestModeFlag.Name, "true")
+	//ctx.Set(utils.EnableTestModeFlag.Name, "true")
 	////////wallet 密码
-	ctx.GlobalSet(utils.GetFlagName(utils.AccountPassFlag), "123456")
+	//ctx.GlobalSet(utils.GetFlagName(utils.AccountPassFlag), "123456")
 	////////启动清除原来数据
-	ctx.GlobalSet(utils.GetFlagName(utils.ClearTestModeDataFlag), "true")
+	//ctx.GlobalSet(utils.GetFlagName(utils.ClearTestModeDataFlag), "true")
 	////////开启跨链验证模块
 	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainVerifyFlag), "true")
 	////////子链跨链协议开启
