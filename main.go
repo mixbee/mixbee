@@ -222,7 +222,7 @@ func startMixbee(ctx *cli.Context) {
 
 	go func() {
 
-		log.Info(http.ListenAndServe("localhost:6060", nil))
+		log.Info(http.ListenAndServe("0.0.0.0:6060", nil))
 	}()
 
 	waitToExit()
