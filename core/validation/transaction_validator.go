@@ -19,7 +19,7 @@ import (
 // VerifyTransaction verifys received single transaction
 func VerifyTransaction(tx *types.Transaction) ontErrors.ErrCode {
 	if err := checkTransactionSignatures(tx); err != nil {
-		log.Info("transaction verify error:", err)
+		log.Warn("transaction verify error:", err)
 		return ontErrors.ErrTransactionContracts
 	}
 

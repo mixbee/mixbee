@@ -131,7 +131,7 @@ func startMixbee(ctx *cli.Context) {
 	//ctx.Set(utils.EnableTestModeFlag.Name, "true")
 	////////wallet 密码
 	//ctx.GlobalSet(utils.GetFlagName(utils.AccountPassFlag), "123456")
-	////////启动清除原来数据
+	//////启动清除原来数据
 	//ctx.GlobalSet(utils.GetFlagName(utils.ClearTestModeDataFlag), "true")
 	////////开启跨链验证模块
 	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainVerifyFlag), "true")
@@ -139,7 +139,7 @@ func startMixbee(ctx *cli.Context) {
 	//ctx.GlobalSet(utils.GetFlagName(utils.EnableCrossChainInteractiveFlag), "true")
 	////////主链的node信息
 	//ctx.GlobalSet(utils.GetFlagName(utils.CrossChainVerifyNode), "http://localhost:20336")
-	////开启debug日志级别
+	//开启debug日志级别
 	//ctx.GlobalSet(utils.GetFlagName(utils.LogLevelFlag), "0")
 	////networkId
 	//ctx.GlobalSet(utils.GetFlagName(utils.NetworkIdFlag), "3")

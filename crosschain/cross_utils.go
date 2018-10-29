@@ -131,7 +131,7 @@ func BuildCrossVerifyRegisterTx(info *CrossChainVerifyNode) (*types.Transaction,
 		TxType:   types.Invoke,
 		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
-		SystemTx: true,
+		SystemTx: 1,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil
@@ -155,7 +155,7 @@ func BuildCrossReleaseTx(seqId string, sig []byte) (*types.Transaction, error) {
 		TxType:   types.Invoke,
 		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
-		SystemTx: true,
+		SystemTx: 1,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil
@@ -177,7 +177,7 @@ func BuildCrossPairEvidenceTx(param string) (*types.Transaction, error) {
 		TxType:   types.Invoke,
 		Nonce:    uint64(time.Now().UnixNano()/1e6),
 		Payload:  invokePayload,
-		SystemTx: true,
+		SystemTx: 1,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil

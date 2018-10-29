@@ -57,8 +57,7 @@ type TxActor struct {
 }
 
 // handleTransaction handles a transaction from network and http
-func (ta *TxActor) handleTransaction(sender tc.SenderType, self *actor.PID,
-	txn *tx.Transaction) {
+func (ta *TxActor) handleTransaction(sender tc.SenderType, self *actor.PID, txn *tx.Transaction) {
 	ta.server.increaseStats(tc.RcvStats)
 	if len(txn.ToArray()) > tc.MAX_TX_SIZE {
 		log.Debugf("handleTransaction: reject a transaction due to size over 1M")
@@ -66,27 +65,22 @@ func (ta *TxActor) handleTransaction(sender tc.SenderType, self *actor.PID,
 	}
 
 	if ta.server.getTransaction(txn.Hash()) != nil {
-		log.Debugf("handleTransaction: transaction %x already in the txn pool",
-			txn.Hash())
+		log.Debugf("handleTransaction: transaction %x already in the txn pool", txn.Hash())
 
 		ta.server.increaseStats(tc.DuplicateStats)
 	} else if ta.server.getTransactionCount() >= tc.MAX_CAPACITY {
-		log.Infof("handleTransaction: transaction pool is full for tx %x",
-			txn.Hash())
-
+		log.Infof("handleTransaction: transaction pool is full for tx %x", txn.Hash())
 		ta.server.increaseStats(tc.FailureStats)
 	} else {
 		if _, overflow := common.SafeMul(txn.GasLimit, txn.GasPrice); overflow {
-			log.Debugf("handleTransaction: gasLimit %v, gasPrice %v overflow",
-				txn.GasLimit, txn.GasPrice)
+			log.Debugf("handleTransaction: gasLimit %v, gasPrice %v overflow", txn.GasLimit, txn.GasPrice)
 			return
 		}
 
-		if !txn.SystemTx {
+		if txn.SystemTx != 1 {
 			if txn.GasLimit < config.DefConfig.Common.GasLimit ||
 				txn.GasPrice < ta.server.getGasPrice() {
-				log.Debugf("handleTransaction: invalid gasLimit %v, gasPrice %v",
-					txn.GasLimit, txn.GasPrice)
+				log.Debugf("handleTransaction: invalid gasLimit %v, gasPrice %v", txn.GasLimit, txn.GasPrice)
 				return
 			}
 
@@ -140,9 +134,7 @@ func (ta *TxActor) Receive(context actor.Context) {
 
 	case *tc.TxReq:
 		sender := msg.Sender
-
 		log.Debugf("txpool-tx actor receives tx from %v ", sender.Sender())
-
 		ta.handleTransaction(sender, context.Self(), msg.Tx)
 
 	case *tc.GetTxnReq:
@@ -232,7 +224,7 @@ func (tpa *TxPoolActor) Receive(context actor.Context) {
 		sender := context.Sender()
 		log.Debugf("txpool actor receives getting tx pool req from %v", sender)
 		res := tpa.server.getTxPool(msg.ByCount, msg.Height)
-		log.Warnf("txpool actor get txs len = %v  txpool len= %v ", len(res),tpa.server.txPool.GetTransactionCount())
+		log.Infof("txpool actor get txs len = %v  txpool len= %v ", len(res), tpa.server.txPool.GetTransactionCount())
 		if sender != nil {
 			sender.Request(&tc.GetTxnPoolRsp{TxnPool: res}, context.Self())
 		}

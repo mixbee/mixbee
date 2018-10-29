@@ -44,7 +44,7 @@ func regIdWithPublicKey(srvc *native.NativeService) ([]byte, error) {
 	}
 
 	if !account.VerifyID(string(arg0)) {
-		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid ID")
+		return utils.BYTE_FALSE, errors.New("register MIX ID error: invalid ID." + string(arg0))
 	}
 
 	key, err := encodeID(arg0)

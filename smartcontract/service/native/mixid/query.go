@@ -60,6 +60,7 @@ func GetDDO(srvc *native.NativeService) ([]byte, error) {
 
 	args := bytes.NewBuffer(srvc.Input)
 	did, _ := serialization.ReadVarBytes(args)
+	fmt.Printf("GetDDO arg0:%x\n",did)
 	key, _ := encodeID(did)
 	var2, err := getRecovery(srvc, key)
 	serialization.WriteVarBytes(&buf, var2)

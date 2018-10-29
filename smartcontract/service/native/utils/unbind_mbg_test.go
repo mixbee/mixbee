@@ -7,7 +7,7 @@ import (
 	"github.com/mixbee/mixbee/common/constants"
 	"github.com/stretchr/testify/assert"
 	"fmt"
-	"time"
+	"github.com/mixbee/mixbee/core/types"
 )
 
 func TestCalcUnbindMbg(t *testing.T) {
@@ -46,4 +46,9 @@ func TestTotalONG(t *testing.T) {
 
 	assert.Equal(t, CalcUnbindMbg(1, 0, ^uint32(0)),
 		constants.MBC_TOTAL_SUPPLY)
+
+	aa := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01}
+	address := types.AddressFromVmCode(aa)
+	fmt.Println(address.ToHexString())
+	fmt.Println(address.ToBase58())
 }

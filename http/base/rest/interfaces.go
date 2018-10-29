@@ -1,5 +1,3 @@
-
-
 package rest
 
 import (
@@ -223,6 +221,7 @@ func GetTransactionByHash(cmd map[string]interface{}) map[string]interface{} {
 	resp["Result"] = tran
 	return resp
 }
+
 func SendRawTransaction(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(berr.SUCCESS)
 
@@ -236,6 +235,7 @@ func SendRawTransaction(cmd map[string]interface{}) map[string]interface{} {
 	}
 	var txn types.Transaction
 	if err := txn.Deserialize(bytes.NewReader(bys)); err != nil {
+		log.Infof("txn.Deserialize:", err)
 		return ResponsePack(berr.INVALID_TRANSACTION)
 	}
 	if txn.TxType == types.Invoke || txn.TxType == types.Deploy {

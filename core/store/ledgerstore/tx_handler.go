@@ -71,7 +71,6 @@ func (self *StateStore) HandleDeployTransaction(store store.LedgerStore, stateBa
 				return err
 			}
 			return fmt.Errorf("gasLimit insufficient, need:%d actual:%d", gasLimit, tx.GasLimit)
-
 		}
 		gasConsumed = gasLimit * tx.GasPrice
 		notifies, err = chargeCostGas(tx.Payer, gasConsumed, config, cache, store)
@@ -98,7 +97,7 @@ func (self *StateStore) HandleInvokeTransaction(store store.LedgerStore, stateBa
 	tx *types.Transaction, block *types.Block, notify *event.ExecuteNotify) error {
 	invoke := tx.Payload.(*payload.InvokeCode)
 	code := invoke.Code
-	sysTransFlag := bytes.Compare(code, ninit.COMMIT_DPOS_BYTES) == 0 || block.Header.Height == 0 || tx.SystemTx
+	sysTransFlag := bytes.Compare(code, ninit.COMMIT_DPOS_BYTES) == 0 || block.Header.Height == 0 || tx.SystemTx == 1
 
 	isCharge := !sysTransFlag && tx.GasPrice != 0
 

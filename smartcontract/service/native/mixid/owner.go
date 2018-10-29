@@ -45,6 +45,7 @@ func (this *owner) Deserialize(r io.Reader) error {
 }
 
 func getAllPk(srvc *native.NativeService, key []byte) ([]*owner, error) {
+
 	val, err := utils.GetStorageItem(srvc, key)
 	if err != nil {
 		return nil, fmt.Errorf("get storage error, %s", err)

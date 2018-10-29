@@ -224,7 +224,7 @@ func (tp *TXPool) RemoveTxsBelowGasPrice(gasPrice uint64) {
 	tp.Lock()
 	defer tp.Unlock()
 	for _, txEntry := range tp.txList {
-		if !txEntry.Tx.SystemTx && txEntry.Tx.GasPrice < gasPrice {
+		if txEntry.Tx.SystemTx != 1 && txEntry.Tx.GasPrice < gasPrice {
 			delete(tp.txList, txEntry.Tx.Hash())
 		}
 	}

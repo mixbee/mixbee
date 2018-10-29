@@ -51,7 +51,7 @@ func (this *NativeService) Invoke() (interface{}, error) {
 		return false, fmt.Errorf("Native contract address %x haven't been registered.", contract.Address)
 	}
 
-	if this.Tx.SystemTx && !IsSystemTx(contract.Address, contract.Method) {
+	if this.Tx.SystemTx == 1 && !IsSystemTx(contract.Address, contract.Method) {
 		return false, fmt.Errorf("Native contract address %x method %x not support systemTx.", contract.Address, contract.Method)
 	}
 

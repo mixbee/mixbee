@@ -22,7 +22,7 @@ var AssetCommand = cli.Command{
 			Usage:       "Transfer mbc or mbg to another account",
 			ArgsUsage:   " ",
 			Description: "Transfer mbc or mbg to another account. If from address does not specified, using default account",
-			Flags: []cli.Flag{
+			Flags: []cli.Flag {
 				utils.RPCPortFlag,
 				utils.TransactionGasPriceFlag,
 				utils.TransactionGasLimitFlag,

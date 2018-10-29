@@ -150,8 +150,8 @@ func CrossUnlockOrRelease(gasPrice, gasLimit uint64, signer *account.Account, se
 	return txHash, nil
 }
 
-func CrossVerifyNodePaidDeposit(gasPrice, gasLimit uint64, signer *account.Account,pbk string,amount uint64) (string, error) {
-	transferTx, err := CrossVerifyNodePaidDepositTx(gasPrice, gasLimit,pbk,amount)
+func CrossVerifyNodePaidDeposit(gasPrice, gasLimit uint64, signer *account.Account, pbk string, amount uint64) (string, error) {
+	transferTx, err := CrossVerifyNodePaidDepositTx(gasPrice, gasLimit, pbk, amount)
 	if err != nil {
 		return "", err
 	}
@@ -282,7 +282,7 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -314,7 +314,7 @@ func SetKeyTx(gasPrice, gasLimit uint64, from, key, value string) (*types.Transa
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -336,20 +336,20 @@ func CrossUnlockTx(gasPrice, gasLimit uint64, seqId string, method string) (*typ
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
-		SystemTx:true,
+		SystemTx: 1,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
 	return tx, nil
 }
 
-func CrossVerifyNodePaidDepositTx(gasPrice, gasLimit uint64,pbk string,amount uint64) (*types.Transaction, error) {
+func CrossVerifyNodePaidDepositTx(gasPrice, gasLimit uint64, pbk string, amount uint64) (*types.Transaction, error) {
 
 	contractAddr := utils.CrossChainVerifynodeContractAddress
 	version := VERSION_CONTRACT_CROSS_CHAIN
-	param := fmt.Sprintf("%s:%d",pbk,amount)
-	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version,crossverifynode.PAID_DEPOSIT, []interface{}{param})
+	param := fmt.Sprintf("%s:%d", pbk, amount)
+	invokeCode, err := httpcom.BuildNativeInvokeCode(contractAddr, version, crossverifynode.PAID_DEPOSIT, []interface{}{param})
 	if err != nil {
 		return nil, fmt.Errorf("build invoke code error:%s", err)
 	}
@@ -360,7 +360,7 @@ func CrossVerifyNodePaidDepositTx(gasPrice, gasLimit uint64,pbk string,amount ui
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -402,7 +402,7 @@ func CrossChainTransferTx(gasPrice, gasLimit uint64, asset, from, to string, aAm
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -447,7 +447,7 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -496,7 +496,7 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,
 		TxType:   types.Invoke,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  invokePayload,
 		Sigs:     make([]*types.Sig, 0, 0),
 	}
@@ -828,7 +828,7 @@ func NewDeployCodeTransaction(gasPrice, gasLimit uint64, code []byte, needStorag
 	tx := &types.Transaction{
 		Version:  VERSION_TRANSACTION,
 		TxType:   types.Deploy,
-		Nonce:    uint64(time.Now().UnixNano()/1e6),
+		Nonce:    uint64(time.Now().UnixNano() / 1e6),
 		Payload:  deployPayload,
 		GasPrice: gasPrice,
 		GasLimit: gasLimit,

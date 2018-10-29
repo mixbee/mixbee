@@ -16,6 +16,7 @@ import (
 
 const (
 	VER    = 0x41
+	METHOD = "mixId"
 )
 
 type Controller struct {
@@ -25,7 +26,7 @@ type Controller struct {
 }
 
 type Identity struct {
-	ID      string       `json:"mixbeeid"`
+	ID      string       `json:"mixId"`
 	Label   string       `json:"label,omitempty"`
 	Lock    bool         `json:"lock"`
 	Control []Controller `json:"controls,omitempty"`
@@ -47,7 +48,7 @@ func CreateID(nonce []byte) (string, error) {
 		return "", fmt.Errorf("create ID error, %s", err)
 	}
 
-	return string(idstring), nil
+	return METHOD + ":" + string(idstring), nil
 }
 
 func GenerateID() (string, error) {
@@ -69,7 +70,7 @@ func VerifyID(id string) bool  {
 	if len(id) < 9 {
 		return false
 	}
-	buf, err := base58.BitcoinEncoding.Decode([]byte(id))
+	buf, err := base58.BitcoinEncoding.Decode([]byte(id[6:]))
 	if err != nil {
 		return false
 	}

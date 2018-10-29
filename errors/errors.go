@@ -24,7 +24,7 @@ func NewDetailErr(err error, errcode ErrCode, errmsg string) DetailError {
 		return nil
 	}
 
-	onterr, ok := err.(ontError)
+	onterr, ok := err.(mixbeeError)
 	if !ok {
 		onterr.root = err
 		onterr.errmsg = err.Error()

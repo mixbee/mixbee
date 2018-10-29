@@ -2,25 +2,25 @@
 
 package errors
 
-type ontError struct {
+type mixbeeError struct {
 	errmsg    string
 	callstack *CallStack
 	root      error
 	code      ErrCode
 }
 
-func (e ontError) Error() string {
+func (e mixbeeError) Error() string {
 	return e.errmsg
 }
 
-func (e ontError) GetErrCode() ErrCode {
+func (e mixbeeError) GetErrCode() ErrCode {
 	return e.code
 }
 
-func (e ontError) GetRoot() error {
+func (e mixbeeError) GetRoot() error {
 	return e.root
 }
 
-func (e ontError) GetCallStack() *CallStack {
+func (e mixbeeError) GetCallStack() *CallStack {
 	return e.callstack
 }

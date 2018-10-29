@@ -1,5 +1,3 @@
-
-
 package types
 
 import (
@@ -28,7 +26,7 @@ type Transaction struct {
 	//Attributes []*TxAttribute
 	attributes byte //this must be 0 now, Attribute Array length use VarUint encoding, so byte is enough for extension
 	Sigs       []*Sig
-	SystemTx   bool
+	SystemTx   uint32
 
 	hash *common.Uint256
 }
@@ -120,7 +118,6 @@ const (
 // Payload define the func for loading the payload data
 // base on payload type which have different struture
 type Payload interface {
-
 	//Serialize payload data
 	Serialize(w io.Writer) error
 
@@ -180,11 +177,10 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[SerializeUnsigned], Transaction item txAttribute length serialization failed.")
 	}
 
-	err = serialization.WriteBool(w,tx.SystemTx)
+	err = serialization.WriteUint32(w, tx.SystemTx)
 	if err != nil {
 		return errors.NewDetailErr(err, errors.ErrNoCode, "[SerializeUnsigned], Transaction item SystemTx serialization failed.")
 	}
-
 
 	return nil
 }
@@ -270,7 +266,7 @@ func (tx *Transaction) DeserializeUnsigned(r io.Reader) error {
 	}
 	tx.attributes = 0
 
-	systemTx, err := serialization.ReadBool(r)
+	systemTx, err := serialization.ReadUint32(r)
 	if err != nil {
 		return err
 	}

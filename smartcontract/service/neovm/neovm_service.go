@@ -165,7 +165,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 
 		switch this.Engine.OpCode {
 		case vm.VERIFY:
-			if this.Tx.SystemTx {
+			if this.Tx.SystemTx == 1 {
 				return nil, errors.NewErr("[NeoVmService] service system call error not support systemTx!")
 			}
 
@@ -201,7 +201,7 @@ func (this *NeoVmService) Invoke() (interface{}, error) {
 			}
 		case vm.APPCALL, vm.TAILCALL:
 
-			if this.Tx.SystemTx {
+			if this.Tx.SystemTx == 1 {
 				return nil, errors.NewErr("[NeoVmService] service system call error not support systemTx!")
 			}
 
@@ -266,7 +266,7 @@ func (this *NeoVmService) SystemCall(engine *vm.ExecutionEngine) error {
 }
 
 func (this *NeoVmService) getContract(address []byte) ([]byte, error) {
-	item, err := this.CloneCache.Store.TryGet(common.ST_CONTRACT, address)
+	item, err := this.CloneCache.Store.TryGet(common.ST_CONTRACT, scommon.ToArrayReverse(address))
 	if err != nil {
 		log.Error("getContract |  Get contract context error!, address=", string(address))
 		return nil, errors.NewErr("[getContract] Get contract context error!")
