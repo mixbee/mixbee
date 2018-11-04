@@ -9,7 +9,7 @@ import (
 	"github.com/mixbee/mixbee/core/ledger"
 	"github.com/mixbee/mixbee/core/signature"
 	"github.com/mixbee/mixbee/core/types"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 )
 
 // VerifyBlock checks whether the block is valid
@@ -49,11 +49,11 @@ func VerifyBlock(block *types.Block, ld *ledger.Ledger, completely bool) error {
 			}
 		*/
 		for _, txVerify := range block.Transactions {
-			if errCode := VerifyTransaction(txVerify); errCode != ontErrors.ErrNoError {
+			if errCode := VerifyTransaction(txVerify); errCode != mixErrors.ErrNoError {
 				return errors.New(fmt.Sprintf("VerifyTransaction failed when verifiy block"))
 			}
 
-			if errCode := VerifyTransactionWithLedger(txVerify, ld); errCode != ontErrors.ErrNoError {
+			if errCode := VerifyTransactionWithLedger(txVerify, ld); errCode != mixErrors.ErrNoError {
 				return errors.New(fmt.Sprintf("VerifyTransaction failed when verifiy block"))
 			}
 		}

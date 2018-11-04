@@ -6,7 +6,7 @@ import (
 
 	"github.com/mixbee/mixbee/mixbee-eventbus/actor"
 	"github.com/mixbee/mixbee/core/types"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 	netActor "github.com/mixbee/mixbee/p2pserver/actor/server"
 	ptypes "github.com/mixbee/mixbee/p2pserver/message/types"
 	txpool "github.com/mixbee/mixbee/txnpool/common"
@@ -38,7 +38,7 @@ func (self *TxPoolActor) VerifyBlock(txs []*types.Transaction, height uint32) er
 
 	txentry := entry.(*txpool.VerifyBlockRsp).TxnPool
 	for _, entry := range txentry {
-		if entry.ErrCode != ontErrors.ErrNoError {
+		if entry.ErrCode != mixErrors.ErrNoError {
 			return errors.New(entry.ErrCode.Error())
 		}
 	}

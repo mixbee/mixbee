@@ -9,7 +9,7 @@ import (
 	"github.com/mixbee/mixbee/core/payload"
 	scom "github.com/mixbee/mixbee/core/store/common"
 	"github.com/mixbee/mixbee/core/types"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 	bactor "github.com/mixbee/mixbee/http/base/actor"
 	bcomn "github.com/mixbee/mixbee/http/base/common"
 	berr "github.com/mixbee/mixbee/http/base/error"
@@ -277,7 +277,7 @@ func SendRawTransaction(params []interface{}) map[string]interface{} {
 			}
 		}
 		hash = txn.Hash()
-		if errCode := bcomn.VerifyAndSendTx(&txn); errCode != ontErrors.ErrNoError {
+		if errCode := bcomn.VerifyAndSendTx(&txn); errCode != mixErrors.ErrNoError {
 			return responseSuccess(errCode.Error())
 		}
 	default:

@@ -11,7 +11,7 @@ import (
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/core/payload"
 	"github.com/mixbee/mixbee/core/types"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 	bactor "github.com/mixbee/mixbee/http/base/actor"
 	"github.com/mixbee/mixbee/smartcontract/event"
 	"github.com/mixbee/mixbee/smartcontract/service/native/utils"
@@ -187,13 +187,13 @@ func TransArryByteToHexString(ptx *types.Transaction) *Transactions {
 	return trans
 }
 
-func VerifyAndSendTx(txn *types.Transaction) ontErrors.ErrCode {
+func VerifyAndSendTx(txn *types.Transaction) mixErrors.ErrCode {
 	// if transaction is verified unsuccessfully then will not put it into transaction pool
-	if errCode := bactor.AppendTxToPool(txn); errCode != ontErrors.ErrNoError {
+	if errCode := bactor.AppendTxToPool(txn); errCode != mixErrors.ErrNoError {
 		log.Warn("Can NOT add the transaction to TxnPool")
 		return errCode
 	}
-	return ontErrors.ErrNoError
+	return mixErrors.ErrNoError
 }
 
 func GetBlockInfo(block *types.Block) BlockInfo {

@@ -13,27 +13,27 @@ import (
 	"github.com/mixbee/mixbee/core/payload"
 	"github.com/mixbee/mixbee/core/signature"
 	"github.com/mixbee/mixbee/core/types"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 )
 
 // VerifyTransaction verifys received single transaction
-func VerifyTransaction(tx *types.Transaction) ontErrors.ErrCode {
+func VerifyTransaction(tx *types.Transaction) mixErrors.ErrCode {
 	if err := checkTransactionSignatures(tx); err != nil {
 		log.Warn("transaction verify error:", err)
-		return ontErrors.ErrTransactionContracts
+		return mixErrors.ErrTransactionContracts
 	}
 
 	if err := checkTransactionPayload(tx); err != nil {
 		log.Warn("[VerifyTransaction],", err)
-		return ontErrors.ErrTransactionPayload
+		return mixErrors.ErrTransactionPayload
 	}
 
-	return ontErrors.ErrNoError
+	return mixErrors.ErrNoError
 }
 
-func VerifyTransactionWithLedger(tx *types.Transaction, ledger *ledger.Ledger) ontErrors.ErrCode {
+func VerifyTransactionWithLedger(tx *types.Transaction, ledger *ledger.Ledger) mixErrors.ErrCode {
 	//TODO: replay check
-	return ontErrors.ErrNoError
+	return mixErrors.ErrNoError
 }
 
 func checkTransactionSignatures(tx *types.Transaction) error {

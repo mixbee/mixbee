@@ -2,7 +2,7 @@
 
 package error
 
-import ontErrors "github.com/mixbee/mixbee/errors"
+import mixErrors "github.com/mixbee/mixbee/errors"
 
 const (
 	SUCCESS            int64 = 0
@@ -48,17 +48,17 @@ var ErrMap = map[int64]string{
 
 	INTERNAL_ERROR:                           "INTERNAL ERROR",
 	SMARTCODE_ERROR:                          "SMARTCODE EXEC ERROR",
-	int64(ontErrors.ErrDuplicatedTx):         "INTERNAL ERROR, ErrDuplicatedTx",
-	int64(ontErrors.ErrDuplicateInput):       "INTERNAL ERROR, ErrDuplicateInput",
-	int64(ontErrors.ErrAssetPrecision):       "INTERNAL ERROR, ErrAssetPrecision",
-	int64(ontErrors.ErrTransactionBalance):   "INTERNAL ERROR, ErrTransactionBalance",
-	int64(ontErrors.ErrAttributeProgram):     "INTERNAL ERROR, ErrAttributeProgram",
-	int64(ontErrors.ErrTransactionContracts): "INTERNAL ERROR, ErrTransactionContracts",
-	int64(ontErrors.ErrTransactionPayload):   "INTERNAL ERROR, ErrTransactionPayload",
-	int64(ontErrors.ErrDoubleSpend):          "INTERNAL ERROR, ErrDoubleSpend",
-	int64(ontErrors.ErrTxHashDuplicate):      "INTERNAL ERROR, ErrTxHashDuplicate",
-	int64(ontErrors.ErrStateUpdaterVaild):    "INTERNAL ERROR, ErrStateUpdaterVaild",
-	int64(ontErrors.ErrSummaryAsset):         "INTERNAL ERROR, ErrSummaryAsset",
-	int64(ontErrors.ErrXmitFail):             "INTERNAL ERROR, ErrXmitFail",
-	int64(ontErrors.ErrNoAccount):            "INTERNAL ERROR, ErrNoAccount",
+	int64(mixErrors.ErrDuplicatedTx):         "INTERNAL ERROR, ErrDuplicatedTx",
+	int64(mixErrors.ErrDuplicateInput):       "INTERNAL ERROR, ErrDuplicateInput",
+	int64(mixErrors.ErrAssetPrecision):       "INTERNAL ERROR, ErrAssetPrecision",
+	int64(mixErrors.ErrTransactionBalance):   "INTERNAL ERROR, ErrTransactionBalance",
+	int64(mixErrors.ErrAttributeProgram):     "INTERNAL ERROR, ErrAttributeProgram",
+	int64(mixErrors.ErrTransactionContracts): "INTERNAL ERROR, ErrTransactionContracts",
+	int64(mixErrors.ErrTransactionPayload):   "INTERNAL ERROR, ErrTransactionPayload",
+	int64(mixErrors.ErrDoubleSpend):          "INTERNAL ERROR, ErrDoubleSpend",
+	int64(mixErrors.ErrTxHashDuplicate):      "INTERNAL ERROR, ErrTxHashDuplicate",
+	int64(mixErrors.ErrStateUpdaterVaild):    "INTERNAL ERROR, ErrStateUpdaterVaild",
+	int64(mixErrors.ErrSummaryAsset):         "INTERNAL ERROR, ErrSummaryAsset",
+	int64(mixErrors.ErrXmitFail):             "INTERNAL ERROR, ErrXmitFail",
+	int64(mixErrors.ErrNoAccount):            "INTERNAL ERROR, ErrNoAccount",
 }

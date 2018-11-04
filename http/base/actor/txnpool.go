@@ -10,7 +10,7 @@ import (
 	"github.com/mixbee/mixbee/common"
 	"github.com/mixbee/mixbee/common/log"
 	"github.com/mixbee/mixbee/core/types"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 	tcomn "github.com/mixbee/mixbee/txnpool/common"
 )
 
@@ -23,13 +23,13 @@ func SetTxPid(actr *actor.PID) {
 func SetTxnPoolPid(actr *actor.PID) {
 	txnPoolPid = actr
 }
-func AppendTxToPool(txn *types.Transaction) ontErrors.ErrCode {
+func AppendTxToPool(txn *types.Transaction) mixErrors.ErrCode {
 	txReq := &tcomn.TxReq{
 		Tx:     txn,
 		Sender: tcomn.HttpSender,
 	}
 	txnPid.Tell(txReq)
-	return ontErrors.ErrNoError
+	return mixErrors.ErrNoError
 }
 
 func GetTxsFromPool(byCount bool) map[common.Uint256]*types.Transaction {

@@ -10,7 +10,7 @@ import (
 	"github.com/mixbee/mixbee-crypto/keypair"
 	s "github.com/mixbee/mixbee-crypto/signature"
 	"github.com/mixbee/mixbee/common/log"
-	ontErrors "github.com/mixbee/mixbee/errors"
+	mixErrors "github.com/mixbee/mixbee/errors"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -39,13 +39,13 @@ func (c *ECDsaCrypto) VerifySignature(message []byte, signature []byte, pubkey [
 
 	pk, err := keypair.DeserializePublicKey(pubkey)
 	if err != nil {
-		return false, ontErrors.NewDetailErr(errors.New("[ECDsaCrypto], deserializing public key failed."), ontErrors.ErrNoCode, "")
+		return false, mixErrors.NewDetailErr(errors.New("[ECDsaCrypto], deserializing public key failed."), mixErrors.ErrNoCode, "")
 	}
 
 	sig, err := s.Deserialize(signature)
 	ok := s.Verify(pk, message, sig)
 	if !ok {
-		return false, ontErrors.NewDetailErr(errors.New("[ECDsaCrypto], VerifySignature failed."), ontErrors.ErrNoCode, "")
+		return false, mixErrors.NewDetailErr(errors.New("[ECDsaCrypto], VerifySignature failed."), mixErrors.ErrNoCode, "")
 	}
 
 	return true, nil
